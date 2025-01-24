@@ -102,6 +102,9 @@ def get_delta_awards(comments, as_id = False):
     #Iterate over every comment in our comment list
     for comment in comments:
 
+        if not comment['author']:
+            continue
+
         #DeltaBot awards deltas, so we need to look for comments where deltabot is the author
         if 'DeltaBot' in comment['author']:
     
@@ -269,7 +272,7 @@ get_ngrams will turn a body of text into a list of n-tuples.  More details in #F
 def get_ngrams(text, n, as_list = True):
     
     #If n=1, we only want a list of words embedded in a list. 
-    if n is 1:
+    if n == 1:
 
         #We want a list of tokens as strings in lists 
         tokens_as_list = []                 
@@ -416,8 +419,9 @@ def main():
     #Encode our directory where our discussion data is as a directory object.
     #Since we may have multiple files in our data directory (this would occur if we collected
     #data on more than one occasion, as I generally do), we want to iterate over each
-    #data file and execute the same code on each file.  
-    directory = os.fsencode('data')     
+    #data file and execute the same code on each file.
+    dir_name = 'data'
+    directory = os.fsencode(dir_name)
 
     #Iterate over files in our data folder.
     for file in os.listdir(directory): 
@@ -429,7 +433,7 @@ def main():
         if filename.endswith(".json"):  
             
             #Read in our CMV data as a list of JSON objects
-            data = json_reader('data/' + filename)  
+            data = json_reader(dir_name + '/' + filename)
              
             #Iterate over each discussion in our dataset.
             for post in data:   
@@ -442,7 +446,10 @@ def main():
                 #Firstly, we will classify each post with respect to the topic. 
                 #The topic attribute in the post JSON object will denote what the discussion's classification is. 
                 post['topic'] = classify_text(title + ' ' + body, topics)
-                
+
+                if not post.get('_comments'):
+                    continue
+
                 get_links(post['_comments'])
 
                 #Secondly, we will first denote how many deltas each comment recieved
@@ -459,7 +466,7 @@ def main():
                     comment['evidence_use'] = classify_text(comment['body'], evidence)
         
             #Write our discussion JSON objects to a new file in the directory /coded. 
-            written = json_writer('data/coded/'+ filename, data)
+            written = json_writer(dir_name + '/coded/'+ filename, data)
             
             #If data is succesfully written to file, json_writer return True.
             #We print a success message to confirm our data is saved. 
