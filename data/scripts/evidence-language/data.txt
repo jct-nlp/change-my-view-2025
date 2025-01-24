@@ -1,0 +1,11 @@
+data
+figure
+amount 
+plot
+graph
+infographic
+percent
+percentile
+% 
+percentage
+
