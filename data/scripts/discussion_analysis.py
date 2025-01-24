@@ -420,7 +420,7 @@ def main():
     #Since we may have multiple files in our data directory (this would occur if we collected
     #data on more than one occasion, as I generally do), we want to iterate over each
     #data file and execute the same code on each file.
-    dir_name = 'data'
+    dir_name = '../data/downloaded_data'
     directory = os.fsencode(dir_name)
 
     #Iterate over files in our data folder.
