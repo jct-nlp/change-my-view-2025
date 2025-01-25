@@ -9,7 +9,8 @@ run: python collect_posts.py
 import praw
 import json
 import datetime
-
+import time
+from prawcore.exceptions import TooManyRequests
 #get_replies turns the Object returned by the Reddit API into a list of replies by ID. 
 #This allows us to store the replies into a JSON object, and allows us to easily reconstruct
 #the discussion tree if needed
@@ -40,6 +41,17 @@ def get_replies(comment):
 #and appends them to a list.  also, get_commetns removes useless REddit attributes that 
 #prohibit us from saving the comments list to a JSON file. dont worry about loosing discussion network
 #strucutre, we will save the ids of the replies in a replies attribute allowing us to reconstruct the network if needed
+def get_comments_with_retry(submission, retries=3, delay=60):
+    for attempt in range(retries):
+        try:
+            return submission.comments.replace_more(limit=50)
+        except TooManyRequests:
+            if attempt < retries - 1:
+                print(f"Rate limit hit. Retrying in {delay} seconds...")
+                time.sleep(delay)
+            else:
+                raise
+
 def get_comments(submission, metadata = True):
 
 	#these are the fields (or attributes) we can save to a json object and store in local memory
@@ -67,7 +79,7 @@ def get_comments(submission, metadata = True):
 
 	#we unpack all of the MoreComments objects.  turning the 
 	#returned discussion tree which is imcomplete into the complete discussion
-	com = submission.comments.replace_more(limit=submission.num_comments)
+	com = get_comments_with_retry(submission)
 
 	#we make our submission comments object iterable, this allows us to go over each comment
 	#in the discussion
@@ -125,10 +137,10 @@ def main():
 
 	#this our where we input our credentials. you need to have these attributes filled out in order to collect data. 
 	reddit = praw.Reddit(client_id='',
-                         client_secret='',
-                         password='',
-                         user_agent='',
-                         username='')
+						 client_secret='',
+						 password='',
+						 user_agent='',
+						 username='')
 
 	output_dir = '../data/downloaded_data/'
 
@@ -177,14 +189,14 @@ def main():
 			#Try and catch will continue on with the program if the Reddit API happens to not return one of our desired fields. 
 			try:
 			
-				data_dict = {field:submission_dict[field] for field in fields}
+				data_dict = {field:submission_dict[field] for field in fields if field in submission_dict and submission_dict[field]}
 			
 			except KeyError:
 			
 				continue
 
 			#replace the CommentForest object with a list of comment metadata dictionaries
-			data_dict['_comments'] = get_comments(submission, metadata = True)
+			data_dict['_comments'] = get_comments(submission, metadata = False)
 
 			#Replace the author Reddit object with the name of the author
 			data_dict['author'] = vars(data_dict['author'])['name']
