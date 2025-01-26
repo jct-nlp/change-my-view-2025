@@ -102,7 +102,7 @@ def get_delta_awards(comments, as_id = False):
     #Iterate over every comment in our comment list
     for comment in comments:
 
-        if not comment['author']:
+        if 'author' not in comment or not comment['author']:
             continue
 
         #DeltaBot awards deltas, so we need to look for comments where deltabot is the author
@@ -171,7 +171,8 @@ def award_deltas(comments):
             dac['Delta']['count'] += 1
 
             #We will add the author and reason to the Delta's 'from' data. 
-            dac['Delta']['from'].update({delta_sig['author']:delta_sig['body']})
+            if 'author' in delta_sig:
+                dac['Delta']['from'].update({delta_sig['author']:delta_sig['body']})
 
 """
 THE FOLLOWING METHODS
@@ -381,6 +382,8 @@ def classify_text(text, topics):
 def get_links(comments):
 
     for comment in comments:
+        if 'body_html' not in comment:
+            continue
         html_doc = comment['body_html']
         soup = BeautifulSoup(html_doc, 'html.parser')
         link_list_tag = soup.findAll('a', attrs={'href': re.compile("^https?://")})
@@ -463,7 +466,8 @@ def main():
                 for comment in post_comments:
 
                     #Create an atribute in the comment JSON obbject that specifies the types of evidence used in the comment body.
-                    comment['evidence_use'] = classify_text(comment['body'], evidence)
+                    if 'body' in comment:
+                        comment['evidence_use'] = classify_text(comment['body'], evidence)
         
             #Write our discussion JSON objects to a new file in the directory /coded. 
             written = json_writer(dir_name + '/coded/'+ filename, data)
