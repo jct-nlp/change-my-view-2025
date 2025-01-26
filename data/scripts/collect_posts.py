@@ -113,7 +113,7 @@ def get_comments(submission, metadata = True):
 				#Try and catch will continue on with the program if the Reddit API happens to not return one of our desired fields. 
 				try:
 
-					data_dict = {field:comment_dict[field] for field in fields}	
+					data_dict = {field:comment_dict[field] for field in fields if field in comment_dict and comment_dict[field]}
 				
 				except KeyError:
 				
@@ -122,7 +122,8 @@ def get_comments(submission, metadata = True):
 				#replace all of the reply objects with reply ids	
 				data_dict['_replies'] = get_replies(comment_dict)
 				#replace the author Reddit Object with the name of the author
-				data_dict['author'] = vars(data_dict['author'])['name']
+				if 'author' in data_dict:
+					data_dict['author'] = vars(data_dict['author'])['name']
 				#append our data to our list of datas
 				data_dicts.append(data_dict)
 	
@@ -137,10 +138,10 @@ def main():
 
 	#this our where we input our credentials. you need to have these attributes filled out in order to collect data. 
 	reddit = praw.Reddit(client_id='',
-						 client_secret='',
-						 password='',
-						 user_agent='',
-						 username='')
+                         client_secret='',
+                         password='',
+                         user_agent='',
+                         username='')
 
 	output_dir = '../data/downloaded_data/'
 
@@ -172,7 +173,7 @@ def main():
 
 	#here we specify the type of post we want, the number of posts we want to collect, and then
 	#iterate over them... collecting the data we need
-	for submission in subreddit.top(limit = 30):
+	for submission in subreddit.top(limit = 100):
 
 
 		print("Collecting data for %s" % submission.title[0:50])
@@ -196,7 +197,7 @@ def main():
 				continue
 
 			#replace the CommentForest object with a list of comment metadata dictionaries
-			data_dict['_comments'] = get_comments(submission, metadata = False)
+			data_dict['_comments'] = get_comments(submission, metadata = True)
 
 			#Replace the author Reddit object with the name of the author
 			data_dict['author'] = vars(data_dict['author'])['name']
