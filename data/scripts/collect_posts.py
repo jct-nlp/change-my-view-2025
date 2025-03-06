@@ -173,7 +173,7 @@ def main():
 
 	#here we specify the type of post we want, the number of posts we want to collect, and then
 	#iterate over them... collecting the data we need
-	for submission in subreddit.top(limit = 100):
+	for submission in subreddit.top(limit = 500):
 
 
 		print("Collecting data for %s" % submission.title[0:50])

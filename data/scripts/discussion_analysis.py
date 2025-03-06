@@ -444,8 +444,10 @@ def main():
                 #We will classify each discussion with respect to the title and selftext.
                 #Therefore, we will concatenate these two strings for classification.
                 title = post['title']
+                if not post.get('selftext'):
+                    continue
                 body = post['selftext']
-                
+
                 #Firstly, we will classify each post with respect to the topic. 
                 #The topic attribute in the post JSON object will denote what the discussion's classification is. 
                 post['topic'] = classify_text(title + ' ' + body, topics)
