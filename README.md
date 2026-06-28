@@ -19,7 +19,38 @@ such as automated debate analysis, content moderation, and persuasive writing as
 More details can be found in the introduction section in the notebook located under "this work" directory.
 
 This repo contains the following:
-1. previous work - articles that inspired us
-2. data - the input for this work
-3. this work - the notebook with the actual work that was done
-4. results - the dataset that was created as part of this work
+1. `previous work/` - articles that inspired us
+2. `data/` - scripts used to collect the data
+3. `this work/` - notebooks with the actual work
+4. `results/` - processed datasets produced by this work
+
+## Notebooks
+
+| Notebook | Description |
+|---|---|
+| `01_data_collection.ipynb` | Parses raw Reddit JSON files and builds the base comments dataset |
+| `02_feature_engineering.ipynb` | Adds all text features (sentiment, tone, style, readability, embeddings) |
+| `03_model_training.ipynb` | Original model training and evaluation (kept as reference baseline) |
+
+## Raw Data
+
+The raw Reddit JSON files are not stored in this repository due to their size.
+They are available on Google Drive (read-only, no sign-in required):
+
+**[Google Drive — raw data folder](https://drive.google.com/drive/folders/1HGik-4OXg2KFpvxPzaGUH625BrYynzmZ?usp=sharing)**
+
+Download the contents and place them under `data/data/` following this structure:
+```
+data/data/
+├── Study2/
+│   └── 20180815182030_posts.json
+├── chaya/
+│   └── combined.json        ← from the redit_data/ folder in Drive
+└── downloaded_data/
+    └── coded/
+        └── 20250210005631_posts.zip
+```
+
+> If you only want to re-run the analysis (not re-collect data), you can skip
+> `01_data_collection.ipynb` and `02_feature_engineering.ipynb` entirely —
+> the processed dataset is already available in `results/cmv_comments_df.csv.zip`.
