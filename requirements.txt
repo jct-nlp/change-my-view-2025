@@ -37,5 +37,6 @@ google-generativeai>=0.7
 shap>=0.45
 
 # Utilities
-python-dotenv>=1.0          # load GEMINI_API_KEY from a .env file
+praw>=7.7                   # Reddit API client — used by 00_data_download.ipynb
+python-dotenv>=1.0          # load API keys from a .env file
 tqdm>=4.66                  # progress bars for API calls
