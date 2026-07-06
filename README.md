@@ -20,7 +20,7 @@ More details can be found in the introduction section in the notebook located un
 
 This repo contains the following:
 1. `previous work/` - articles that inspired us
-2. `data/` - scripts used to collect the data
+2. `data/` - raw and processed data files
 3. `this work/` - notebooks with the actual work
 4. `results/` - processed datasets produced by this work
 
@@ -39,9 +39,9 @@ They are available on Google Drive (read-only, no sign-in required):
 
 **[Google Drive — raw data folder](https://drive.google.com/drive/folders/1HGik-4OXg2KFpvxPzaGUH625BrYynzmZ?usp=sharing)**
 
-Download the contents and place them under `data/data/` following this structure:
+Download the contents and place them under `data/` following this structure:
 ```
-data/data/
+data/
 ├── Study2/
 │   └── 20180815182030_posts.json
 ├── chaya/
