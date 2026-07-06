@@ -163,7 +163,5 @@ cython_debug/
 
 # Large data files — not tracked in git due to size
 # Available on Google Drive: https://drive.google.com/drive/folders/1HGik-4OXg2KFpvxPzaGUH625BrYynzmZ
-# See README.md for the full directory structure and per-file sources
-data/Study2/20180815182030_posts.json
-data/chaya/combined.json
-data/downloaded_data/
+data/**/*.json
+data/**/*.zip
