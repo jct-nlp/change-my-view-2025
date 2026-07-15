@@ -33,6 +33,9 @@ plotly>=5.20
 # LLM scoring — Move 2 (Gemini API)
 google-genai>=1.0
 
+# Sentiment (TextBlob attempt in 03.1_feature_engineering_light.ipynb)
+textblob>=0.18
+
 # Model interpretability — Move 2 (SHAP figure)
 shap>=0.45
 
