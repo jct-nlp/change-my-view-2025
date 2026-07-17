@@ -1,0 +1,6 @@
+[
+  "sentiment_vader",
+  "ethos_score",
+  "pathos_score",
+  "logos_score"
+]
