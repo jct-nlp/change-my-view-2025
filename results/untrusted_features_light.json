@@ -1,6 +1,7 @@
 [
   "sentiment_vader",
   "tone_label",
+  "style_label",
   "ethos_score",
   "pathos_score",
   "logos_score"
