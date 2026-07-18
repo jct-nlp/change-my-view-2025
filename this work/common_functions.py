@@ -71,6 +71,13 @@ Reply with exactly one line per text, in the format "N: label" (matching the num
 Texts:
 """
 
+STYLE_LLM_PROMPT_PREFIX = """Analyze the writing register of each of the following numbered texts and classify it as one of the following: Formal, Informal.
+
+Reply with exactly one line per text, in the format "N: label" (matching the numbers below), and nothing else.
+
+Texts:
+"""
+
 RHETORICAL_LLM_PROMPT_PREFIX = """Rate each of the following numbered texts on three rhetorical appeals, each on a scale from 0 (not present) to 1 (strongly present):
 
 - ethos: appeals to the author's credibility, authority, expertise, or character
