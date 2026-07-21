@@ -190,9 +190,19 @@ def _autolabel(ax, rects):
                     ha='center', va='bottom')
 
 
-def _plot_convincing_split(labels, convincing_counts, non_convincing_counts, xlabel, title, width=0.4, figsize=(12, 6)):
+def _autolabel_rate(ax, rects, ns):
+    for rect, n in zip(rects, ns):
+        height = rect.get_height()
+        ax.annotate(f'{height:.1f}%\n(n={n})',
+                    xy=(rect.get_x() + rect.get_width() / 2, height),
+                    xytext=(0, 3),
+                    textcoords="offset points",
+                    ha='center', va='bottom', fontsize=8)
+
+
+def _draw_counts_panel(ax, labels, convincing_counts, non_convincing_counts, xlabel, title):
     x = range(len(labels))
-    fig, ax = plt.subplots(figsize=figsize)
+    width = 0.4
     rects1 = ax.bar([i - width / 2 for i in x], convincing_counts, width, label='Convincing', color='green')
     rects2 = ax.bar([i + width / 2 for i in x], non_convincing_counts, width, label='Non-Convincing', color='red')
     _autolabel(ax, rects1)
@@ -202,49 +212,90 @@ def _plot_convincing_split(labels, convincing_counts, non_convincing_counts, xla
     ax.set_ylabel('Number of Comments')
     ax.set_title(title)
     ax.set_xticks(x)
-    ax.set_xticklabels(labels)
+    ax.set_xticklabels(labels, rotation=45, ha='right')
     ax.legend()
-    plt.xticks(rotation=45, ha='right')
-    plt.tight_layout()
+
+
+def _draw_rate_panel(ax, labels, rates, ns, xlabel, title, baseline_rate):
+    x = range(len(labels))
+    rects = ax.bar(x, rates, width=0.6, color='steelblue')
+    _autolabel_rate(ax, rects, ns)
+
+    ax.axhline(baseline_rate, color='gray', linestyle='--', linewidth=1, label=f'Baseline ({baseline_rate:.1f}%)')
+    ax.legend()
+
+    ax.set_xlabel(xlabel)
+    ax.set_ylabel('Convincing Rate (%)')
+    ax.set_title(title)
+    ax.set_xticks(x)
+    ax.set_xticklabels(labels, rotation=45, ha='right')
+    ax.set_ylim(0, max(list(rates) + [baseline_rate]) * 1.25)
+
+
+def _plot_convincing(labels, convincing_counts, non_convincing_counts, rates, ns,
+                      xlabel, count_title, rate_title, baseline_rate, figsize, show_counts, panel_gap):
+    if show_counts:
+        # each panel gets the same size as the standalone rate chart below, side by side
+        fig, (ax_counts, ax_rate) = plt.subplots(1, 2, figsize=(figsize[0] * 2, figsize[1]))
+        _draw_counts_panel(ax_counts, labels, convincing_counts, non_convincing_counts, xlabel, count_title)
+        _draw_rate_panel(ax_rate, labels, rates, ns, xlabel, rate_title, baseline_rate)
+        plt.tight_layout()
+        fig.subplots_adjust(wspace=panel_gap)  # applied after tight_layout, which would otherwise collapse the gap
+    else:
+        fig, ax_rate = plt.subplots(figsize=figsize)
+        _draw_rate_panel(ax_rate, labels, rates, ns, xlabel, rate_title, baseline_rate)
+        plt.tight_layout()
+
     plt.show()
 
 
-def plot_feature(df, feature_name, feature_disp_name, bin_width, width=0.4, figsize=(12, 6)):
+def _counts_by_group(df, group_key, index):
+    counts = df.groupby([group_key, 'is_convincing'], observed=True).size().unstack(fill_value=0)
+    counts = counts.reindex(index, fill_value=0)
+    convincing_counts = counts[1] if 1 in counts.columns else pd.Series(0, index=index)
+    non_convincing_counts = counts[0] if 0 in counts.columns else pd.Series(0, index=index)
+    return convincing_counts, non_convincing_counts
+
+
+def plot_feature(df, feature_name, feature_disp_name, bin_width, figsize=(7, 4), show_counts=False, panel_gap=0.3):
     min_val = df[feature_name].min()
     max_val = df[feature_name].max()
 
     bins = [min_val + i * bin_width for i in range(int((max_val - min_val) / bin_width) + 2)]
+    bin_labels = [f'{bins[i]:.2f}-{bins[i + 1]:.2f}' for i in range(len(bins) - 1)]
 
-    convincing_counts = []
-    non_convincing_counts = []
-    bin_labels = []
+    binned = pd.cut(df[feature_name], bins, labels=bin_labels, right=False)
+    grouped = df.groupby(binned, observed=True)['is_convincing']
+    rates = (grouped.mean() * 100).reindex(bin_labels, fill_value=0)
+    ns = grouped.count().reindex(bin_labels, fill_value=0)
+    convincing_counts, non_convincing_counts = _counts_by_group(df, binned, bin_labels)
 
-    for i in range(len(bins) - 1):
-        lower_bound = bins[i]
-        upper_bound = bins[i + 1]
-        bin_comments = df[(df[feature_name] >= lower_bound) & (df[feature_name] < upper_bound)]
-        convincing_counts.append(bin_comments[bin_comments['is_convincing'] == 1].shape[0])
-        non_convincing_counts.append(bin_comments[bin_comments['is_convincing'] == 0].shape[0])
-        bin_labels.append(f'{lower_bound:.2f}-{upper_bound:.2f}')
-
-    _plot_convincing_split(
-        bin_labels, convincing_counts, non_convincing_counts,
+    _plot_convincing(
+        bin_labels, convincing_counts.values, non_convincing_counts.values,
+        rates.values, ns.values,
         xlabel=f'{feature_disp_name} Bin',
-        title=f'Number of Convincing and Non-Convincing Comments per {feature_disp_name} Bin',
-        width=width, figsize=figsize,
+        count_title=f'Number of Convincing and Non-Convincing Comments per {feature_disp_name} Bin',
+        rate_title=f'Convincing Rate by {feature_disp_name} Bin',
+        baseline_rate=df['is_convincing'].mean() * 100,
+        figsize=figsize,
+        show_counts=show_counts,
+        panel_gap=panel_gap,
     )
 
 
-def plot_category_histogram(df, column_name, display_name):
-    convincing_counts = df[df['is_convincing'] == 1][column_name].value_counts()
-    non_convincing_counts = df[df['is_convincing'] == 0][column_name].value_counts()
+def plot_category_histogram(df, column_name, display_name, figsize=(6, 4), show_counts=False, panel_gap=0.3):
+    rate_table = df.groupby(column_name, observed=True)['is_convincing'].agg(['mean', 'count']).sort_values('mean', ascending=False)
+    labels = rate_table.index.astype(str)
+    convincing_counts, non_convincing_counts = _counts_by_group(df, column_name, rate_table.index)
 
-    categories = convincing_counts.index.union(non_convincing_counts.index)
-    convincing_counts = convincing_counts.reindex(categories, fill_value=0)
-    non_convincing_counts = non_convincing_counts.reindex(categories, fill_value=0)
-
-    _plot_convincing_split(
-        categories, convincing_counts, non_convincing_counts,
+    _plot_convincing(
+        labels, convincing_counts.values, non_convincing_counts.values,
+        rate_table['mean'].values * 100, rate_table['count'].values,
         xlabel=display_name,
-        title=f'Number of Convincing and Non-Convincing Comments per {display_name}',
+        count_title=f'Number of Convincing and Non-Convincing Comments per {display_name}',
+        rate_title=f'Convincing Rate by {display_name}',
+        baseline_rate=df['is_convincing'].mean() * 100,
+        figsize=figsize,
+        show_counts=show_counts,
+        panel_gap=panel_gap,
     )
