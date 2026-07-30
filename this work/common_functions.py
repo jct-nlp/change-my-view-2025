@@ -257,9 +257,15 @@ def _counts_by_group(df, group_key, index):
     return convincing_counts, non_convincing_counts
 
 
-def plot_feature(df, feature_name, feature_disp_name, bin_width, figsize=(7, 4), show_counts=False, panel_gap=0.3):
+def plot_feature(df, feature_name, feature_disp_name, bin_width, figsize=(7, 4), show_counts=False, panel_gap=0.3, bin_anchor=None):
     min_val = df[feature_name].min()
     max_val = df[feature_name].max()
+
+    if bin_anchor is not None:
+        # shift the first edge down to the nearest bin_width multiple of bin_anchor below
+        # min_val, so bin_anchor itself always falls exactly on a bin edge (e.g. bin_anchor=0
+        # keeps negative and positive values from being mixed into the same bin)
+        min_val = bin_anchor + bin_width * np.floor((min_val - bin_anchor) / bin_width)
 
     bins = [min_val + i * bin_width for i in range(int((max_val - min_val) / bin_width) + 2)]
     bin_labels = [f'{bins[i]:.2f}-{bins[i + 1]:.2f}' for i in range(len(bins) - 1)]
