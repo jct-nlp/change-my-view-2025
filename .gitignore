@@ -168,3 +168,4 @@ data/**/*.zip
 
 # Results are committed as zipped CSVs only, not raw CSVs
 results/*.csv
+/.idea/*
