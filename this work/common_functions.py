@@ -36,7 +36,23 @@ def make_gemini_client(env_path='../.env'):
     return genai.Client(api_key=api_key)
 
 
-def generate_content_with_retry(client, model, contents, max_retries=5, initial_delay=2):
+def reload_gemini_client(env_path='../.env'):
+    """Re-reads GEMINI_API_KEY from .env, overriding the value already loaded into this
+    process, and returns a fresh client for it. For manually rotating to a different
+    project's key mid-run (e.g. after one hits its free-tier daily quota): update
+    GEMINI_API_KEY in .env, then call this and re-run the scoring cell - it only retries
+    rows still missing scores, so nothing already scored is repeated."""
+    load_dotenv(Path(env_path), override=True)
+    api_key = os.environ.get('GEMINI_API_KEY')
+    return genai.Client(api_key=api_key)
+
+
+def generate_content_with_retry(client, model, contents, max_retries=2, initial_delay=5):
+    # max_retries/initial_delay were 5/2 originally; during sustained high-demand periods each
+    # 503 retry attempt still consumes a unit of the free-tier daily quota even though it fails,
+    # so 5 retries could burn most of a day's 20-request quota on a single unlucky batch. 2
+    # retries with a longer initial delay caps that damage while still absorbing an ordinary
+    # one-off blip.
     delay = initial_delay
     for attempt in range(max_retries):
         try:
@@ -47,6 +63,65 @@ def generate_content_with_retry(client, model, contents, max_retries=5, initial_
             print(f"Gemini overloaded (503), retrying in {delay}s...")
             time.sleep(delay)
             delay *= 2
+
+
+def score_comments_by_thread(df, strategy_names, score_fn, checkpoint_path, prompt_hash,
+                              batch_size=20, batch_delay=13, cooldown_delay=60):
+    """Scores df's rows in batches grouped by 'original_post', so shared context (the post
+    itself) is sent once per batch rather than once per row. score_fn(original_post, rows)
+    returns one score tuple per row (or None for an unparseable reply). Checkpointed to
+    checkpoint_path after every batch and resumable: only rows missing a score, or tagged
+    with a different prompt_hash than the current one, are (re-)scored on the next call."""
+    for name in strategy_names:
+        df[name] = pd.NA
+    df['prompt_hash'] = pd.NA
+
+    if os.path.exists(checkpoint_path):
+        checkpoint = pd.read_csv(checkpoint_path, index_col=0)
+        current_prompt_rows = checkpoint.index[checkpoint['prompt_hash'] == prompt_hash]
+        never_scored = checkpoint['prompt_hash'].isna().sum()
+        stale_rows = len(checkpoint) - len(current_prompt_rows) - never_scored
+        for name in strategy_names + ['prompt_hash']:
+            df.loc[df.index.isin(current_prompt_rows), name] = checkpoint.loc[current_prompt_rows, name]
+        print(f'Loaded checkpoint: {len(current_prompt_rows)} rows match the current prompt, '
+              f'{stale_rows} row(s) were scored under a different prompt version and will be re-scored, '
+              f'{never_scored} row(s) were never scored yet')
+
+    pending = df[df[strategy_names[0]].isna()]
+    stopped_early = False
+    n_batches_done = 0
+    for original_post, group in pending.groupby('original_post', sort=False):
+        if stopped_early:
+            break
+        group_index = group.index
+        for start in range(0, len(group_index), batch_size):
+            batch_index = group_index[start:start + batch_size]
+            delay = batch_delay
+            try:
+                scores = score_fn(original_post, [df.loc[i] for i in batch_index])
+                for idx, score_tuple in zip(batch_index, scores):
+                    if score_tuple is None:
+                        print(f'no parseable response for row {idx}')
+                        continue
+                    for name, val in zip(strategy_names, score_tuple):
+                        df.at[idx, name] = val
+                    df.at[idx, 'prompt_hash'] = prompt_hash
+                df.to_csv(checkpoint_path)
+                n_batches_done += 1
+                if n_batches_done % 10 == 0:
+                    print(f'{n_batches_done} batches done')
+            except genai_errors.ClientError as e:
+                print(f'batch for rows {list(batch_index)} failed: {e}')
+                print('stopping early - re-run this call to continue from here.')
+                stopped_early = True
+                break
+            except Exception as e:
+                print(f'batch for rows {list(batch_index)} failed, will retry on next run: {e}')
+                delay = cooldown_delay
+            time.sleep(delay)
+
+    print(f'Done: {df[strategy_names[0]].notna().sum()} / {len(df)} scored')
+    return df
 
 
 class BlockedResponseError(Exception):
