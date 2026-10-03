@@ -364,8 +364,12 @@ def plot_feature(df, feature_name, feature_disp_name, bin_width, figsize=(7, 4),
     )
 
 
-def plot_category_histogram(df, column_name, display_name, figsize=(6, 4), show_counts=False, panel_gap=0.3):
-    rate_table = df.groupby(column_name, observed=True)['is_convincing'].agg(['mean', 'count']).sort_values('mean', ascending=False)
+def plot_category_histogram(df, column_name, display_name, figsize=(6, 4), show_counts=False, panel_gap=0.3, sort_by_value=False):
+    rate_table = df.groupby(column_name, observed=True)['is_convincing'].agg(['mean', 'count'])
+    # sort_by_value: natural ascending category order (e.g. an ordinal 1-5 scale) instead of
+    # the default rate-descending order, which reads fine for unordered categories but
+    # scrambles an ordinal scale into a hard-to-read sequence like 5, 4, 1, 3, 2.
+    rate_table = rate_table.sort_index() if sort_by_value else rate_table.sort_values('mean', ascending=False)
     labels = rate_table.index.astype(str)
     convincing_counts, non_convincing_counts = _counts_by_group(df, column_name, rate_table.index)
 
