@@ -39,6 +39,15 @@ textblob>=0.18
 # Model interpretability — Move 2 (SHAP figure)
 shap>=0.45
 
+# External validation — Move 3 (08_wa_external_validation.ipynb): downloads the Winning
+# Arguments corpus. Pulls in a heavy dependency tree (spaCy, sentence-transformers, etc.) that
+# this notebook doesn't otherwise need — only convokit.download() is used, not its Corpus class.
+# On this project's x86_64 (Rosetta) macOS venv, `pip install convokit` alone tries to build
+# `bottleneck` (a pandas optional dependency) from source and fails (missing x86_64 Command Line
+# Tools); install a prebuilt wheel first to avoid that: `pip install --only-binary=:all: bottleneck`,
+# then `pip install --prefer-binary convokit`.
+convokit>=3.0
+
 # Utilities
 praw>=7.7                   # Reddit API client — used by 00_data_download.ipynb
 nltk>=3.8                   # SnowballStemmer for annotation in 01_data_collection.ipynb
