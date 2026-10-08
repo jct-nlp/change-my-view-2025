@@ -10,6 +10,7 @@ file.
 
 import os
 import re
+import threading
 import time
 from pathlib import Path
 
@@ -19,6 +20,7 @@ import pandas as pd
 from dotenv import load_dotenv
 from google import genai
 from google.genai import errors as genai_errors
+from google.genai import types as genai_types
 
 # --- Gemini setup -----------------------------------------------------
 
@@ -29,11 +31,17 @@ from google.genai import errors as genai_errors
 # DEFAULT_GEMINI_MODEL = 'gemini-2.5-flash'.
 DEFAULT_GEMINI_MODEL = 'gemini-flash-latest'
 
+# Without this, a request that hangs instead of erroring (observed on a free-tier key under
+# load - no response, no exception, for the better part of an hour) blocks generate_content
+# forever: no retry, no cooldown, no log output, since nothing ever raises to trigger them.
+# 60s matches this file's own cooldown_delay convention for a failed batch.
+GEMINI_TIMEOUT_MS = 60_000
+
 
 def make_gemini_client(env_path='../.env'):
     load_dotenv(Path(env_path))  # .env file must contain GEMINI_API_KEY
     api_key = os.environ.get('GEMINI_API_KEY')
-    return genai.Client(api_key=api_key)
+    return genai.Client(api_key=api_key, http_options=genai_types.HttpOptions(timeout=GEMINI_TIMEOUT_MS))
 
 
 def reload_gemini_client(env_path='../.env'):
@@ -44,7 +52,22 @@ def reload_gemini_client(env_path='../.env'):
     rows still missing scores, so nothing already scored is repeated."""
     load_dotenv(Path(env_path), override=True)
     api_key = os.environ.get('GEMINI_API_KEY')
-    return genai.Client(api_key=api_key)
+    return genai.Client(api_key=api_key, http_options=genai_types.HttpOptions(timeout=GEMINI_TIMEOUT_MS))
+
+
+# Observed directly (lsof): a call can hold its TCP connection ESTABLISHED for 13+ minutes
+# with no response and no exception - the client connected fine, the server (or something
+# between) just never answered. HttpOptions(timeout=...) on the client does NOT bound this -
+# it apparently only covers some earlier phase, not "connected but silently stalled." This
+# runs the call on a daemon thread with its own hard wall-clock deadline (joined with a
+# timeout), independent of whatever the SDK does internally, so a stall gets forced into a
+# failure instead of blocking the batch loop forever. A first version of this used
+# ThreadPoolExecutor, which seemed to work (raised correctly after the timeout) but left the
+# whole *process* unable to exit afterward - its worker threads aren't daemonic, so Python's
+# shutdown hook waits for every leaked stalled-call thread to finish, which could be forever.
+# A plain daemon Thread doesn't have that problem: the leaked thread is abandoned outright at
+# interpreter exit, not waited on.
+GEMINI_CALL_TIMEOUT_SECONDS = 60
 
 
 def generate_content_with_retry(client, model, contents, max_retries=2, initial_delay=5):
@@ -55,14 +78,38 @@ def generate_content_with_retry(client, model, contents, max_retries=2, initial_
     # one-off blip.
     delay = initial_delay
     for attempt in range(max_retries):
-        try:
-            return client.models.generate_content(model=model, contents=contents)
-        except genai_errors.ServerError:
-            if attempt == max_retries - 1:
-                raise
-            print(f"Gemini overloaded (503), retrying in {delay}s...")
-            time.sleep(delay)
-            delay *= 2
+        result_box = {}
+
+        def _call():
+            try:
+                result_box['value'] = client.models.generate_content(model=model, contents=contents)
+            except BaseException as e:
+                result_box['error'] = e
+
+        t = threading.Thread(target=_call, daemon=True)
+        t.start()
+        t.join(timeout=GEMINI_CALL_TIMEOUT_SECONDS)
+
+        if t.is_alive():
+            error = TimeoutError(f'Gemini call did not return within {GEMINI_CALL_TIMEOUT_SECONDS}s (stalled connection)')
+        elif 'error' in result_box:
+            error = result_box['error']
+            # DEADLINE_EXCEEDED (504) means the server itself gave up processing this specific
+            # batch, not a generic capacity blip - plausibly something about this particular
+            # entry (e.g. an unusually long comment) rather than momentary overload, so retrying
+            # the identical batch is unlikely to help and just spends another quota unit for
+            # nothing. Skip straight to the next entry instead, same as a non-retryable ClientError.
+            if getattr(error, 'status', None) == 'DEADLINE_EXCEEDED' or not isinstance(error, genai_errors.ServerError):
+                raise error  # non-retryable - propagate immediately
+        else:
+            return result_box['value']
+
+        if attempt == max_retries - 1:
+            raise error
+        label = 'timed out (stalled connection)' if isinstance(error, TimeoutError) else 'overloaded (503)'
+        print(f"Gemini {label}, retrying in {delay}s...")
+        time.sleep(delay)
+        delay *= 2
 
 
 def score_comments_by_thread(df, strategy_names, score_fn, checkpoint_path, prompt_hash,
