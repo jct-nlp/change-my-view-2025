@@ -79,7 +79,7 @@ predecessor's saved output, without re-running the whole chain.
 | `05_rhetorical_scoring.ipynb` | The project's main contribution: an 8-strategy rhetorical rubric, scored per comment by the Gemini API, with test-retest and hand-scoring validation. Requires `GEMINI_API_KEY`. Output: `results/05_cmv_comments_df.csv.zip`. |
 | `06_strategy_ablation.ipynb` | Does adding the strategy scores improve the model? Feature ablation, model re-selection, and a length-controlled benchmark isolating the strategy-score effect from the `word_count` confound. |
 | `07_strategy_interpretation.ipynb` | Which strategies drive the result? SHAP beeswarm and Mann-Whitney effect sizes per strategy, on the full population and a length-matched sample. |
-| `08_wa_external_validation.ipynb` | External validation on the independent Winning Arguments (WA) corpus (Tan et al. 2016, via `convokit`) - same rubric, prompt, and model architecture as `05`-`07`, unchanged, to check whether the findings generalize beyond this project's own CMV sample. |
+| `08_wa_external_validation.ipynb` | External validation on the independent Winning Arguments (WA) corpus (Tan et al. 2016, via `convokit`) - same rubric, prompt, and model architecture as `05`-`07`, unchanged, to check whether the findings generalize beyond this project's own dataset. |
 
 ## Raw Data
 
