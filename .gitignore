@@ -170,3 +170,4 @@ data/**/*.zip
 results/*.csv
 /.idea/*
 /timeline-documents/
+/writing/
