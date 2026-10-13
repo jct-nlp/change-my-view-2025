@@ -169,5 +169,13 @@ data/**/*.zip
 # Results are committed as zipped CSVs only, not raw CSVs
 results/*.csv
 /.idea/*
-/timeline-documents/
-/writing/
+
+# Internal planning/draft material — lives only on the local-only
+# `local-documents-and-notes` branch (see its own worktree), symlinked
+# in here for convenience. Never meant to be tracked on this branch.
+/timeline-documents
+/writing
+/paper_preparation
+/GEMINI_API_NOTES.md
+/PLAN.md
+/WRITING_PLAN.md
