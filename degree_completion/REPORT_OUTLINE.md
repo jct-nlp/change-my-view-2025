@@ -76,20 +76,37 @@ validation on an independent corpus).
    tension with prior work worth naming, not glossing over. **[INTERPRETIVE]** framing of the
    tension; the two numbers themselves are each **[VERIFIED]** from their respective sources.
 3. **Labruna, Modzelewski, Satta & Da San Martino (2026)**, *"Detecting Winning Arguments with
-   Large Language Models and Persuasion Strategies"*, Findings of EACL 2026. **[NEEDS
-   VERIFICATION]** — full citation details (exact title wording, page numbers) were read from
-   `08_wa_external_validation.ipynb`'s own markdown citation, not from the paper directly; confirm
-   against the actual paper before the reference list is finalized. This is the paper whose
-   method this project adapts (LLM-assigned persuasion-strategy scores) — their original scope was
-   6 propaganda-technique strategies on news articles; this project adapts the *method* to 8 new,
-   CMV-specific constructive strategies (refutation, justification, concession, evidence, personal
-   narrative, call-to-action, simplification, question-asking). Also the source of the Winning
-   Arguments pairwise-accuracy benchmark numbers compared against in §08 (Independent Scoring
-   53.78–56.66%, MS-PS-AVG 60.59–62.83%, best reported 64.53%).
+   Large Language Models and Persuasion Strategies"*, Findings of the Association for
+   Computational Linguistics: EACL 2026, pages 1888–1915, Rabat, Morocco. **[VERIFIED
+   2026-10-14]** — confirmed directly against the published paper (ACL Anthology
+   2026.findings-eacl.97): title, author order, and venue all match `08`'s citation exactly; page
+   numbers added (not previously known). This is the paper whose method this project adapts
+   (LLM-assigned persuasion-strategy scores) — their own taxonomy of 6 strategies (Attack on
+   Reputation, Distraction, Manipulative Wording, Simplification, Justification, Call) is drawn
+   from prior propaganda/persuasion-technique literature (Dimitrov et al. 2024; Piskorski et al.
+   2023a,b) and applied by Labruna et al. primarily to Winning Arguments, Anthropic/Persuasion,
+   and Persuasion for Good — a SemEval 2023 news-article dataset (536 articles) is used only as a
+   secondary human-annotation validation check (§5.5), not the paper's primary application domain,
+   so "6 propaganda-technique strategies on news articles" slightly overstates how central news
+   text is to their main experiments; minor wording to tighten if this sentence is reused in the
+   final report. This project adapts the *method* to 8 new, CMV-specific constructive strategies
+   (refutation, justification, concession, evidence, personal narrative, call-to-action,
+   simplification, question-asking) — two names (`justification`, `simplification`) are shared with
+   Labruna et al.'s own taxonomy but defined independently for this project's CMV rubric, not
+   reused from their definitions. Also the source of the Winning Arguments pairwise-accuracy
+   benchmark numbers compared against in §08: **confirmed exactly against the paper's own Table 1**
+   — Independent Scoring 53.78–56.66% (min Gemma-3-12B, max LLaMA-3.1-8B), MS-PS-AVG 60.59–62.83%
+   (min OpenAI-o3, max Gemma-3-12B), best reported 64.53% (MS-PS-MLP, OpenAI-o3). All three ranges
+   match `08`'s citation exactly, with no discrepancy found.
 4. **Tan, Niculae, Danescu-Niculescu-Mizil & Lee (2016)**, *"Winning Arguments: Interaction
-   Dynamics and Persuasion Strategies in Good-faith Online Discussions"*, WWW 2016. **[NEEDS
-   VERIFICATION]** — exact citation details similarly read secondhand from `08`'s markdown;
-   confirm directly. Source of the external-validation corpus used in §08.
+   Dynamics and Persuasion Strategies in Good-faith Online Discussions"*, Proceedings of the 25th
+   International Conference on World Wide Web (WWW 2016), pages 613–624. **[VERIFIED 2026-10-14]**
+   — confirmed directly: title, author order, and venue all match `08`'s citation exactly; page
+   numbers added (not previously known). Source of the external-validation corpus used in §08; the
+   dataset's own pairing methodology (4,263 winner/loser pairs, matched by Jaccard similarity of
+   initial replies within the same thread) is independently corroborated by Labruna et al.'s
+   description of the same corpus (§3.1 of their paper) and matches `08_wa_external_validation.ipynb`'s
+   own pair-reconstruction assertion (`assert len(pairs_df) == 4263`).
 
 ### 2.4 What is different in this project
 **Cover, as a short explicit list — already-verified contrasts:**
@@ -279,16 +296,33 @@ each of the 8 strategies.
 ### 3.9 External validation
 **Cover:** the Winning Arguments corpus (Tan et al. 2016, via `convokit`), an independent dataset
 built with a different negative-sampling methodology (topically-matched pairs, not this project's
-thread-leaf sampling); the same rubric, prompt, and architecture applied unchanged ("no feature
-selection or tuning against WA" — a stated, important methodological discipline); the explicit
-5-question validation framing the notebook poses for itself. **[VERIFIED]**, `08_wa_external_validation.ipynb`.
-See `RESULTS_SHORTLIST.md` finding #5 for the headline (partial, not full, replication) result.
-**Supplementary/exploratory check:** `wa_quick_experiments.ipynb` is self-described in its own
-opening cell as scratch/exploratory, "not documented to the same standard, and not necessarily
-headed for the final report" — its three findings (embeddings don't move pairwise accuracy; a
-zero-shot cross-corpus transfer works above chance but degrades from the refit version; adding
-`concession` back doesn't help) are usable but should be explicitly labeled supplementary, not
-part of the main numbered-notebook results chain, per the notebook's own framing.
+thread-leaf sampling); the same rubric, prompt, and the same **model architecture and training
+configuration already selected** on the home dataset (`RobustScaler` + `SMOTE` + `XGBoost`, from
+`04.1`/`04.2`, carried unchanged through `06`/`07`) — reused as-is, with **no re-selection of
+architecture or configuration on WA** ("no feature selection or tuning against WA").
+
+**Training/evaluation procedure — state this precisely, it is not zero-shot:** a **new model
+instance is fit on WA's own native training split** and evaluated on WA's own native heldout
+split (the same train/test partition the corpus ships with and the literature's own benchmark
+numbers are computed on) — **[VERIFIED]**, `08_wa_external_validation.ipynb` cell 19 ("Fit on WA's
+own native `train` split... evaluated on WA's own native `heldout` split... with no re-selection on
+WA"). This is **reusing a selected architecture/configuration and fitting new parameters on WA's
+training data** — distinct from (a) selecting/tuning a *new* configuration using WA data (not
+done — the validation grid from `04.1` was not rerun against WA), and from (b) zero-shot transfer
+without refitting (not done here — that is a separate, out-of-scope check, see below).
+
+The explicit 5-question validation framing the notebook poses for itself is **[VERIFIED]**. See
+`RESULTS_SHORTLIST.md` finding #5 for the headline (partial, not full, replication) result.
+
+**Out of scope for the official report/presentation:** `wa_quick_experiments.ipynb` is a separate,
+self-described scratch/exploratory notebook ("not documented to the same standard, and not
+necessarily headed for the final report"). One of its three checks ("Experiment 2") *is* genuine
+zero-shot transfer — the home-trained model applied directly to WA's heldout split with **no
+refitting at all** — which is why it must not be confused with the §3.9 procedure above. Per
+explicit instruction, this notebook and all three of its findings (embeddings on top of the robust
+core; the zero-shot check; re-adding `concession`) are **excluded from the official report and
+presentation** — retained only as a labeled, out-of-scope entry in `RESULTS_SHORTLIST.md` for
+completeness of the research record, not as reportable results.
 
 ---
 
@@ -345,7 +379,7 @@ This is a single recurring gap, not eight separate ones — flagged once here, a
 ## 6. References
 
 **Cover, as separate items:**
-- The four related-work/method papers in §2.3 (full citations needed, two **[NEEDS VERIFICATION]**).
+- The four related-work/method papers in §2.3 (all four now **[VERIFIED]**, including page numbers).
 - **Code reuse to cite explicitly:** Priniski & Horne's `collect_posts.py`/`discussion_analysis.py`
   (github.com/jpriniski/CMV) — both the data-collection approach and the evidence-marker keyword
   method were adapted from this code. **[VERIFIED]**.

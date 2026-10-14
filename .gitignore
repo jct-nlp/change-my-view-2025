@@ -179,3 +179,10 @@ results/*.csv
 /GEMINI_API_NOTES.md
 /PLAN.md
 /WRITING_PLAN.md
+/refutation_reannotation/appendix_refutation_reannotation.ipynb
+/refutation_reannotation/refutation_reannotation_guidelines.md
+/refutation_reannotation/refutation_reannotation_sample.csv
+/refutation_reannotation/refutation_reannotation_sheet_chaya.csv
+/refutation_reannotation/refutation_reannotation_sheet_dikla.csv
+/refutation_reannotation/refutation_reannotation_translations.csv
+/this work/wa_quick_experiments.ipynb

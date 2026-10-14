@@ -8,6 +8,11 @@ an honest report is a stronger report. All numbers below were read directly from
 execute/stream output by independent research passes over the source notebooks; exact values are
 quoted, not estimated.
 
+**Note on Finding 6:** as of 2026-10-14, Finding 6 (`wa_quick_experiments.ipynb`'s zero-shot
+cross-corpus check) is explicitly **out of scope for the official report and presentation**,
+per instruction. It stays in this document only to preserve the research record — not as a
+proposed slide, backup slide, or report result. See Finding 6 itself for the full status note.
+
 ---
 
 ## Finding 1 — A length confound: the engineered feature pipeline is beaten by raw word count
@@ -201,6 +206,16 @@ rhetorical-strategy scores again add predictive value beyond `word_count` and ag
 length control. But the specific strategy that dominates is different: `justification`, not
 `refutation`, is WA's top strategy by both SHAP and effect size.
 
+**Procedure — state this precisely, it is not zero-shot transfer:** the model architecture and
+training configuration already selected on the home dataset (`RobustScaler` + `SMOTE` + `XGBoost`,
+chosen in `04.1`/`04.2`, reused unchanged through `06`/`07`) was carried over as-is — no new
+architecture/configuration selection was performed on WA. A **new model instance was then fit on
+WA's own native training split and evaluated on WA's own native heldout split**
+(`08_wa_external_validation.ipynb` cell 19, verified directly). In short: reuse the selected
+configuration, refit its parameters on WA's training data, evaluate on WA's held-out data — distinct
+from tuning a new configuration on WA (not done) and distinct from zero-shot transfer without
+refitting (not done here; that is a separate, out-of-scope check — see Finding 6).
+
 **Quantitative results (WA corpus: 8,106 comments, no-skill baseline 0.5291; word_count confound
 weaker here, r=0.1516 vs. 0.3716 at home):**
 | Feature set | PR-AUC | lift over no-skill |
@@ -252,25 +267,35 @@ here's an open hypothesis for why."
 
 ---
 
-## Finding 6 (supplementary) — Cross-corpus zero-shot transfer works above chance but degrades
+## Finding 6 — EXCLUDED FROM OFFICIAL DELIVERABLES — cross-corpus zero-shot transfer works above chance but degrades
+
+**Status (2026-10-14): explicitly out of scope for the official report and presentation**, per
+direct instruction. Retained here only so this piece of the research record isn't lost — not as a
+candidate for the report, slides, or backup slides. Do not include it, reference it, or draw on it
+when drafting any of those deliverables.
 
 **Finding:** A model trained only on the home dataset, applied directly to WA's held-out split with
-no retraining, performs above chance but clearly below the WA-refit version from Finding 5.
+**no refitting at all** — genuine zero-shot transfer, unlike the main WA validation in Finding 5,
+which refits a new model on WA's own training split — performs above chance but clearly below the
+Finding-5 (refit) version.
 
 **Quantitative results:** zero-shot transfer — PR-AUC 0.5621 (vs. 0.5291 no-skill), ROC-AUC 0.5453,
-pairwise accuracy 53.29%. WA-refit version (Finding 5): pairwise accuracy 58.09–58.68%.
+pairwise accuracy 53.29%. Finding 5's WA-refit version: pairwise accuracy 58.09–58.68%.
 
-**Source:** `this work/wa_quick_experiments.ipynb` — **note its own self-description as a
-scratch/exploratory notebook**, "not documented to the same standard, and not necessarily headed
-for the final report." Usable, but should be labeled supplementary in the report, not presented
-alongside the main numbered-notebook results as if equally finalized.
+**Source:** `this work/wa_quick_experiments.ipynb` — self-described in its own opening cell as a
+scratch/exploratory notebook, "not documented to the same standard, and not necessarily headed for
+the final report." That self-description is why it's excluded here, not just a caveat on how to
+present it.
 
-**Why it matters:** a clean, genuine negative/limited-generalization result: "some of what the
-model learned carries over, but letting it see the target data still helps meaningfully" — directly
-relevant to any claim about how far this project's findings generalize without adaptation.
+**Why it matters (research-record note, not a reporting instruction):** a clean, genuine
+negative/limited-generalization result: "some of what the model learned carries over, but letting
+it see the target data still helps meaningfully" — relevant to internal understanding of how far
+this project's findings generalize without refitting, even though it isn't going in the deliverables.
 
-**Presentation suitability:** **No — leave out of the 15-minute talk, mention only if asked.** Good
-backup-slide material for an examiner question about generalization, not a headline finding.
+**Presentation suitability:** **Excluded — not a main slide, not a backup slide.** Per instruction,
+this is out of scope for the presentation entirely, including backup slides. If asked an
+examiner question about zero-shot generalization specifically, this is background knowledge to
+have in mind, not material to put on screen.
 
 ---
 
@@ -322,10 +347,7 @@ appears in Finding 3; listed again here because it supports a distinct point.)
 
 **Why it matters:** for a report evaluated partly on "deep-learning techniques, limitations, and
 suggested improvements," this is a useful counterpoint to a narrative that bigger/more features
-are always better — it's a concrete, numeric argument for parsimony and interpretability, and
-pairs well with the `wa_quick_experiments.ipynb` finding (Finding 6's companion result, not
-separately listed here) that adding rich document embeddings on top barely moved WA's pairwise
-accuracy despite improving PR-AUC.
+are always better — a concrete, numeric argument for parsimony and interpretability.
 
 **Limitations/qualifications:** same order-sensitivity caveat as Finding 3 applies (reported as
 mean±std, not a single point estimate).
