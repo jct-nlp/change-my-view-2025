@@ -121,12 +121,23 @@ than any other feature family tested, including length itself.
 - Best single combination found anywhere in the modeling work: **8 strategy scores + `word_count`
   alone (9 columns) = 0.5379±0.0109 PR-AUC**, beating every larger combination tested, including
   the full 237-column feature set.
-- Length-controlled retention (strict 1:1 length-matched sample, 1,235 comments): the *strategy
-  gain itself* retains **84%** of its full-population value (0.0664→0.0557), while `word_count`'s
-  own lift retains only ~18% and the full engineered pipeline's only ~25% (consistent figures
-  reported in both `04.3` and `06`).
+- Length-controlled retention, `06`'s own strict 1:1 length-matched sample (built within the
+  2,753-row scored population, n=1,235): the *strategy gain itself* retains **84%** of its
+  full-population value (0.0664→0.0557). This is a self-contained result within `06` — do not merge
+  it with `04.3_length_controlled_analysis.ipynb`'s own, separately-constructed strict 1:1 match
+  (also n=1,235, but built within the full 3,971-row dataset, a different population): that notebook
+  found `word_count`'s own lift-over-no-skill retains ~18% (0.0576/0.3225) and the engineered
+  pipeline's own lift retains ~18% as well (0.0334/0.1817), **not 25%** — `06`'s own markdown
+  (cell 36) cites "25%" for the engineered pipeline, but the only "25%" figure actually computed
+  in `04.3` is a different quantity (residual `word_count` *correlation* retained under `04.3`'s
+  *loose* 84-word floor, not under the strict match, and not a lift figure at all — `04.3` cell 41).
+  **Resolved 2026-10-14** (see `PRESENTATION_STORYLINE.md`'s verification checklist): this is a
+  mix-up in `06`'s narrative text, not a real discrepancy in the computed results. Present the 84%
+  strategy-score-gain figure on its own, and if `04.3`'s figures are cited at all, use ~18%/~18%,
+  never ~18%/~25%.
 
-**Source:** `this work/06_strategy_ablation.ipynb`.
+**Source:** `this work/06_strategy_ablation.ipynb` (primary); `04.3_length_controlled_analysis.ipynb`
+(separate background check only, see caveat above).
 
 **Important methodological disclosure attached to this finding:** the underlying XGBoost+SMOTE
 pipeline on this correlated, 200+-column feature matrix is sensitive to column *order* — refitting
@@ -339,9 +350,15 @@ weight for its own 1–2 minutes in a 15-minute talk.
 scores plus `word_count` (9 columns total) — outperforms the full 237-column engineered-plus-
 strategy feature set, and does so with a small, interpretable, directly-explainable set of inputs.
 
-**Quantitative results:** 9-column combination: 0.5379±0.0109 PR-AUC vs. the full 237-column set's
-0.5202±0.0177 — a small model beating a much larger one, not a close second. (Same number already
-appears in Finding 3; listed again here because it supports a distinct point.)
+**Quantitative results:** 9-column combination: 0.5379±0.0109 PR-AUC (XGBoost, this project's
+architecture throughout) vs. the full 237-column set's 0.5202±0.0177 — a small model beating a much
+larger one, not a close second. (Same number already appears in Finding 3; listed again here because
+it supports a distinct point.) **Architecture note:** `06` cells 28–30 re-ran the full
+classifier×resampling grid on just these 9 columns and found Random Forest edges out XGBoost here
+(order-robust test PR-AUC 0.5432±0.0065 vs. 0.5380±0.0108) — a gap smaller than either model's own
+order-induced spread, so not a confident win for either. Report this as "XGBoost, with Random Forest
+scoring statistically indistinguishably," not as XGBoost being the best architecture for this
+feature set.
 
 **Source:** `this work/06_strategy_ablation.ipynb`.
 

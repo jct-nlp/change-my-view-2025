@@ -224,34 +224,78 @@ with error bars.
 
 ### 7. Length matching and compact model (7:55–9:45, RQ2)
 
-**Central message:** the strategy gain survives length control far better than any other feature
-family tested, including length itself.
+**Central message:** the strategy-score gain survives length control far better than the
+engineered-feature family it's measured against.
 
-**Sequence of arguments:**
-- Two length-control samples, built to re-measure each model's lift over the test fold's own
-  no-skill baseline: a loose word-count floor (1,638 comments) and a strict 1:1 length-matched
-  sample (1,235 comments).
-- Retention of the *strategy gain itself* under strict matching: **84%** (0.0664 → 0.0557) — versus
-  only ~18% retained by `word_count`'s own lift and ~25% by the full engineered pipeline's lift
-  (consistent figures across `04.3` and `06`).
+**Two separate length-matched experiments exist in this project and must not be shown as one
+unified comparison** — different source notebooks, different populations, different purposes:
+
+- `04.3_length_controlled_analysis.ipynb` matches **within the full 3,971-row dataset** (loose
+  floor: 1,638 comments; strict 1:1 match: 1,235 comments) and re-measures each of three
+  *different* models' (`TF-IDF`, `word_count` alone, the engineered pipeline) own lift-over-no-skill,
+  before vs. after matching.
+- `06_strategy_ablation.ipynb` matches separately, **within its own 2,753-row LLM-scored subset**
+  (strict 1:1 match: 1,235 comments — a coincidentally similar row count, not the same sample: `06`
+  cell 31 explains explicitly why `04.3`'s sample can't be reused here, since many of its matched
+  non-convincing rows fall under the 30-word scoring floor and have no strategy score), and asks a
+  narrower, different question: does the *incremental gain from adding the 8 strategy scores*
+  (not any single model's own lift) survive the same kind of matching.
+
+**For the main length-matching slide, present only `06`'s self-contained result:** the
+strategy-score gain itself is **0.0664 PR-AUC** on the full scored population (n=2,753) vs.
+**0.0557** on its own length-matched sample (n=1,235) — **84% retention** (`06` cells 32/35). This
+is the slide's only number from this section; do not add `04.3`'s word-count/engineered-pipeline
+retention figures to the same chart or caption as if they were a directly comparable, same-sample
+measurement.
+
+**If `04.3`'s result is mentioned at all** (e.g. as a verbal aside, not on the main chart), state it
+as a separate check on a separate sample: `04.3` §8.11 found `word_count`'s own lift-over-no-skill
+fell from 0.3225 (full dataset) to 0.0576 (its own strict 1:1 match) — **~18% retained** — and the
+engineered pipeline's own lift fell from 0.1817 to 0.0334, **also ~18% retained** (0.0334/0.1817 =
+18.4%), not 25%. **Resolved 2026-10-14:** `06`'s own markdown cell 36 cites "~25%" for the engineered
+pipeline's retention and attributes it to `04.3`, but that is a mix-up within `06`'s narrative text —
+the only "25%" figure anywhere in `04.3` is a different quantity on a different sample: the
+*residual `word_count` correlation* remaining after `04.3`'s *loose* 84-word floor
+(r=0.093/0.3716=25.0%, `04.3` cell 41), not the engineered pipeline's lift retention under strict
+matching. `04.3`'s own cells 21–22 are internally consistent and give ~18% for both `word_count` and
+the engineered pipeline. **Use ~18% for both, never 25%, on any slide, in the report, or in Q&A.**
+(The research computation itself is correct and unchanged — only `06`'s one-sentence description of
+it is wrong; per `RESEARCH_GUARDRAILS.md`'s standing rule to flag rather than edit research
+notebooks, `06_strategy_ablation.ipynb` cell 36 has been left as-is. Decide separately if you want
+that notebook cell's prose corrected too.)
 - Best single feature combination found anywhere in the project: the 8 strategy scores +
-  `word_count` alone (9 columns) = PR-AUC **0.5379±0.0109** — beats every larger combination
-  tested, including the full 237-column set. Useful as a parsimony/interpretability counterpoint if
-  a "why not just throw in everything" question comes up.
+  `word_count` alone (9 columns) = PR-AUC **0.5379±0.0109** (XGBoost, `06` cell 22) — beats every
+  larger combination tested, including the full 237-column set. Useful as a parsimony/
+  interpretability counterpoint if a "why not just throw in everything" question comes up.
+- **XGBoost vs. Random Forest on this 9-column set — do not call XGBoost "the best architecture"
+  here.** `06` cells 28–30 re-ran the full classifier×resampling grid on just these 9 columns:
+  `RF (over)` edges out `XGB (over)` on both validation (0.4331 vs. 0.4133) and the order-robust
+  held-out test comparison (0.5432±0.0065 vs. 0.5380±0.0108) — a 0.0052 gap, smaller than either
+  architecture's own order-induced spread, so not a confident win either way. The notebook's own
+  conclusion, and this project's, is to keep `XGB (over)` for consistency with every other result in
+  the talk, not because it was shown to outperform Random Forest on this feature set — say "XGBoost
+  (0.5380), with Random Forest scoring statistically indistinguishably at 0.5432" if asked, never
+  "XGBoost was the best architecture for this combination."
 - Optional aside if time allows: re-running the full 27-combination selection grid from scratch on
-  the small 1,235-row matched sample picked a *different* architecture that scored *below* its own
-  no-skill baseline on test (lift −0.0162) — a small-validation-set overfitting case (205 validation
-  rows, 27 candidates) — while simply reusing the architecture already selected on the full dataset
-  scored positively (lift +0.0334). A good "lessons learned" aside, not essential to the core arc.
+  the small 1,235-row matched sample (`04.3` §8.12) picked a *different* architecture that scored
+  *below* its own no-skill baseline on test (lift −0.0162) — a small-validation-set overfitting case
+  (205 validation rows, 27 candidates) — while simply reusing the architecture already selected on
+  the full dataset scored positively (lift +0.0334). A good "lessons learned" aside, not essential to
+  the core arc, and unrelated to the 9-feature XGB-vs-RF question above (different sample, different
+  feature set).
 
-**Suggested visual:** a length-matching lift comparison (three samples × three feature families).
-Avoid implying causal independence from length — frame as "most of each model's apparent skill
-really is about length; a small, real signal survives."
+**Suggested visual:** the strategy-score-gain retention chart from `06` alone (full population vs.
+its own length-matched sample) — two bars, not three populations merged. Avoid implying causal
+independence from length — frame as "the strategy-score gain survives length matching much better
+than the feature families it's layered on top of."
 
-**Source notebooks:** `04.3_length_controlled_analysis.ipynb`, `06_strategy_ablation.ipynb`.
+**Source notebooks:** `06_strategy_ablation.ipynb` (primary, for the main chart);
+`04.3_length_controlled_analysis.ipynb` (background only, cite as a separate check if mentioned).
 
-**Caveats:** length matching changes the sample and reduces power; state which sample/subset any
-retention percentage is computed on.
+**Caveats:** length matching changes the sample and reduces power; state which notebook, which
+population, and which matching protocol any retention percentage is computed on — never leave it
+implicit which of the two differently-built "length-matched sample" constructions a number refers
+to.
 
 ---
 
@@ -453,7 +497,7 @@ slides entirely** — see "Methodological wording to preserve" above.
 
 | Question | Where the answer is |
 |---|---|
-| "How do you know the model isn't just learning length again when you say strategies matter?" | Section 7 — length-matched retention, 84% vs ~18–25% for other feature families. |
+| "How do you know the model isn't just learning length again when you say strategies matter?" | Section 7 — the strategy-score *gain* retains 84% of its value under `06`'s own length matching (scored subset); `word_count`'s and the engineered pipeline's own lifts retain only ~18% under `04.3`'s separately-constructed matching (full dataset) — cite these as two different checks, not one chart. |
 | "Is refutation really the key strategy, or is that just this one dataset?" | Section 9 — explicitly: no, it reverses on WA; justification dominates there. |
 | "How reliable is the LLM's rhetorical scoring?" | Section 8 caveat / `05_rhetorical_scoring.ipynb` — self-consistency strong, human agreement weaker, worst exactly on refutation/justification. |
 | "Why PR-AUC and not accuracy or ROC-AUC?" | Section 2 — ~16% positive rate; justified explicitly in `04.1_model_training.ipynb`. |
@@ -476,3 +520,18 @@ slides entirely** — see "Methodological wording to preserve" above.
 - [ ] Decide if Section 7 needs two physical slides after first timed rehearsal.
 - [ ] Time a spoken draft; reduce details before reducing font size.
 - [ ] Update `degree_completion/PROGRESS.md` only when work is actually complete.
+- [x] **2026-10-14 — resolved.** `06_strategy_ablation.ipynb` cell 36's own markdown claims the
+  engineered pipeline's lift "collapsed to 25%" under `04.3`'s strict length matching, citing `04.3`.
+  Direct verification against `04.3` cells 19–22 instead finds: (a) the engineered pipeline's own
+  strict-match lift retention is ~18.4% (0.0334/0.1817), not 25% — matching `word_count`'s own
+  ~17.9%, not differing from it; (b) the only "25%" figure `04.3` actually computes is a *different*
+  quantity on a *different* sample — residual `word_count` *correlation* (not lift) remaining after
+  the *loose* 84-word floor (`04.3` cell 41: r=0.093/0.3716=25.0%). This is a mix-up inside `06`'s own
+  narrative text, not a sample/population-compatibility caveat, and the underlying computed values
+  are unaffected. **Resolution: all presentation documentation now states ~18% for both `word_count`
+  and the engineered pipeline's strict-match retention, and never cites 25%** — see Section 7 above,
+  `RESULTS_SHORTLIST.md` Finding 3, and `figures/FIGURE_NOTES.md`. Initially flagged rather than
+  edited, per `RESEARCH_GUARDRAILS.md`'s standing rule; at your explicit request,
+  `06_strategy_ablation.ipynb` cell 36's markdown has since also been corrected directly (prose
+  only — no code, outputs, or execution counts touched), with an inline note explaining the earlier
+  error.
