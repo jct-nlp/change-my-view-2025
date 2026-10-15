@@ -380,6 +380,12 @@ similarity at all (36.6% of the home dataset's unfiltered non-convincing pool is
 This is offered with one supporting, not proving, number; no experiment in this project tests it
 directly.
 
+**Limitations / interpretation** The Winning Arguments validation supports the broader finding that 
+rhetorical-strategy scores contain predictive information in a second dataset. However, it does not 
+establish that their **incremental predictive contribution beyond comment length** replicates to the 
+same extent observed in my original dataset. That stronger claim would require an explicit, 
+comparable length-controlled ablation on WA.
+
 **Suggested visual:** the WA feature-set comparison table (PR-AUC / pairwise accuracy) — more
 presentation-friendly than another SHAP plot at this point in the talk; avoid two SHAP slides back
 to back.

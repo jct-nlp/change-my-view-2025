@@ -314,6 +314,15 @@ without refitting (not done here — that is a separate, out-of-scope check, see
 The explicit 5-question validation framing the notebook poses for itself is **[VERIFIED]**. See
 `RESULTS_SHORTLIST.md` finding #5 for the headline (partial, not full, replication) result.
 
+**Limitations / interpretation:** the WA validation supports the broader finding that
+rhetorical-strategy scores contain predictive information in a second dataset. However, it does
+**not** establish that their incremental predictive contribution beyond comment length replicates
+to the same extent observed on the home dataset — no length-controlled ablation comparable to
+`06_strategy_ablation.ipynb`'s length-matched benchmark (the 84%-retention result) was run on WA.
+That stronger claim would require an explicit, comparable length-controlled ablation on WA, which
+is not part of this project's current scope. State the WA result as "the strategy signal itself
+replicates," not "the length-independence of that signal replicates."
+
 **Out of scope for the official report/presentation:** `wa_quick_experiments.ipynb` is a separate,
 self-described scratch/exploratory notebook ("not documented to the same standard, and not
 necessarily headed for the final report"). One of its three checks ("Experiment 2") *is* genuine
