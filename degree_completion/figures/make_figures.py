@@ -1,32 +1,44 @@
 """
-Generates the first three MSc-defense presentation figures from verified notebook outputs.
+Generates all seven MSc-defense presentation figures from verified notebook outputs.
 
 Every numeric constant below was read directly from the cited notebook cell (see
-FIGURE_NOTES.md for the full source trail) -- nothing here is estimated or re-derived.
+FIGURE_NOTES.md for the full source trail, exact definitions, and caveats) -- nothing here
+is estimated or re-derived except Figure 4's raw word_count array, which is recomputed from
+the saved results CSV using the exact same one-line formula as 04.2_baseline_comparison.ipynb
+cell 30 (read-only extraction, no model refit).
+
 Run from this directory (or anywhere, paths are relative to this file):
 
-    source ../../.venv/bin/activate   # repo venv has matplotlib
+    source ../../.venv/bin/activate   # repo venv has matplotlib + pandas
     python make_figures.py
 
-Outputs PNG (300 dpi) and SVG for each figure into this directory.
+Outputs PNG (300 dpi) and SVG for each figure into this directory. All seven figures share
+one figure size (16:9, for direct use on a presentation slide), one typography system, one
+color system, and one title/subtitle/footer layout -- see the shared helpers below.
 """
 
 import os
+import zipfile
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
-import matplotlib.font_manager as fm
+import matplotlib.lines as mlines
+import numpy as np
+import pandas as pd
 
 HERE = os.path.dirname(os.path.abspath(__file__))
+REPO_ROOT = os.path.dirname(os.path.dirname(HERE))
+RESULTS_DIR = os.path.join(REPO_ROOT, "results")
 
 # ---------------------------------------------------------------------------
 # Shared style -- one palette, one typography system, one figure size, reused
-# across all three figures (dataviz skill's validated default categorical
-# palette, first three slots: blue / orange / aqua).
+# across all seven figures (dataviz skill's validated default categorical
+# palette: blue / orange / aqua / yellow, first four slots).
 # ---------------------------------------------------------------------------
-COLOR_BLUE = "#2a78d6"    # reference / baseline bars
-COLOR_ORANGE = "#eb6834"  # the headline / highlighted finding
-COLOR_AQUA = "#1baf7a"    # third supporting category
+COLOR_BLUE = "#2a78d6"      # reference / baseline / "population A" / "dataset A"
+COLOR_ORANGE = "#eb6834"    # the headline / highlighted finding / "population B" / "dataset B"
+COLOR_AQUA = "#1baf7a"      # third supporting category
+COLOR_GRAY_LINE = "#c3c2b7"  # de-emphasized context series (bump chart, literature bands)
 INK_PRIMARY = "#0b0b0b"
 INK_SECONDARY = "#52514e"
 INK_MUTED = "#898781"
@@ -34,7 +46,7 @@ GRIDLINE = "#e1e0d9"
 BASELINE_LINE = "#898781"
 SURFACE = "#fcfcfb"
 
-FIGSIZE = (9.5, 5.2)
+FIGSIZE = (10, 5.625)  # 16:9 -- drops directly onto a presentation slide
 DPI = 300
 
 plt.rcParams.update({
@@ -52,16 +64,39 @@ plt.rcParams.update({
 })
 
 
+# ---------------------------------------------------------------------------
+# Shared helpers -- identical title/subtitle/footer anchoring on every figure.
+# ---------------------------------------------------------------------------
+def _header(fig, title, subtitle=None, title_size=17):
+    fig.suptitle(title, x=0.055, y=0.95, ha="left", va="top",
+                 fontsize=title_size, fontweight="bold", color=INK_PRIMARY)
+    if subtitle:
+        fig.text(0.055, 0.855, subtitle, ha="left", va="top",
+                  fontsize=11, color=INK_SECONDARY, linespacing=1.4)
+
+
+def _footer(fig, text):
+    fig.text(0.055, 0.015, text, ha="left", va="bottom",
+              fontsize=7.8, color=INK_MUTED, linespacing=1.35)
+
+
 def _style_axes(ax, xlabel, xlim):
     ax.set_xlim(*xlim)
-    ax.set_xlabel(xlabel, fontsize=12, color=INK_SECONDARY, labelpad=10)
+    ax.set_xlabel(xlabel, fontsize=11, color=INK_SECONDARY, labelpad=8)
     ax.xaxis.grid(True, color=GRIDLINE, linewidth=1, zorder=0)
     ax.set_axisbelow(True)
     for spine in ["top", "right", "left"]:
         ax.spines[spine].set_visible(False)
     ax.spines["bottom"].set_color(GRIDLINE)
-    ax.tick_params(axis="y", length=0, labelsize=13)
-    ax.tick_params(axis="x", length=0, labelsize=11)
+    ax.tick_params(axis="y", length=0, labelsize=12.5)
+    ax.tick_params(axis="x", length=0, labelsize=10.5)
+
+
+def _no_skill_line(ax, x, label):
+    ax.axvline(x, color=BASELINE_LINE, linestyle=(0, (5, 3)), linewidth=1.5, zorder=2)
+    ax.annotate(label, xy=(x, 1.0), xycoords=("data", "axes fraction"),
+                xytext=(6, -3), textcoords="offset points",
+                va="top", ha="left", fontsize=9, color=INK_MUTED, style="italic")
 
 
 def _save(fig, name):
@@ -73,19 +108,25 @@ def _save(fig, name):
     print(f"Saved {svg_path}")
 
 
+def _load_comment_word_counts():
+    """Recomputes word_count the same way 04.2_baseline_comparison.ipynb cell 30 does, from
+    the saved, already-cleaned results CSV. Read-only extraction -- no model fit, no rerun."""
+    zpath = os.path.join(RESULTS_DIR, "03_cmv_comments_df.csv.zip")
+    with zipfile.ZipFile(zpath) as z:
+        df = pd.read_csv(z.open(z.namelist()[0]))
+    df["word_count"] = df["cleaned_final_comment"].fillna("").apply(lambda s: len(s.split()))
+    return df[["word_count", "is_convincing"]]
+
+
 # ---------------------------------------------------------------------------
 # Figure 1 -- Initial model comparison
 # Source: this work/04.2_baseline_comparison.ipynb, cells 9-10, 33
 # ---------------------------------------------------------------------------
 def figure1():
-    labels = [
-        "Selected engineered-feature\npipeline (XGBoost + SMOTE,\n229 features)",
-        "TF-IDF + Logistic\nRegression",
-        "Word count alone\n(1 feature)",
-    ]
+    labels = ["Engineered pipeline\n(229 features)", "TF-IDF +\nLogistic Regression", "Word count alone\n(1 feature)"]
     values = [0.3848, 0.5119, 0.5256]
     colors = [COLOR_BLUE, COLOR_AQUA, COLOR_ORANGE]
-    no_skill = 0.2031  # majority-class PR-AUC = test-fold positive rate (n=709, 81 threads)
+    no_skill = 0.2031  # majority-class PR-AUC = test-fold positive rate
 
     fig, ax = plt.subplots(figsize=FIGSIZE)
     y_pos = range(len(labels))
@@ -93,30 +134,20 @@ def figure1():
 
     for bar, val in zip(bars, values):
         ax.text(val + 0.012, bar.get_y() + bar.get_height() / 2, f"{val:.4f}",
-                va="center", ha="left", fontsize=13, color=INK_PRIMARY, fontweight="bold")
+                va="center", ha="left", fontsize=14, color=INK_PRIMARY, fontweight="bold")
 
-    ax.axvline(no_skill, color=BASELINE_LINE, linestyle=(0, (5, 3)), linewidth=1.6, zorder=2)
-    ax.annotate(f"No-skill baseline\n(majority class) = {no_skill:.3f}",
-                xy=(no_skill, 1.0), xycoords=("data", "axes fraction"),
-                xytext=(6, -4), textcoords="offset points",
-                va="top", ha="left", fontsize=9.5, color=INK_MUTED, style="italic")
+    _no_skill_line(ax, no_skill, f"No-skill = {no_skill:.3f}")
 
     ax.set_yticks(y_pos)
-    ax.set_yticklabels(labels, fontsize=12.5)
+    ax.set_yticklabels(labels, fontsize=13)
     ax.invert_yaxis()
     _style_axes(ax, "Held-out PR-AUC", (0, 0.62))
 
-    fig.suptitle("Word Count Alone Outperforms the Engineered-Feature Pipeline",
-                 x=0.06, y=0.97, ha="left", fontsize=15.5, color=INK_PRIMARY, fontweight="bold")
-    fig.text(0.06, 0.885, "Held-out test set: 709 comments, 81 threads (thread-disjoint split) — same test fold for all three models",
-              fontsize=10.5, color=INK_SECONDARY)
+    _header(fig, "Word Count Beats the Engineered Pipeline",
+            "Held-out PR-AUC, same 709-comment test set for all three models")
+    _footer(fig, "Source: 04.2_baseline_comparison.ipynb, cells 9–10, 33. Full methodology and caveats in FIGURE_NOTES.md.")
 
-    fig.text(0.06, 0.015,
-              "Source: this work/04.2_baseline_comparison.ipynb, cells 9–10 (engineered pipeline, TF-IDF) and 33 (word count). "
-              "PR-AUC values and no-skill baseline verified 2026-10-14.",
-              fontsize=8.5, color=INK_MUTED)
-
-    fig.subplots_adjust(left=0.30, right=0.95, top=0.78, bottom=0.16)
+    fig.subplots_adjust(left=0.27, right=0.95, top=0.80, bottom=0.14)
     _save(fig, "figure1_initial_model_comparison")
     plt.close(fig)
 
@@ -126,49 +157,44 @@ def figure1():
 # Source: this work/06_strategy_ablation.ipynb, cell 17
 # ---------------------------------------------------------------------------
 def figure2():
-    labels = [
-        "Engineered-feature model\n(no rhetorical scores)",
-        "Engineered-feature model\n+ 8 rhetorical-strategy scores",
-        "Rhetorical-strategy\nscores only",
-    ]
+    labels = ["Engineered features\n(no strategy scores)", "Engineered features\n+ 8 strategy scores", "Strategy scores\nonly"]
     means = [0.4467, 0.5202, 0.3538]
     stds = [0.0196, 0.0177, 0.0079]
     colors = [COLOR_BLUE, COLOR_ORANGE, COLOR_AQUA]
-    no_skill = 0.2382  # test-fold positive rate, scored subset (n=2,753; test 592/80 threads)
+    no_skill = 0.2382  # test-fold positive rate, scored subset
 
     fig, ax = plt.subplots(figsize=FIGSIZE)
-    y_pos = range(len(labels))
+    y_pos = list(range(len(labels)))
     bars = ax.barh(y_pos, means, xerr=stds, color=colors, height=0.55, zorder=3,
-                    error_kw=dict(ecolor=INK_SECONDARY, elinewidth=1.6, capsize=5, capthick=1.6))
+                    error_kw=dict(ecolor=INK_SECONDARY, elinewidth=1.5, capsize=5, capthick=1.5))
 
     for bar, mean, std in zip(bars, means, stds):
-        ax.text(mean + std + 0.012, bar.get_y() + bar.get_height() / 2, f"{mean:.4f} ± {std:.4f}",
-                va="center", ha="left", fontsize=12.5, color=INK_PRIMARY, fontweight="bold")
+        ax.text(mean + std + 0.012, bar.get_y() + bar.get_height() / 2, f"{mean:.4f}",
+                va="center", ha="left", fontsize=13.5, color=INK_PRIMARY, fontweight="bold")
 
-    ax.axvline(no_skill, color=BASELINE_LINE, linestyle=(0, (5, 3)), linewidth=1.6, zorder=2)
-    ax.annotate(f"No-skill baseline\n(scored subset) = {no_skill:.3f}",
-                xy=(no_skill, 1.0), xycoords=("data", "axes fraction"),
-                xytext=(6, -4), textcoords="offset points",
-                va="top", ha="left", fontsize=9.5, color=INK_MUTED, style="italic")
+    # Gain bracket between bar 0 and bar 1, same visual language as Figure 3's retention bracket.
+    bracket_x = 0.60
+    ax.plot([bracket_x, bracket_x], [0, 1], color=INK_MUTED, linewidth=1.3, zorder=2, clip_on=False)
+    ax.plot([bracket_x - 0.01, bracket_x], [0, 0], color=INK_MUTED, linewidth=1.3, zorder=2, clip_on=False)
+    ax.plot([bracket_x - 0.01, bracket_x], [1, 1], color=INK_MUTED, linewidth=1.3, zorder=2, clip_on=False)
+    ax.text(bracket_x + 0.012, 0.5, "+0.0735", va="center", ha="left", fontsize=14,
+            color=INK_PRIMARY, fontweight="bold", clip_on=False)
+
+    _no_skill_line(ax, no_skill, f"No-skill = {no_skill:.3f}")
+    ax.annotate("±SD, 8 column orderings\n(not a confidence interval)",
+                xy=(1.0, 1.0), xycoords="axes fraction", xytext=(-4, -3), textcoords="offset points",
+                va="top", ha="right", fontsize=8.5, color=INK_MUTED, style="italic", linespacing=1.3)
 
     ax.set_yticks(y_pos)
-    ax.set_yticklabels(labels, fontsize=12.5)
+    ax.set_yticklabels(labels, fontsize=13)
     ax.invert_yaxis()
-    _style_axes(ax, "Held-out PR-AUC (mean ± SD across 8 column orderings)", (0, 0.68))
+    _style_axes(ax, "Held-out PR-AUC (mean ± SD)", (0, 0.78))
 
-    fig.suptitle("Rhetorical-Strategy Scores Add Predictive Value Beyond Engineered Features",
-                 x=0.06, y=0.97, ha="left", fontsize=14.5, color=INK_PRIMARY, fontweight="bold")
-    fig.text(0.06, 0.875,
-              "Scored subset (n=2,753; test: 592 comments, 80 threads) — error bars are ± SD across 8 random\n"
-              "feature-column orderings of the same fixed XGBoost+SMOTE architecture, NOT bootstrap confidence intervals",
-              fontsize=10, color=INK_SECONDARY)
+    _header(fig, "Strategy Scores Add +0.0735 PR-AUC",
+            "Scored subset, n=2,753 (test: 592 comments)")
+    _footer(fig, "Source: 06_strategy_ablation.ipynb, cell 17 (headline_df). Column-order sensitivity documented in cells 11–14. Full caveats in FIGURE_NOTES.md.")
 
-    fig.text(0.06, 0.015,
-              "Source: this work/06_strategy_ablation.ipynb, cell 17 (headline_df). Values verified 2026-10-14. "
-              "Column-order sensitivity documented in cells 11–14 of the same notebook.",
-              fontsize=8.5, color=INK_MUTED)
-
-    fig.subplots_adjust(left=0.32, right=0.95, top=0.76, bottom=0.16)
+    fig.subplots_adjust(left=0.29, right=0.90, top=0.78, bottom=0.14)
     _save(fig, "figure2_strategy_incremental_value")
     plt.close(fig)
 
@@ -178,54 +204,317 @@ def figure2():
 # Source: this work/06_strategy_ablation.ipynb, cells 32 and 35
 # ---------------------------------------------------------------------------
 def figure3():
-    labels = [
-        "Full scored population\n(n = 2,753)",
-        "Length-matched sample\n(within scored population, n = 1,235)",
-    ]
+    labels = ["Full scored population\n(n = 2,753)", "Length-matched sample\n(n = 1,235)"]
     gains = [0.0664, 0.0557]
     colors = [COLOR_BLUE, COLOR_ORANGE]
     retention_pct = 0.0557 / 0.0664 * 100  # 83.9%, reported as "84%"
 
     fig, ax = plt.subplots(figsize=FIGSIZE)
     y_pos = range(len(labels))
-    bars = ax.barh(y_pos, gains, color=colors, height=0.42, zorder=3)
+    bars = ax.barh(y_pos, gains, color=colors, height=0.40, zorder=3)
 
     for bar, val in zip(bars, gains):
         ax.text(val + 0.0015, bar.get_y() + bar.get_height() / 2, f"+{val:.4f} PR-AUC",
-                va="center", ha="left", fontsize=13, color=INK_PRIMARY, fontweight="bold")
+                va="center", ha="left", fontsize=14, color=INK_PRIMARY, fontweight="bold")
 
-    # Bracket + retention callout between the two bars, kept well inside xlim so it
-    # can't inflate the saved bbox past the footer text's wrap width.
-    y0, y1 = 0, 1
     bracket_x = 0.080
-    ax.plot([bracket_x, bracket_x], [y0, y1], color=INK_MUTED, linewidth=1.3, zorder=2, clip_on=False)
-    ax.plot([bracket_x - 0.004, bracket_x], [y0, y0], color=INK_MUTED, linewidth=1.3, zorder=2, clip_on=False)
-    ax.plot([bracket_x - 0.004, bracket_x], [y1, y1], color=INK_MUTED, linewidth=1.3, zorder=2, clip_on=False)
-    ax.text(bracket_x + 0.004, (y0 + y1) / 2, f"{retention_pct:.0f}% of the gain\nis retained",
-            va="center", ha="left", fontsize=12.5, color=INK_PRIMARY, fontweight="bold", clip_on=False)
+    ax.plot([bracket_x, bracket_x], [0, 1], color=INK_MUTED, linewidth=1.3, zorder=2, clip_on=False)
+    ax.plot([bracket_x - 0.004, bracket_x], [0, 0], color=INK_MUTED, linewidth=1.3, zorder=2, clip_on=False)
+    ax.plot([bracket_x - 0.004, bracket_x], [1, 1], color=INK_MUTED, linewidth=1.3, zorder=2, clip_on=False)
+    ax.text(bracket_x + 0.004, 0.5, f"{retention_pct:.0f}% retained",
+            va="bottom", ha="left", fontsize=14, color=INK_PRIMARY, fontweight="bold", clip_on=False)
+    ax.text(bracket_x + 0.004, 0.5, "descriptive estimate, not a significance test",
+            va="top", ha="left", fontsize=8.5, color=INK_MUTED, style="italic", clip_on=False)
 
     ax.set_yticks(y_pos)
-    ax.set_yticklabels(labels, fontsize=12.5)
+    ax.set_yticklabels(labels, fontsize=13)
     ax.invert_yaxis()
-    _style_axes(ax, "Incremental PR-AUC gain from adding 8 rhetorical-strategy scores", (0, 0.10))
+    _style_axes(ax, "Incremental PR-AUC gain from the 8 strategy scores", (0, 0.105))
 
-    fig.suptitle("The Rhetorical-Strategy Gain Survives Length Matching",
-                 x=0.06, y=0.96, ha="left", va="top", fontsize=15.5, color=INK_PRIMARY, fontweight="bold")
-    fig.text(0.06, 0.78,
-              "Same engineered-feature baseline (‘trusted’ columns), same scored-subset population, before vs. after a strict\n"
-              "1:1 length match built within it — this is a comparison of incremental PR-AUC gain, not of raw PR-AUC across\n"
-              "populations with different class prevalence (23.8% vs. 51.3% positive)",
-              va="top", fontsize=9.8, color=INK_SECONDARY, linespacing=1.5)
+    _header(fig, "Strategy Gain Survives Length Matching",
+            "Matched by word-count decile bins, not exact-length pairs — within 06's own scored population")
+    _footer(fig, "Source: 06_strategy_ablation.ipynb, cells 32 (matching) and 35 (length_benchmark_df). "
+                 "A separate, non-comparable sample exists in 04.3 (not used here). Full caveats in FIGURE_NOTES.md.")
 
-    fig.text(0.06, 0.015,
-              "Source: this work/06_strategy_ablation.ipynb, cells 32 (matching) and 35 (length_benchmark_df). Values verified 2026-10-14.\n"
-              "This length-matched sample is constructed within the 2,753-row scored population and is a separate, differently-built sample\n"
-              "from 04.3_length_controlled_analysis.ipynb's own length-matched sample (built from the full 3,971-row dataset); the two are not\n"
-              "combined here.",
-              va="bottom", fontsize=8.2, color=INK_MUTED, linespacing=1.4)
-
-    fig.subplots_adjust(left=0.30, right=0.92, top=0.62, bottom=0.26)
+    fig.subplots_adjust(left=0.27, right=0.92, top=0.80, bottom=0.14)
     _save(fig, "figure3_strategy_gain_length_matching")
+    plt.close(fig)
+
+
+# ---------------------------------------------------------------------------
+# Figure 4 -- Comment length by outcome
+# Source: this work/04.2_baseline_comparison.ipynb, cells 30-31
+# ---------------------------------------------------------------------------
+def figure4():
+    df = _load_comment_word_counts()
+    mean_non_convincing = 78.0   # full dataset, cell 30
+    mean_convincing = 216.7      # full dataset, cell 30
+    n_non_convincing = int((df["is_convincing"] == 0).sum())
+    n_convincing = int((df["is_convincing"] == 1).sum())
+    n_total = len(df)
+
+    trimmed = df[df["word_count"] < 600]  # same < 600 cutoff as cell 31 (excludes 56 comments, 1.4%)
+    bins = np.arange(0, 650, 50)
+
+    fig, ax = plt.subplots(figsize=FIGSIZE)
+    ax.hist(trimmed.loc[trimmed["is_convincing"] == 0, "word_count"], bins=bins, density=True,
+            color=COLOR_BLUE, alpha=0.55, zorder=3,
+            label=f"Non-convincing (n={n_non_convincing:,}, {n_non_convincing/n_total*100:.1f}%)")
+    ax.hist(trimmed.loc[trimmed["is_convincing"] == 1, "word_count"], bins=bins, density=True,
+            color=COLOR_ORANGE, alpha=0.55, zorder=4,
+            label=f"Convincing (n={n_convincing:,}, {n_convincing/n_total*100:.1f}%)")
+
+    ax.axvline(mean_non_convincing, color=COLOR_BLUE, linestyle=(0, (5, 3)), linewidth=1.6, zorder=5)
+    ax.axvline(mean_convincing, color=COLOR_ORANGE, linestyle=(0, (5, 3)), linewidth=1.6, zorder=5)
+    ax.annotate(f"mean {mean_non_convincing:.0f}", xy=(mean_non_convincing, 1.0), xycoords=("data", "axes fraction"),
+                xytext=(-6, -4), textcoords="offset points", va="top", ha="right",
+                fontsize=9.5, color=COLOR_BLUE, fontweight="bold")
+    ax.annotate(f"mean {mean_convincing:.0f}", xy=(mean_convincing, 1.0), xycoords=("data", "axes fraction"),
+                xytext=(6, -4), textcoords="offset points", va="top", ha="left",
+                fontsize=9.5, color=COLOR_ORANGE, fontweight="bold")
+
+    ax.legend(loc="upper right", frameon=False, fontsize=10.5, bbox_to_anchor=(1.0, 0.92))
+    ax.set_xlim(0, 600)
+    ax.set_ylabel("Density", fontsize=11, color=INK_SECONDARY, labelpad=8)
+    ax.set_yticks([])
+    for spine in ["top", "right", "left"]:
+        ax.spines[spine].set_visible(False)
+    ax.spines["bottom"].set_color(GRIDLINE)
+    ax.set_xlabel("Comment word count (trimmed at 600 words)", fontsize=11, color=INK_SECONDARY, labelpad=8)
+    ax.tick_params(axis="x", length=0, labelsize=10.5)
+    ax.xaxis.grid(True, color=GRIDLINE, linewidth=1, zorder=0)
+    ax.set_axisbelow(True)
+
+    _header(fig, "Convincing Comments Are Much Longer",
+            "Word-count distribution by outcome, full dataset (n=3,971)")
+    _footer(fig, "Source: 04.2_baseline_comparison.ipynb, cells 30–31. Means from the full dataset; display trimmed at <600 words\n"
+                 "(excludes 56 comments, 1.4%, per the notebook's own cutoff). Shapes shown as density, not raw counts — legend\n"
+                 "states actual class sizes. Full caveats in FIGURE_NOTES.md.")
+
+    fig.subplots_adjust(left=0.07, right=0.95, top=0.80, bottom=0.21)
+    _save(fig, "figure4_comment_length_by_outcome")
+    plt.close(fig)
+
+
+# ---------------------------------------------------------------------------
+# Figure 5 -- Refutation vs. justification under length control
+# Source: this work/07_strategy_interpretation.ipynb, cell 36
+# ---------------------------------------------------------------------------
+def figure5():
+    # (strategy, mean |SHAP| full population, mean |SHAP| length-matched), word_count excluded
+    # (1.0245 / 0.8402 -- dwarfs every strategy and is already established in Figures 1-4).
+    data = [
+        ("refutation", 0.6034, 0.5193),
+        ("concession", 0.3439, 0.3445),
+        ("simplification", 0.3193, 0.3383),
+        ("evidence", 0.3592, 0.3090),
+        ("call_to_action", 0.1837, 0.2707),
+        ("personal_narrative", 0.1853, 0.2168),
+        ("justification", 0.4156, 0.1956),
+        ("question_asking", 0.1518, 0.1806),
+    ]
+    # Sort by length-matched value descending, same convention as the notebook's own table.
+    data = sorted(data, key=lambda row: row[2], reverse=True)
+    highlighted = {"refutation", "justification"}
+    display_names = {
+        "refutation": "Refutation", "justification": "Justification", "concession": "Concession",
+        "simplification": "Simplification", "evidence": "Evidence", "call_to_action": "Call to Action",
+        "personal_narrative": "Personal Narrative", "question_asking": "Question Asking",
+    }
+
+    fig, ax = plt.subplots(figsize=FIGSIZE)
+    y_pos = list(range(len(data)))[::-1]
+
+    for y, (name, full, matched) in zip(y_pos, data):
+        is_hi = name in highlighted
+        line_color = INK_MUTED if not is_hi else INK_SECONDARY
+        ax.plot([full, matched], [y, y], color=line_color, linewidth=(2.2 if is_hi else 1.2), zorder=2, alpha=(1.0 if is_hi else 0.6))
+        ax.scatter([full], [y], s=(95 if is_hi else 55), color=COLOR_BLUE, zorder=3,
+                   edgecolors=SURFACE, linewidths=1, alpha=(1.0 if is_hi else 0.75))
+        ax.scatter([matched], [y], s=(95 if is_hi else 55), color=COLOR_ORANGE, zorder=3,
+                   edgecolors=SURFACE, linewidths=1, alpha=(1.0 if is_hi else 0.75))
+
+    ax.set_yticks(y_pos)
+    labels = [display_names[name] for name, _, _ in data]
+    ax.set_yticklabels(labels, fontsize=12.5)
+    for tick, (name, _, _) in zip(ax.get_yticklabels(), data):
+        if name in highlighted:
+            tick.set_fontweight("bold")
+            tick.set_color(INK_PRIMARY)
+        else:
+            tick.set_color(INK_MUTED)
+
+    # Value callouts for the two highlighted strategies only, to keep the chart simplified.
+    for name, full, matched in data:
+        if name in highlighted:
+            y = dict(zip([n for n, _, _ in data], y_pos))[name]
+            ax.annotate(f"{full:.3f}", xy=(full, y), xytext=(0, 10), textcoords="offset points",
+                        ha="center", fontsize=9.5, color=COLOR_BLUE, fontweight="bold")
+            ax.annotate(f"{matched:.3f}", xy=(matched, y), xytext=(0, 10), textcoords="offset points",
+                        ha="center", fontsize=9.5, color=COLOR_ORANGE, fontweight="bold")
+
+    legend_handles = [
+        mlines.Line2D([], [], marker="o", linestyle="None", color=COLOR_BLUE, markersize=9, label="Full population"),
+        mlines.Line2D([], [], marker="o", linestyle="None", color=COLOR_ORANGE, markersize=9, label="Length-matched"),
+    ]
+    ax.legend(handles=legend_handles, loc="lower right", frameon=False, fontsize=10.5)
+
+    _style_axes(ax, "Mean |SHAP value| (word_count excluded — see notes)", (0, 0.72))
+
+    _header(fig, "Refutation Holds Up; Justification Does Not",
+            "Mean |SHAP| per strategy, before vs. after length matching")
+    _footer(fig, "Predictive importance from one fitted model, not a causal effect. Strategy scores are LLM-generated; refutation\n"
+                 "and justification had the weakest agreement with human scoring (05_rhetorical_scoring.ipynb). Source:\n"
+                 "07_strategy_interpretation.ipynb, cell 36 (shap_comparison). Full caveats in FIGURE_NOTES.md.")
+
+    fig.subplots_adjust(left=0.22, right=0.95, top=0.80, bottom=0.17)
+    _save(fig, "figure5_refutation_vs_justification_shap")
+    plt.close(fig)
+
+
+# ---------------------------------------------------------------------------
+# Figure 6 -- Strategy-ranking differences between datasets (CMV vs. WA)
+# Sources: 07_strategy_interpretation.ipynb cell 39; 08_wa_external_validation.ipynb cell 33
+# ---------------------------------------------------------------------------
+def figure6():
+    # (strategy, home r, home significant, wa r, wa significant)
+    data = [
+        ("justification", 0.3584, True, 0.1962, True),
+        ("refutation", 0.3149, True, 0.0949, True),
+        ("simplification", 0.1944, True, 0.1105, True),
+        ("call_to_action", 0.1584, True, 0.0305, True),
+        ("concession", 0.1481, True, 0.0542, True),
+        ("evidence", 0.1018, True, 0.1467, True),
+        ("question_asking", 0.0069, False, -0.0135, False),
+        ("personal_narrative", -0.0217, False, 0.0224, True),
+    ]
+    display_names = {
+        "refutation": "Refutation", "justification": "Justification", "concession": "Concession",
+        "simplification": "Simplification", "evidence": "Evidence", "call_to_action": "Call to Action",
+        "personal_narrative": "Personal Narrative", "question_asking": "Question Asking",
+    }
+    home_rank = {name: i + 1 for i, (name, r, *_ ) in enumerate(sorted(data, key=lambda row: row[1], reverse=True))}
+    wa_rank = {name: i + 1 for i, (name, _, _, r, _) in enumerate(sorted(data, key=lambda row: row[3], reverse=True))}
+
+    highlighted = {"refutation": COLOR_ORANGE, "evidence": COLOR_AQUA}
+    # refutation: drops from #2 (home) to #4 (WA) despite leading by SHAP at home (Figure 5).
+    # evidence: the largest riser, #6 (home) to #2 (WA).
+
+    fig, ax = plt.subplots(figsize=FIGSIZE)
+    x_home, x_wa = 0.0, 1.0
+
+    for name, home_r, home_sig, wa_r, wa_sig in data:
+        color = highlighted.get(name, COLOR_GRAY_LINE)
+        is_hi = name in highlighted
+        ax.plot([x_home, x_wa], [home_rank[name], wa_rank[name]],
+                color=color, linewidth=(2.6 if is_hi else 1.4), zorder=(4 if is_hi else 2),
+                alpha=(1.0 if is_hi else 0.85))
+        for x, r, sig in [(x_home, home_r, home_sig), (x_wa, wa_r, wa_sig)]:
+            rank = home_rank[name] if x == x_home else wa_rank[name]
+            ax.scatter([x], [rank], s=(110 if is_hi else 70),
+                       facecolors=(color if sig else SURFACE), edgecolors=color, linewidths=1.6,
+                       zorder=(5 if is_hi else 3))
+        label_color = INK_PRIMARY if is_hi else INK_MUTED
+        weight = "bold" if is_hi else "normal"
+        ax.annotate(display_names[name], xy=(x_home, home_rank[name]), xytext=(-10, 0),
+                    textcoords="offset points", va="center", ha="right", fontsize=11,
+                    color=label_color, fontweight=weight)
+        ax.annotate(f"{display_names[name]}  (r={wa_r:.2f})" if is_hi else f"r={wa_r:.2f}",
+                    xy=(x_wa, wa_rank[name]), xytext=(10, 0),
+                    textcoords="offset points", va="center", ha="left", fontsize=(11 if is_hi else 9.5),
+                    color=label_color, fontweight=weight)
+        if is_hi:
+            ax.annotate(f"r={home_r:.2f}", xy=(x_home, home_rank[name]), xytext=(-10, -14),
+                        textcoords="offset points", va="center", ha="right", fontsize=9.5, color=label_color)
+
+    ax.set_xlim(-0.55, 1.75)
+    ax.set_ylim(8.7, 0.3)
+    ax.set_xticks([x_home, x_wa])
+    ax.set_xticklabels(["CMV (home)", "Winning Arguments"], fontsize=13, fontweight="bold", color=INK_PRIMARY)
+    ax.set_yticks([])
+    for spine in ax.spines.values():
+        spine.set_visible(False)
+    ax.tick_params(axis="x", length=0, pad=10)
+    ax.tick_params(axis="y", length=0)
+
+    legend_handles = [
+        mlines.Line2D([], [], marker="o", linestyle="None", color=INK_MUTED, markersize=8,
+                      markerfacecolor=INK_MUTED, label="Significant (FDR < .05)"),
+        mlines.Line2D([], [], marker="o", linestyle="None", color=INK_MUTED, markersize=8,
+                      markerfacecolor=SURFACE, label="Not significant"),
+    ]
+    ax.legend(handles=legend_handles, loc="lower center", bbox_to_anchor=(0.5, -0.05),
+              ncol=2, frameon=False, fontsize=9.5)
+
+    _header(fig, "Strategy Importance Is Dataset-Dependent",
+            "Rank-biserial effect size (same method, both datasets) — rank 1 = strongest")
+    _footer(fig, "Justification leads by this metric in both datasets; refutation leads by SHAP importance at home only (Figure 5) —\n"
+                 "the two methods disagree on CMV's top strategy. Source: 07_strategy_interpretation.ipynb cell 39 (home);\n"
+                 "08_wa_external_validation.ipynb cell 33 (WA, full population). Full caveats in FIGURE_NOTES.md.")
+
+    fig.subplots_adjust(left=0.20, right=0.85, top=0.78, bottom=0.17)
+    _save(fig, "figure6_strategy_ranking_cmv_vs_wa")
+    plt.close(fig)
+
+
+# ---------------------------------------------------------------------------
+# Figure 7 -- Winning Arguments validation
+# Source: this work/08_wa_external_validation.ipynb, cells 20, 36, 38-39
+# ---------------------------------------------------------------------------
+def figure7():
+    labels = ["Word count\nonly", "Strategy scores\nonly", "Robust core\n(4 features)"]
+    colors = [COLOR_BLUE, COLOR_AQUA, COLOR_ORANGE]
+    pr_auc = [0.5767, 0.5967, 0.5919]
+    pairwise = [55.59, 57.27, 58.68]
+    no_skill_pr_auc = 0.5291
+    chance_pairwise = 50.0
+    lit_independent = (53.78, 56.66)
+    lit_full = (60.59, 64.53)
+
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=FIGSIZE)
+    y_pos = range(len(labels))
+
+    bars1 = ax1.barh(y_pos, pr_auc, color=colors, height=0.55, zorder=3)
+    for bar, val in zip(bars1, pr_auc):
+        ax1.text(val + 0.01, bar.get_y() + bar.get_height() / 2, f"{val:.4f}",
+                  va="center", ha="left", fontsize=12, color=INK_PRIMARY, fontweight="bold")
+    _no_skill_line(ax1, no_skill_pr_auc, f"No-skill = {no_skill_pr_auc:.3f}")
+    ax1.set_yticks(y_pos)
+    ax1.set_yticklabels(labels, fontsize=11.5)
+    ax1.invert_yaxis()
+    _style_axes(ax1, "Held-out PR-AUC", (0, 0.72))
+    ax1.set_title("PR-AUC", fontsize=12.5, color=INK_SECONDARY, pad=10, loc="left")
+
+    bars2 = ax2.barh(y_pos, pairwise, color=colors, height=0.55, zorder=3)
+    for bar, val in zip(bars2, pairwise):
+        ax2.text(val + 0.8, bar.get_y() + bar.get_height() / 2, f"{val:.1f}%",
+                  va="center", ha="left", fontsize=12, color=INK_PRIMARY, fontweight="bold")
+    ax2.axvspan(*lit_independent, color=COLOR_GRAY_LINE, alpha=0.3, zorder=1)
+    ax2.axvspan(*lit_full, color=COLOR_GRAY_LINE, alpha=0.3, zorder=1)
+    ax2.annotate("lit.\nindependent\nscoring", xy=(sum(lit_independent) / 2, 1.0), xycoords=("data", "axes fraction"),
+                 xytext=(0, -3), textcoords="offset points", va="top", ha="center", fontsize=7.5,
+                 color=INK_MUTED, linespacing=1.2)
+    ax2.annotate("lit.\nfull\nmethod", xy=(sum(lit_full) / 2, 1.0), xycoords=("data", "axes fraction"),
+                 xytext=(0, -3), textcoords="offset points", va="top", ha="center", fontsize=7.5,
+                 color=INK_MUTED, linespacing=1.2)
+    ax2.axvline(chance_pairwise, color=BASELINE_LINE, linestyle=(0, (5, 3)), linewidth=1.5, zorder=2)
+    ax2.annotate(f"chance = {chance_pairwise:.0f}%", xy=(chance_pairwise, 0.0), xycoords=("data", "axes fraction"),
+                 xytext=(6, 4), textcoords="offset points", va="bottom", ha="left", fontsize=9,
+                 color=INK_MUTED, style="italic")
+    ax2.set_yticks(y_pos)
+    ax2.set_yticklabels([])
+    ax2.invert_yaxis()
+    _style_axes(ax2, "Pairwise accuracy", (45, 68))
+    ax2.set_title("Pairwise accuracy (vs. literature)", fontsize=12.5, color=INK_SECONDARY, pad=10, loc="left")
+
+    _header(fig, "Rhetorical Signal Replicates on Winning Arguments",
+            "Architecture selected on CMV, refit on WA's own training data — not zero-shot")
+    _footer(fig, "Literature bands (Labruna et al. 2026, Table 1) use a different pipeline and task framing — context only, not a\n"
+                 "like-for-like comparison. Excludes exploratory wa_quick_experiments.ipynb results. Source:\n"
+                 "08_wa_external_validation.ipynb, cells 20, 38–39. Full caveats in FIGURE_NOTES.md.")
+
+    fig.subplots_adjust(left=0.20, right=0.97, top=0.76, bottom=0.21, wspace=0.35)
+    _save(fig, "figure7_wa_external_validation")
     plt.close(fig)
 
 
@@ -233,4 +522,8 @@ if __name__ == "__main__":
     figure1()
     figure2()
     figure3()
-    print("\nAll three figures generated.")
+    figure4()
+    figure5()
+    figure6()
+    figure7()
+    print("\nAll seven figures generated.")
