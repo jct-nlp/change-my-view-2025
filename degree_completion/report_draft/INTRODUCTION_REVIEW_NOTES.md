@@ -5,11 +5,14 @@ finalized text.
 
 ## 1. Claims needing factual verification or citations
 
-- **Opening sentence, §1.1** ("an active topic within NLP and computational argumentation") is
-  marked `[CITATION NEEDED]` — it is a generic field-level claim, not something verified against
-  this project's own reference list. Either supply a general reference, cut the claim to
-  something narrower and already supported (e.g. lead directly with the Priniski & Horne / Na &
-  DeDeo citations), or leave the marker in for now.
+- **Resolved (per your instruction):** the opening sentence originally carried a
+  `[CITATION NEEDED]` marker for a generic "active topic in NLP/computational argumentation"
+  claim with no supporting source in the project's bibliography. No such general-field reference
+  exists in this repo (checked — no `.bib` file or equivalent on this branch), so rather than
+  running a literature search for one, the sentence was rephrased to make the same point using
+  only the two already-verified CMV-specific sources (Priniski & Horne, 2018; Na & DeDeo, 2022),
+  cited once at the end of the merged opening paragraph rather than redundantly in two consecutive
+  sentences. No new citation was added.
 - The four citations used (Priniski & Horne 2018; Na & DeDeo 2022; Labruna et al. 2026; Tan et
   al. 2016) were all independently verified against the published papers in a prior review pass
   (see `REPORT_OUTLINE.md` §2.3) — their title/author/venue details are solid. What is **not**
