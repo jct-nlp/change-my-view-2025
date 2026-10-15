@@ -1,6 +1,17 @@
 # Figure Notes — Seven Presentation Figures
 
-**Status:** 2026-10-15. Covers all seven figures identified as essential in
+**Status:** 2026-10-15, final targeted refinement pass. Fixed Figure 7's overlapping literature-band
+labels and chance-line position (Priority 1); kept all eight strategies in Figure 6 and added a
+third highlight color so Justification — the stable #1 by this metric in both datasets — is as
+identifiable as the two strategies that move (Priority 2); softened several speaker-note claims
+that stated more than the cited chart alone shows, in Figures 3, 5, and 7 (Priority 3); shortened
+on-chart footers across several figures, moving detail into this document (Priority 4); shortened
+Figure 3's subtitle, clarified Figure 4's per-class normalization and truncation, and nudged two
+near-identical Concession markers in Figure 5 apart for visibility (Priority 5). Figures 1 and 2
+are unchanged from the prior pass, per instruction. See "Unresolved scientific or visualization
+issues" at the end of this document for the full list of what changed and why.
+
+Covers all seven figures identified as essential in
 `FIGURE_SELECTION_PLAN.md`. The charts themselves are kept deliberately lean — one title, one
 short subtitle, labeled bars/points, a compact source line. Everything else (full population and
 split definitions, exact metric definitions, every caveat, significance/reliability notes) lives
@@ -150,8 +161,10 @@ survives that averaging."
 ## Figure 3 — Rhetorical-strategy gain under length matching
 
 **Files:** `figure3_strategy_gain_length_matching.png` / `.svg`
-**On-chart title/subtitle:** "Strategy Gain Survives Length Matching" / "Matched by word-count
-decile bins, not exact-length pairs — within 06's own scored population"
+**On-chart title/subtitle:** "Strategy Gain Survives Length Matching" / "Incremental PR-AUC gain,
+full vs. length-matched population" (shortened 2026-10-15; the decile-bin matching detail moved
+from the subtitle into the footer and the speaker notes below, per a request to keep subtitles
+short and move technical explanation off the chart).
 
 ### 1. Source notebook and exact cells
 `this work/06_strategy_ablation.ipynb`: cell 31 (why `04.3`'s sample isn't reused here), cell 32
@@ -308,6 +321,13 @@ population) and cells 33–36 (length-matched sample, `comments_df_matched`).
 | Call to Action | 0.1837 | 0.2707 |
 | Question Asking | 0.1518 | 0.1806 |
 
+**Visual note:** Concession's two values (0.3439 / 0.3445) are only 0.0006 apart — closer than the
+marker size can distinguish at this scale. The chart applies a small, symmetric vertical nudge
+(±0.10, in display position only) to Concession's two dots so both remain visible as distinct
+points rather than rendering as a single blob that could be misread as a missing observation. The
+plotted *x*-values (the actual SHAP numbers) are unchanged; only the on-screen vertical placement
+of that one row's two markers was adjusted for legibility.
+
 ### 3. Dataset and evaluation population
 Same two populations as Figure 3: the 2,753-row scored population (full) and its own 1,235-row
 decile-bin length-matched sample. SHAP values are computed on each sample's held-out test fold for
@@ -361,6 +381,13 @@ measured one."
 **Files:** `figure6_strategy_ranking_cmv_vs_wa.png` / `.svg`
 **On-chart title/subtitle:** "Strategy Importance Is Dataset-Dependent" / "Rank-biserial effect
 size (same method, both datasets) — rank 1 = strongest"
+
+**Revised 2026-10-15:** all eight strategies are kept visible (unchanged from the prior version —
+this was never reduced to three). Justification is now also highlighted in blue (bold label,
+larger marker), alongside Refutation (orange) and Evidence (aqua), so the strategy that ranks #1
+in both datasets by this metric is as easy to spot as the two that move — not just inferable from
+its position at the top row. The other five strategies remain in a muted gray, legible but
+visually secondary.
 
 ### 1. Source notebook and exact cells
 Home (CMV): `this work/07_strategy_interpretation.ipynb`, cell 39 (`effect_size_comparison`, "full
@@ -453,7 +480,15 @@ no-skill baseline), cell 36 (`pruning_df` — PR-AUC including the "robust core"
 | Chance (pairwise) | — | 50.00% |
 
 Literature reference bands (Labruna et al. 2026, Table 1, pairwise accuracy only): Independent
-Scoring 53.78–56.66%; full MS-PS method 60.59–64.53%.
+Scoring 53.78–56.66%; full MS-PS method 60.59–64.53%. **Revised 2026-10-15:** an earlier version of
+this chart shaded these ranges directly behind the pairwise-accuracy bars with in-plot floating
+labels — the independent-scoring band sits right under the "word count only" bar's own value
+(55.6%), so the label collided with the bar every time. The shading and in-plot labels were
+removed; the two ranges are now given as plain text in the chart's footer only, with no shaded
+region drawn behind the bars — this also more clearly avoids suggesting the literature range is
+being visually overlaid for direct comparison. The "Chance = 50%" label was also moved from a
+bottom-anchored position (which sat on top of the bottom bar) to the same top-anchored convention
+used for the "No-skill" label in the PR-AUC panel, for both consistency and legibility.
 
 Not shown on-chart, documented here for completeness: the single best configuration found by
 pruning (`−call_to_action`, 8 of 9 columns) reaches PR-AUC 0.5937 and pairwise accuracy 59.10% —
@@ -550,3 +585,42 @@ them as context, not a direct comparison."
 - **The "25%" retention figure correction** (Figure 3 / `06_strategy_ablation.ipynb` cell 36,
   resolved 2026-10-14) is not reproduced anywhere in this document or in Figure 3 — confirmed
   clean on this pass.
+
+**2026-10-15 refinement pass — what changed, by figure:**
+- **Figure 7 (Priority 1, required):** the right panel's literature-reference shading and floating
+  in-plot labels collided with the bars and bar-value labels (the independent-scoring band sits
+  directly under the "word count only" bar's own 55.6% value). Removed the shading and labels
+  entirely; literature ranges now appear only as plain text in the footer. The "Chance = 50%" label
+  was also repositioned from bottom-anchored (sitting on the bottom bar) to the same top-anchored
+  convention as the PR-AUC panel's "No-skill" label. No numeric values changed. Re-inspected
+  visually after the fix — clean at both full resolution and approximate slide size.
+- **Figure 6 (Priority 2, required):** all eight strategies were already present (never reduced to
+  three) and remain so. Added a third highlight color (blue) for Justification so it's visually
+  identifiable as the stable #1-by-this-metric strategy in both datasets, alongside the existing
+  Refutation (orange, the faller) and Evidence (aqua, the riser) highlights. No ranks, effect
+  sizes, or significance markers changed.
+- **Figure 3, 5, 7 (Priority 3, required):** softened speaker-note language that stated more than
+  the specific chart shows. Figure 3: the note that length matching "collapses most models'
+  predictive skill" is now explicitly marked as notebook context *not shown on this chart*, not a
+  claim about what Figure 3 itself demonstrates. Figure 5: "justification is mostly a length proxy"
+  is now framed as one plausible interpretation of the pattern, not a proven conclusion — this was
+  already softened in the prior pass and re-confirmed here. Figure 7: title, subtitle, footer, and
+  notes already stated "methodology transfer, refit on WA, not an identical experiment" from the
+  prior pass; re-confirmed consistent with the newly added `PRESENTATION_STORYLINE.md` /
+  `REPORT_OUTLINE.md` limitation on incremental-contribution-beyond-length not being separately
+  tested on WA.
+- **Figure 4, 5, 6 (Priority 4, recommended):** shortened on-chart footers (e.g., Figure 5's footer
+  cut from 3 lines to 2; Figure 6's source citation abbreviated) while keeping every caveat flagged
+  as essential — error-bar meaning, the causal-vs-predictive distinction, and the
+  descriptive-vs-significance-test distinction are all still stated on the relevant charts, not
+  only in this document.
+- **Figure 3, 4, 5 (Priority 5, recommended):** Figure 3's subtitle shortened from a full
+  methodology sentence to a short metric/population label, with the decile-bin detail moved to the
+  footer and speaker notes. Figure 4's footer now states explicitly that each class is normalized
+  separately (density, not raw counts), that the display is truncated at 600 words, and that the
+  plotted means are from the full, untruncated dataset. Figure 5's two near-overlapping Concession
+  markers (0.3439 / 0.3445, 0.0006 apart) are now nudged vertically apart for visibility, documented
+  above under Figure 5 §2. Figures 1 and 2 were left unchanged, as instructed.
+- **All seven figures re-inspected visually** after regeneration, both at native resolution and by
+  checking relative element sizes against a 16:9 slide — no remaining text clipping, overlap, or
+  illegibly small annotations found.

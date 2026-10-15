@@ -232,11 +232,11 @@ def figure3():
     _style_axes(ax, "Incremental PR-AUC gain from the 8 strategy scores", (0, 0.105))
 
     _header(fig, "Strategy Gain Survives Length Matching",
-            "Matched by word-count decile bins, not exact-length pairs — within 06's own scored population")
-    _footer(fig, "Source: 06_strategy_ablation.ipynb, cells 32 (matching) and 35 (length_benchmark_df). "
-                 "A separate, non-comparable sample exists in 04.3 (not used here). Full caveats in FIGURE_NOTES.md.")
+            "Incremental PR-AUC gain, full vs. length-matched population")
+    _footer(fig, "Matched by word-count decile bin, not exact-length pairs. A separate, non-comparable sample exists\n"
+                 "in 04.3 (not used here). Source: 06_strategy_ablation.ipynb, cells 32, 35. Full caveats in FIGURE_NOTES.md.")
 
-    fig.subplots_adjust(left=0.27, right=0.92, top=0.80, bottom=0.14)
+    fig.subplots_adjust(left=0.27, right=0.92, top=0.82, bottom=0.17)
     _save(fig, "figure3_strategy_gain_length_matching")
     plt.close(fig)
 
@@ -287,9 +287,9 @@ def figure4():
 
     _header(fig, "Convincing Comments Are Much Longer",
             "Word-count distribution by outcome, full dataset (n=3,971)")
-    _footer(fig, "Source: 04.2_baseline_comparison.ipynb, cells 30–31. Means from the full dataset; display trimmed at <600 words\n"
-                 "(excludes 56 comments, 1.4%, per the notebook's own cutoff). Shapes shown as density, not raw counts — legend\n"
-                 "states actual class sizes. Full caveats in FIGURE_NOTES.md.")
+    _footer(fig, "Each class normalized separately (density, not raw counts); truncated at 600 words (excludes 1.4% of\n"
+                 "comments). Means shown are from the full, untruncated dataset. Source: 04.2_baseline_comparison.ipynb,\n"
+                 "cells 30–31. Full caveats in FIGURE_NOTES.md.")
 
     fig.subplots_adjust(left=0.07, right=0.95, top=0.80, bottom=0.21)
     _save(fig, "figure4_comment_length_by_outcome")
@@ -325,13 +325,20 @@ def figure5():
     fig, ax = plt.subplots(figsize=FIGSIZE)
     y_pos = list(range(len(data)))[::-1]
 
+    # Concession's two values (0.3439 / 0.3445) are only 0.0006 apart -- close enough that the
+    # two markers would render as a single indistinguishable blob at this marker size. A small,
+    # symmetric vertical nudge (not a change to either plotted value) keeps both points visibly
+    # distinct rather than implying a missing observation; documented in FIGURE_NOTES.md.
+    row_nudge = {"concession": 0.10}
+
     for y, (name, full, matched) in zip(y_pos, data):
         is_hi = name in highlighted
+        dy = row_nudge.get(name, 0.0)
         line_color = INK_MUTED if not is_hi else INK_SECONDARY
-        ax.plot([full, matched], [y, y], color=line_color, linewidth=(2.2 if is_hi else 1.2), zorder=2, alpha=(1.0 if is_hi else 0.6))
-        ax.scatter([full], [y], s=(95 if is_hi else 55), color=COLOR_BLUE, zorder=3,
+        ax.plot([full, matched], [y - dy, y + dy], color=line_color, linewidth=(2.2 if is_hi else 1.2), zorder=2, alpha=(1.0 if is_hi else 0.6))
+        ax.scatter([full], [y - dy], s=(95 if is_hi else 55), color=COLOR_BLUE, zorder=3,
                    edgecolors=SURFACE, linewidths=1, alpha=(1.0 if is_hi else 0.75))
-        ax.scatter([matched], [y], s=(95 if is_hi else 55), color=COLOR_ORANGE, zorder=3,
+        ax.scatter([matched], [y + dy], s=(95 if is_hi else 55), color=COLOR_ORANGE, zorder=3,
                    edgecolors=SURFACE, linewidths=1, alpha=(1.0 if is_hi else 0.75))
 
     ax.set_yticks(y_pos)
@@ -363,9 +370,8 @@ def figure5():
 
     _header(fig, "Refutation Retains More Model Importance After Length Matching",
             "Mean |SHAP| per strategy, before vs. after length matching")
-    _footer(fig, "Predictive importance from one fitted model, not a causal effect. Strategy scores are LLM-generated; refutation\n"
-                 "and justification had the weakest agreement with human scoring (05_rhetorical_scoring.ipynb). Source:\n"
-                 "07_strategy_interpretation.ipynb, cell 36 (shap_comparison). Full caveats in FIGURE_NOTES.md.")
+    _footer(fig, "Fitted-model importance, not a causal effect. Refutation & justification had the weakest agreement with\n"
+                 "human scoring (05_rhetorical_scoring.ipynb). Source: 07_strategy_interpretation.ipynb, cell 36. Full caveats in FIGURE_NOTES.md.")
 
     fig.subplots_adjust(left=0.22, right=0.95, top=0.80, bottom=0.17)
     _save(fig, "figure5_refutation_vs_justification_shap")
@@ -396,9 +402,11 @@ def figure6():
     home_rank = {name: i + 1 for i, (name, r, *_ ) in enumerate(sorted(data, key=lambda row: row[1], reverse=True))}
     wa_rank = {name: i + 1 for i, (name, _, _, r, _) in enumerate(sorted(data, key=lambda row: row[3], reverse=True))}
 
-    highlighted = {"refutation": COLOR_ORANGE, "evidence": COLOR_AQUA}
+    highlighted = {"refutation": COLOR_ORANGE, "evidence": COLOR_AQUA, "justification": COLOR_BLUE}
     # refutation: drops from #2 (home) to #4 (WA) despite leading by SHAP at home (Figure 5).
     # evidence: the largest riser, #6 (home) to #2 (WA).
+    # justification: ranks #1 in both datasets by this metric -- the stable leader, highlighted
+    # so it isn't read as "the strategy nobody is pointing at."
 
     fig, ax = plt.subplots(figsize=FIGSIZE)
     x_home, x_wa = 0.0, 1.0
@@ -450,7 +458,7 @@ def figure6():
             "Rank-biserial effect size (same method, both datasets) — rank 1 = strongest")
     _footer(fig, "Not a simple refutation↔justification swap: justification leads by this metric in both datasets. Evidence is\n"
                  "the biggest riser (6th → 2nd on WA); refutation is the biggest faller among previously-strong strategies (2nd → 4th).\n"
-                 "Source: 07_strategy_interpretation.ipynb cell 39 (home); 08_wa_external_validation.ipynb cell 33 (WA). Full caveats in FIGURE_NOTES.md.")
+                 "Source: 07 cell 39 (home), 08 cell 33 (WA). Full caveats in FIGURE_NOTES.md.")
 
     fig.subplots_adjust(left=0.20, right=0.85, top=0.78, bottom=0.17)
     _save(fig, "figure6_strategy_ranking_cmv_vs_wa")
@@ -489,32 +497,25 @@ def figure7():
     for bar, val in zip(bars2, pairwise):
         ax2.text(val + 0.8, bar.get_y() + bar.get_height() / 2, f"{val:.1f}%",
                   va="center", ha="left", fontsize=12, color=INK_PRIMARY, fontweight="bold")
-    ax2.axvspan(*lit_independent, color=COLOR_GRAY_LINE, alpha=0.3, zorder=1)
-    ax2.axvspan(*lit_full, color=COLOR_GRAY_LINE, alpha=0.3, zorder=1)
-    ax2.annotate("lit.\nindependent\nscoring", xy=(sum(lit_independent) / 2, 1.0), xycoords=("data", "axes fraction"),
-                 xytext=(0, -3), textcoords="offset points", va="top", ha="center", fontsize=7.5,
-                 color=INK_MUTED, linespacing=1.2)
-    ax2.annotate("lit.\nfull\nmethod", xy=(sum(lit_full) / 2, 1.0), xycoords=("data", "axes fraction"),
-                 xytext=(0, -3), textcoords="offset points", va="top", ha="center", fontsize=7.5,
-                 color=INK_MUTED, linespacing=1.2)
-    ax2.axvline(chance_pairwise, color=BASELINE_LINE, linestyle=(0, (5, 3)), linewidth=1.5, zorder=2)
-    ax2.annotate(f"chance = {chance_pairwise:.0f}%", xy=(chance_pairwise, 0.0), xycoords=("data", "axes fraction"),
-                 xytext=(6, 4), textcoords="offset points", va="bottom", ha="left", fontsize=9,
-                 color=INK_MUTED, style="italic")
+    # Chance line uses the same top-anchored convention as the PR-AUC panel's no-skill line
+    # (avoids sitting on top of the bottom bar, which a bottom-anchored label did previously).
+    _no_skill_line(ax2, chance_pairwise, f"Chance = {chance_pairwise:.0f}%")
     ax2.set_yticks(y_pos)
     ax2.set_yticklabels([])
     ax2.invert_yaxis()
     _style_axes(ax2, "Pairwise accuracy", (45, 68))
-    ax2.set_title("Pairwise accuracy (vs. literature)", fontsize=12.5, color=INK_SECONDARY, pad=10, loc="left")
+    ax2.set_title("Pairwise accuracy", fontsize=12.5, color=INK_SECONDARY, pad=10, loc="left")
+    # Literature reference moved out of the plotting region entirely (no shaded bands, no
+    # floating in-panel labels, which collided with the bars/chance line) -- kept instead as
+    # one line in the footer below, where there's established headroom.
 
     _header(fig, "Rhetorical Signal Replicates on Winning Arguments",
             "Same architecture, retrained on WA's own data — a methodology transfer, not an identical experiment")
-    _footer(fig, "Not zero-shot: a new model was fit on WA's own training split, evaluated on WA's own heldout split (not\n"
-                 "CMV's fitted model applied directly). Literature bands (Labruna et al. 2026, Table 1) use a different\n"
-                 "pipeline — context only, not a like-for-like comparison. Excludes wa_quick_experiments.ipynb exploratory results.\n"
-                 "Source: 08_wa_external_validation.ipynb, cells 20, 38–39. Full caveats in FIGURE_NOTES.md.")
+    _footer(fig, "Not zero-shot: new model fit on WA's own training split, evaluated on WA's own heldout split.\n"
+                 "Lit. reference (Labruna et al. 2026, different pipeline — context only): independent scoring\n"
+                 "53.8–56.7%, full method 60.6–64.5%. Source: 08_wa_external_validation.ipynb, cells 20, 38–39.")
 
-    fig.subplots_adjust(left=0.20, right=0.97, top=0.76, bottom=0.25, wspace=0.35)
+    fig.subplots_adjust(left=0.20, right=0.97, top=0.76, bottom=0.21, wspace=0.35)
     _save(fig, "figure7_wa_external_validation")
     plt.close(fig)
 
