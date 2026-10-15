@@ -95,6 +95,9 @@ discipline.
 - Evaluation: thread-grouped `GroupShuffleSplit` (80/20 by thread), zero thread overlap between
   train and test, verified by assertion — prevents the model from "peeking" at a related comment
   from the same discussion.
+- Model inputs: The engineered-feature model includes reply, OP, and reply–OP relational features; 
+  TF-IDF and word-count baselines use reply-only information. Mention this distinction briefly when 
+  presenting the methodology.
 - Metric: PR-AUC chosen over accuracy/ROC-AUC because only ~16% of comments are positive.
 
 **Suggested visual:** a small pipeline diagram — data collection → annotation → feature engineering
