@@ -213,12 +213,14 @@ shrinks — unlike most other signal in this project.
 "Showing that strategies help isn't enough, since we already know length dominates everything
 else — the real question is whether the strategy gain is *also* just a length proxy. We built a
 length-matched sample: for every convincing comment, non-convincing comments drawn from the same
-word-count decile bin, not hand-picked nearest-length pairs. That collapses most models' skill —
-length was doing most of the work. But the specific *gain* from adding the eight strategy scores
-only drops from 0.066 to 0.056, about 84% retained. I want to be precise about what that number is:
-a descriptive point estimate on one matched sample, not a significance test — but it's the
-strongest evidence in this project that the strategy scores capture something beyond comment
-length."
+word-count decile bin, not hand-picked nearest-length pairs. What this chart shows is the specific
+*gain* from adding the eight strategy scores on top of the engineered features, before and after
+that matching — it drops only from 0.066 to 0.056, about 84% retained. I want to be precise about
+what that number is: a descriptive point estimate on one matched sample, not a significance test.
+(Elsewhere in the same notebook, each arm's own overall lift-over-no-skill does drop more sharply
+under matching — not shown on this chart — which is the context for why this gain's own retention
+is the more notable number.) This is the strongest evidence in this project that the strategy
+scores capture something beyond comment length, short of a formal independence test."
 
 ---
 
@@ -285,8 +287,8 @@ PR-AUC rather than accuracy throughout."
 ## Figure 5 — Refutation vs. justification under length control
 
 **Files:** `figure5_refutation_vs_justification_shap.png` / `.svg`
-**On-chart title/subtitle:** "Refutation Holds Up; Justification Does Not" / "Mean |SHAP| per
-strategy, before vs. after length matching"
+**On-chart title/subtitle:** "Refutation Retains More Model Importance After Length Matching" /
+"Mean |SHAP| per strategy, before vs. after length matching"
 
 ### 1. Source notebook and exact cells
 `this work/07_strategy_interpretation.ipynb`, cell 36 (`shap_comparison` — the full
@@ -337,15 +339,18 @@ averaged over repeated fits or column orderings in this notebook.
 
 ### 7. One-sentence takeaway
 Refutation keeps its predictive importance once comment length is controlled for; justification's
-importance was mostly a length proxy.
+drops sharply — one plausible reading is that its apparent importance was partly a length proxy,
+though the data alone don't prove that interpretation.
 
 ### 8. Suggested speaker notes (~30–35 seconds)
 "We can ask the model directly which strategies it's actually using, via SHAP. On the full
 population, refutation is the most important strategy, well ahead of justification in second
 place. Once we control for length — same matched sample as the last slide — refutation barely
-moves, staying clearly in first place. Justification collapses, falling behind concession,
-simplification, and evidence. Most of what the model was using justification for turns out to be
-a length signal in disguise. One honest caveat: these are also the two strategies our LLM scorer
+moves, staying clearly in first place. Justification's importance drops sharply, falling behind
+concession, simplification, and evidence. One reasonable interpretation is that much of what the
+model was using justification for was tracking length rather than justification itself — but
+that's an interpretation of the pattern, not something this comparison proves on its own. One
+honest caveat on top of that: these are also the two strategies our LLM scorer
 agreed with human judgment on the least — the strongest finding here is also the least reliably
 measured one."
 
@@ -411,8 +416,8 @@ have a symmetric SD/CI reported in either notebook in a form suitable for plotti
   ranking (Figure 5) or any future model-based ranking on WA.
 
 ### 7. One-sentence takeaway
-The group-level finding that rhetorical strategies matter replicates on an independent corpus, but
-which specific strategy leads does not.
+This is not a simple refutation↔justification swap: justification leads by this metric in both
+datasets, while evidence rises sharply (6th→2nd) and refutation falls (2nd→4th) between them.
 
 ### 8. Suggested speaker notes (~35–40 seconds)
 "We re-ran the same strategy-vs-outcome test on a completely different corpus — Winning Arguments,
@@ -430,8 +435,8 @@ test says justification."
 ## Figure 7 — Winning Arguments validation
 
 **Files:** `figure7_wa_external_validation.png` / `.svg`
-**On-chart title/subtitle:** "Rhetorical Signal Replicates on Winning Arguments" / "Architecture
-selected on CMV, refit on WA's own training data — not zero-shot"
+**On-chart title/subtitle:** "Rhetorical Signal Replicates on Winning Arguments" / "Same
+architecture, retrained on WA's own data — a methodology transfer, not an identical experiment"
 
 ### 1. Source notebook and exact cells
 `this work/08_wa_external_validation.ipynb`: cell 20 (`feature_set_df` — PR-AUC per feature set,
@@ -481,10 +486,13 @@ shufflings in the source notebook (same convention as every other figure in this
 are in cells 20/39 if needed for a backup slide.
 
 ### 6. Methodological limitations
-- **This was not zero-shot transfer.** The architecture and training configuration (`RobustScaler`
-  + `SMOTE` + `XGBoost`) were selected once on the CMV data and reused unchanged; a **new model
-  instance was fit on WA's own training split** and evaluated on WA's own heldout split. No
-  model-family or hyperparameter selection was performed specifically for WA.
+- **This is a transfer of the training methodology, refit on WA — not zero-shot transfer, and not
+  a direct reproduction of the same model or an identical experiment.** The architecture and
+  training configuration (`RobustScaler` + `SMOTE` + `XGBoost`) were selected once on the CMV data
+  and reused unchanged; a **new model instance was fit on WA's own training split** and evaluated
+  on WA's own heldout split. No model-family or hyperparameter selection was performed specifically
+  for WA. Say explicitly: "same method, retrained on WA's data," not "the same model" or "the same
+  experiment repeated."
 - **Literature bands are context, not a like-for-like benchmark.** Labruna et al. (2026) score a
   different, LLM-native pipeline on a task framing that isn't identical to this project's reused
   architecture; the bands are shown as shaded context only, explicitly caveated on the chart and
@@ -494,18 +502,26 @@ are in cells 20/39 if needed for a backup slide.
   presentation, per `RESEARCH_GUARDRAILS.md`.
 - The robust core (4 features) is a fixed, pre-registered choice carried over from `07`'s own
   criterion on CMV data, not re-derived or tuned on WA.
+- The Winning Arguments validation supports the broader finding that 
+  rhetorical-strategy scores contain predictive information in a second dataset. However, it does not 
+  establish that their **incremental predictive contribution beyond comment length** replicates to the 
+  same extent observed in my original dataset. That stronger claim would require an explicit, 
+  comparable length-controlled ablation on WA.
 
 ### 7. One-sentence takeaway
-Refitting the same architecture on Winning Arguments' own training data reproduces the structural
-finding — strategy scores add value — and lands in a defensible position against the literature's
-own benchmarks.
+Transferring the same training methodology to Winning Arguments — a new model, refit on WA's own
+data, not the same model or an identical experiment — reproduces the structural finding that
+strategy scores add value, landing in a defensible position against the literature's own
+benchmarks.
 
 ### 8. Suggested speaker notes (~35–40 seconds)
 "Finally, we checked whether any of this holds up outside our own dataset, on Winning Arguments —
 a published, independently constructed corpus of debate.org pairs. To be precise about the
 protocol: we did not just apply our fitted model to WA. We took the same architecture and training
 configuration already selected on our own data, and fit a *new* model on WA's own training split,
-then evaluated on WA's own heldout split — not zero-shot. Word count alone reaches 0.58 PR-AUC;
+then evaluated on WA's own heldout split — not zero-shot. This is a transfer of the training
+methodology, refit on WA's own data — not a direct reproduction of the same model or an identical
+experiment. Word count alone reaches 0.58 PR-AUC;
 adding strategy scores pushes it to 0.59–0.60, and a compact four-feature 'robust core' lands at
 58.7% pairwise accuracy — inside the literature's own benchmark range for simpler scoring methods,
 below their full method. Those literature numbers come from a different pipeline, so I'm showing

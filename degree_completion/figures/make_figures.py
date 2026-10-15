@@ -361,7 +361,7 @@ def figure5():
 
     _style_axes(ax, "Mean |SHAP value| (word_count excluded — see notes)", (0, 0.72))
 
-    _header(fig, "Refutation Holds Up; Justification Does Not",
+    _header(fig, "Refutation Retains More Model Importance After Length Matching",
             "Mean |SHAP| per strategy, before vs. after length matching")
     _footer(fig, "Predictive importance from one fitted model, not a causal effect. Strategy scores are LLM-generated; refutation\n"
                  "and justification had the weakest agreement with human scoring (05_rhetorical_scoring.ipynb). Source:\n"
@@ -448,9 +448,9 @@ def figure6():
 
     _header(fig, "Strategy Importance Is Dataset-Dependent",
             "Rank-biserial effect size (same method, both datasets) — rank 1 = strongest")
-    _footer(fig, "Justification leads by this metric in both datasets; refutation leads by SHAP importance at home only (Figure 5) —\n"
-                 "the two methods disagree on CMV's top strategy. Source: 07_strategy_interpretation.ipynb cell 39 (home);\n"
-                 "08_wa_external_validation.ipynb cell 33 (WA, full population). Full caveats in FIGURE_NOTES.md.")
+    _footer(fig, "Not a simple refutation↔justification swap: justification leads by this metric in both datasets. Evidence is\n"
+                 "the biggest riser (6th → 2nd on WA); refutation is the biggest faller among previously-strong strategies (2nd → 4th).\n"
+                 "Source: 07_strategy_interpretation.ipynb cell 39 (home); 08_wa_external_validation.ipynb cell 33 (WA). Full caveats in FIGURE_NOTES.md.")
 
     fig.subplots_adjust(left=0.20, right=0.85, top=0.78, bottom=0.17)
     _save(fig, "figure6_strategy_ranking_cmv_vs_wa")
@@ -508,12 +508,13 @@ def figure7():
     ax2.set_title("Pairwise accuracy (vs. literature)", fontsize=12.5, color=INK_SECONDARY, pad=10, loc="left")
 
     _header(fig, "Rhetorical Signal Replicates on Winning Arguments",
-            "Architecture selected on CMV, refit on WA's own training data — not zero-shot")
-    _footer(fig, "Literature bands (Labruna et al. 2026, Table 1) use a different pipeline and task framing — context only, not a\n"
-                 "like-for-like comparison. Excludes exploratory wa_quick_experiments.ipynb results. Source:\n"
-                 "08_wa_external_validation.ipynb, cells 20, 38–39. Full caveats in FIGURE_NOTES.md.")
+            "Same architecture, retrained on WA's own data — a methodology transfer, not an identical experiment")
+    _footer(fig, "Not zero-shot: a new model was fit on WA's own training split, evaluated on WA's own heldout split (not\n"
+                 "CMV's fitted model applied directly). Literature bands (Labruna et al. 2026, Table 1) use a different\n"
+                 "pipeline — context only, not a like-for-like comparison. Excludes wa_quick_experiments.ipynb exploratory results.\n"
+                 "Source: 08_wa_external_validation.ipynb, cells 20, 38–39. Full caveats in FIGURE_NOTES.md.")
 
-    fig.subplots_adjust(left=0.20, right=0.97, top=0.76, bottom=0.21, wspace=0.35)
+    fig.subplots_adjust(left=0.20, right=0.97, top=0.76, bottom=0.25, wspace=0.35)
     _save(fig, "figure7_wa_external_validation")
     plt.close(fig)
 
