@@ -17,9 +17,12 @@ finalized text.
   al. 2016) were all independently verified against the published papers in a prior review pass
   (see `REPORT_OUTLINE.md` §2.3) — their title/author/venue details are solid. What is **not**
   yet done: formatting them into an actual References-chapter bibliography entry. The in-text
-  "(Author, Year)" style used here assumes that chapter will exist; confirm the citation style
-  (numbered vs. author-year) before the full report is assembled — `REPORT_OUTLINE.md` flags that
-  the CAS Overleaf bundle has no numbered `.bst` style, a decision noted as unresolved there too.
+  "(Author, Year)" style used here assumes that chapter will exist; the citation style (numbered
+  vs. author-year) for *this* report is simply undecided — `REPORT_OUTLINE.md` does not address it
+  either way. *(Correction, 2026-10-17: an earlier version of this bullet incorrectly attributed a
+  "CAS Overleaf bundle has no numbered `.bst`" claim to `REPORT_OUTLINE.md`. That claim belongs to
+  a separate, currently out-of-scope journal-paper citation-style question — not this MSc report.
+  `REPORT_OUTLINE.md` was re-checked directly and says nothing about it.)*
 - No new or additional citations were invented. No notebook-derived number in this draft goes
   beyond what `REPORT_OUTLINE.md` / `RESULTS_SHORTLIST.md` already mark `[VERIFIED]`.
 
