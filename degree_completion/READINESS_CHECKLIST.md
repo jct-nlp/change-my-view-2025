@@ -32,7 +32,7 @@ running any new experiments or retraining any model.
 | Discussion — deep-learning techniques | **Ready** | No | Full list of transformer/LLM-based methods used (and in two cases rejected) already identified. |
 | Discussion — limitations | **Ready** | No | Comprehensive list already assembled, including the refutation/justification reliability caveat. |
 | Discussion — suggested improvements | **Ready** | No | Three concrete, explicitly-labeled-as-future-work items already identified; must be written as proposals, not completed work. |
-| References | **Needs writing or editing** | No | The four citations are verified (see dedicated rows below) but not yet formatted into an actual References-chapter bibliography; citation style (numbered vs. author-year) is undecided for this report. See the new task item below. |
+| References | **Needs writing or editing** | No | The four citations are verified (see dedicated rows below) but not yet formatted into an actual References-chapter bibliography. Citation style resolved: author-year (2026-10-17). See the task item below. |
 | Code/data access link | **Ready**, pending one decision | No | README.md already has complete, usable data-access instructions; needs a decision on whether to pin a specific commit/release for reproducibility (repo is still actively changing). |
 
 ## Cross-cutting items
@@ -68,12 +68,12 @@ is:
 5. Drafting presentation slides from `PRESENTATION_STORYLINE.md`.
 6. Writing the References section's "AI tools used" line for Gemini's research-method role (already
    fully documented); confirming only the narrower question below before finalizing it.
-7. **New (2026-10-17): choosing a citation style (numbered vs. author-year) and formatting the
-   four already-verified citations, the code-reuse credit, and the systems/libraries list (all
-   listed in `REPORT_OUTLINE.md` §6) into an actual References-chapter bibliography.** Not yet
-   started — no References chapter exists in `report_draft/` yet (only the Introduction does).
-   Currently only folded into `PROGRESS.md`'s Sat 2026-11-07 "Finish report" catch-all task, not
-   tracked as its own item until now.
+7. **Formatting the four already-verified citations, the code-reuse credit, and the
+   systems/libraries list (all listed in `REPORT_OUTLINE.md` §6) into an actual References-chapter
+   bibliography, author-year style (resolved 2026-10-17).** Not yet started — no References
+   chapter exists in `report_draft/` yet (only the Introduction does). Currently only folded into
+   `PROGRESS.md`'s Sat 2026-11-07 "Finish report" catch-all task, not tracked as its own item
+   until now.
 
 ## Decisions requiring the user's input (collected from across all four documents)
 
@@ -89,6 +89,8 @@ is:
    markdown rather than the original papers — fine to proceed on that basis, or verify first?~~ —
    **resolved.** Both verified directly against the published papers (2026-10-14); see the
    citation rows above.
-5. **Citation style** — numbered or author-year for the References chapter? Undecided for this
-   MSc report (not addressed anywhere in `REPORT_OUTLINE.md`). Needed before the four citations
-   can be formatted into actual bibliography entries.
+5. ~~**Citation style** — numbered or author-year for the References chapter?~~ — **resolved
+   (2026-10-17): author-year.** Not specified by the university requirements, so chosen for
+   consistency with the in-text "(Author, Year)" citations already used throughout
+   `01_INTRODUCTION.md` — no rewriting of existing in-text citations needed when the References
+   chapter is written.
