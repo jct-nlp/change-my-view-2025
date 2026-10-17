@@ -28,31 +28,36 @@ finalized text.
 
 ## 2. Places needing your judgment or approval
 
-- **"Evolution of the research" framing (§1.2).** The draft states plainly that the length
-  confound was *not* fully anticipated in the initial design and that the length-controlled /
-  ablation work was a response to an empirical finding partway through the project. This is
-  accurate to the notebook record (`04.2`'s own narrative), but it is a more exposed admission
-  than the original `00_introduction.ipynb` text, whose §1.2 goal list already names length and
-  rhetorical strategies as objectives from the start. Confirm you're comfortable with this framing
-  — it is more honest about process but also more exposed than simply restating the notebook's own
-  retrospective goal list as if it were the original plan.
-- **Tone of the contributions paragraph (§1.4, final paragraph).** Deliberately modest wording
-  ("modest and empirical rather than methodological novelties in their own right"). If you want a
-  stronger claim to novelty — e.g. the 8-strategy CMV-specific taxonomy, or the explicit
-  length-controlled ablation methodology itself — that is a judgment call for you, not something
-  resolved by the notebooks.
+- **RESOLVED (2026-10-17) — "Evolution of the research" framing (§1.2).** The draft states plainly
+  that the length confound was *not* fully anticipated in the initial design and that the
+  length-controlled / ablation work was a response to an empirical finding partway through the
+  project. This is accurate to the notebook record (`04.2`'s own narrative), but it is a more
+  exposed admission than the original `00_introduction.ipynb` text, whose §1.2 goal list already
+  names length and rhetorical strategies as objectives from the start. **You confirmed you're
+  comfortable with this framing.** No change made — kept as written.
+- **RESOLVED (2026-10-17) — Tone of the contributions paragraph (§1.4, final paragraph).**
+  Deliberately modest wording ("modest and empirical rather than methodological novelties in their
+  own right"). Flagged as a judgment call for you — a stronger claim to novelty (e.g. the
+  8-strategy CMV-specific taxonomy, or the explicit length-controlled ablation methodology itself)
+  was possible instead. **You said to keep as is.** No change made.
 - **No research questions were changed.** The three RQs are used verbatim as given. Flagging per
   the task's own instruction that any change to them requires explicit approval — none was made.
 
 ## 3. Ambiguity about contribution or novelty
 
-- The report does not yet state, anywhere, how this project's 8-strategy rubric relates to Na &
-  DeDeo's (2022) unsupervised "Relevance & Presumption" category — the closest prior-work analogue
-  to `refutation` — which they found among their *least* effective categories, the opposite of
-  this project's finding. `REPORT_OUTLINE.md` §2.3 flags this explicitly as "worth one explicit
-  sentence in Discussion," not the Introduction — left out of this draft deliberately, per the
-  task's instruction not to overload the Introduction, but worth confirming that's still the right
-  home for it.
+- **RESOLVED (2026-10-17) — Na & DeDeo placement.** The report does not yet state, anywhere, how
+  this project's 8-strategy rubric relates to Na & DeDeo's (2022) unsupervised "Relevance &
+  Presumption" category — the closest prior-work analogue to `refutation` — which they found among
+  their *least* effective categories, the opposite of this project's finding. `REPORT_OUTLINE.md`
+  §2.3 flags this explicitly as "worth one explicit sentence in Discussion," not the Introduction.
+  **You agreed Discussion is the right home for it**, and separately asked where the Na & DeDeo
+  citation itself came from — traced to `previous work/diversity of arguments/2205.07938v1.pdf`,
+  already in the repository since 2025-03-06 (its own `previous work/readme.md` describes it as
+  background reading, not something cited in any notebook), surfaced during the 2026-10-14
+  research-mapping pass that built `REPORT_OUTLINE.md`, not something you mentioned in this
+  conversation. **You plan to investigate the paper itself further once work reaches the
+  Discussion section** — left out of the Introduction, as originally scoped, with no further action
+  needed here for now.
 - Methodological vs. empirical contributions are distinguished in §1.4's closing paragraph, but
   only at a high level. If the Methods/Discussion chapters later want a sharper "what exactly is
   new here vs. adapted from Priniski & Horne / Labruna et al." statement, that line will need to be
