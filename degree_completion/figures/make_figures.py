@@ -44,7 +44,7 @@ INK_SECONDARY = "#52514e"
 INK_MUTED = "#898781"
 GRIDLINE = "#e1e0d9"
 BASELINE_LINE = "#898781"
-SURFACE = "#fcfcfb"
+SURFACE = "#FFFDF8"
 
 FIGSIZE = (10, 5.625)  # 16:9 -- drops directly onto a presentation slide
 DPI = 300
@@ -67,17 +67,33 @@ plt.rcParams.update({
 # ---------------------------------------------------------------------------
 # Shared helpers -- identical title/subtitle/footer anchoring on every figure.
 # ---------------------------------------------------------------------------
-def _header(fig, title, subtitle=None, title_size=17):
-    fig.suptitle(title, x=0.055, y=0.95, ha="left", va="top",
-                 fontsize=title_size, fontweight="bold", color=INK_PRIMARY)
+def _header(fig, title, subtitle=None, title_size=17, show_title=True, subtitle_size=11,
+            subtitle_center=False):
+    """show_title=False omits the on-chart title (e.g. when the slide's own headline already
+    states it) and moves the subtitle up into the freed space. subtitle_center=True centers the
+    subtitle on the figure instead of left-aligning it at the standard margin."""
+    if show_title:
+        fig.suptitle(title, x=0.055, y=0.95, ha="left", va="top",
+                     fontsize=title_size, fontweight="bold", color=INK_PRIMARY)
+        subtitle_y = 0.855
+    else:
+        subtitle_y = 0.95
     if subtitle:
-        fig.text(0.055, 0.855, subtitle, ha="left", va="top",
-                  fontsize=11, color=INK_SECONDARY, linespacing=1.4)
+        if subtitle_center:
+            fig.text(0.5, subtitle_y, subtitle, ha="center", va="top",
+                      fontsize=subtitle_size, color=INK_SECONDARY, linespacing=1.4)
+        else:
+            fig.text(0.055, subtitle_y, subtitle, ha="left", va="top",
+                      fontsize=subtitle_size, color=INK_SECONDARY, linespacing=1.4)
 
 
-def _footer(fig, text):
-    fig.text(0.055, 0.015, text, ha="left", va="bottom",
-              fontsize=7.8, color=INK_MUTED, linespacing=1.35)
+def _footer(fig, text, center=False):
+    if center:
+        fig.text(0.5, 0.015, text, ha="center", va="bottom",
+                  fontsize=7.8, color=INK_MUTED, linespacing=1.35)
+    else:
+        fig.text(0.055, 0.015, text, ha="left", va="bottom",
+                  fontsize=7.8, color=INK_MUTED, linespacing=1.35)
 
 
 def _style_axes(ax, xlabel, xlim):
@@ -92,18 +108,24 @@ def _style_axes(ax, xlabel, xlim):
     ax.tick_params(axis="x", length=0, labelsize=10.5)
 
 
-def _no_skill_line(ax, x, label):
+def _no_skill_line(ax, x, label, fontsize=9):
     ax.axvline(x, color=BASELINE_LINE, linestyle=(0, (5, 3)), linewidth=1.5, zorder=2)
     ax.annotate(label, xy=(x, 1.0), xycoords=("data", "axes fraction"),
                 xytext=(6, -3), textcoords="offset points",
-                va="top", ha="left", fontsize=9, color=INK_MUTED, style="italic")
+                va="top", ha="left", fontsize=fontsize, color=INK_MUTED, style="italic")
 
 
-def _save(fig, name):
+def _save(fig, name, facecolor=None):
+    """facecolor overrides the shared SURFACE color for this figure only (the rcParam
+    savefig.facecolor is fixed to SURFACE, so a per-figure override must be passed explicitly
+    here, not just set on the Figure/Axes)."""
     png_path = os.path.join(HERE, f"{name}.png")
     svg_path = os.path.join(HERE, f"{name}.svg")
-    fig.savefig(png_path, dpi=DPI, bbox_inches="tight")
-    fig.savefig(svg_path, bbox_inches="tight")
+    save_kwargs = {"bbox_inches": "tight"}
+    if facecolor is not None:
+        save_kwargs["facecolor"] = facecolor
+    fig.savefig(png_path, dpi=DPI, **save_kwargs)
+    fig.savefig(svg_path, **save_kwargs)
     print(f"Saved {png_path}")
     print(f"Saved {svg_path}")
 
@@ -144,10 +166,11 @@ def figure1():
     _style_axes(ax, "Held-out PR-AUC", (0, 0.62))
 
     _header(fig, "Word Count Beats the Engineered Pipeline",
-            "Held-out PR-AUC, same 709-comment test set for all three models")
-    _footer(fig, "Source: 04.2_baseline_comparison.ipynb, cells 9–10, 33. Full methodology and caveats in FIGURE_NOTES.md.")
+            "Held-out PR-AUC, same 709-comment test set for all three models",
+            show_title=False, subtitle_size=15)
+    _footer(fig, "Source: 04.2_baseline_comparison.ipynb, cells 9–10, 33.")
 
-    fig.subplots_adjust(left=0.27, right=0.95, top=0.80, bottom=0.14)
+    fig.subplots_adjust(left=0.27, right=0.95, top=0.88, bottom=0.14)
     _save(fig, "figure1_initial_model_comparison")
     plt.close(fig)
 
@@ -180,21 +203,22 @@ def figure2():
     ax.text(bracket_x + 0.012, 0.5, "+0.0735", va="center", ha="left", fontsize=14,
             color=INK_PRIMARY, fontweight="bold", clip_on=False)
 
-    _no_skill_line(ax, no_skill, f"No-skill = {no_skill:.3f}")
+    _no_skill_line(ax, no_skill, f"No-skill = {no_skill:.3f}", fontsize=11)
     ax.annotate("±SD, 8 column orderings\n(not a confidence interval)",
                 xy=(1.0, 1.0), xycoords="axes fraction", xytext=(-4, -3), textcoords="offset points",
-                va="top", ha="right", fontsize=8.5, color=INK_MUTED, style="italic", linespacing=1.3)
+                va="top", ha="right", fontsize=10.5, color=INK_MUTED, style="italic", linespacing=1.3)
 
     ax.set_yticks(y_pos)
     ax.set_yticklabels(labels, fontsize=13)
     ax.invert_yaxis()
     _style_axes(ax, "Held-out PR-AUC (mean ± SD)", (0, 0.78))
 
-    _header(fig, "Strategy Scores Add +0.0735 PR-AUC",
-            "Scored subset, n=2,753 (test: 592 comments)")
-    _footer(fig, "Source: 06_strategy_ablation.ipynb, cell 17 (headline_df). Column-order sensitivity documented in cells 11–14. Full caveats in FIGURE_NOTES.md.")
+    # No title/subtitle at top -- moved below the chart as a short explanation line instead.
+    fig.text(0.055, 0.105, "Scored subset, n=2,753 (test: 592 comments)",
+             ha="left", va="bottom", fontsize=11, color=INK_SECONDARY, linespacing=1.3)
+    _footer(fig, "Source: 06_strategy_ablation.ipynb, cell 17 (headline_df). Column-order sensitivity documented in cells 11–14.")
 
-    fig.subplots_adjust(left=0.29, right=0.90, top=0.78, bottom=0.14)
+    fig.subplots_adjust(left=0.29, right=0.90, top=0.95, bottom=0.22)
     _save(fig, "figure2_strategy_incremental_value")
     plt.close(fig)
 
@@ -229,14 +253,12 @@ def figure3():
     ax.set_yticks(y_pos)
     ax.set_yticklabels(labels, fontsize=13)
     ax.invert_yaxis()
-    _style_axes(ax, "Incremental PR-AUC gain from the 8 strategy scores", (0, 0.105))
+    _style_axes(ax, "Incremental PR-AUC", (0, 0.105))
 
-    _header(fig, "Strategy Gain Survives Length Matching",
-            "Incremental PR-AUC gain, full vs. length-matched population")
     _footer(fig, "Matched by word-count decile bin, not exact-length pairs. A separate, non-comparable sample exists\n"
-                 "in 04.3 (not used here). Source: 06_strategy_ablation.ipynb, cells 32, 35. Full caveats in FIGURE_NOTES.md.")
+                 "in 04.3 (not used here). Source: 06_strategy_ablation.ipynb, cells 32, 35.")
 
-    fig.subplots_adjust(left=0.27, right=0.92, top=0.82, bottom=0.17)
+    fig.subplots_adjust(left=0.27, right=0.92, top=0.95, bottom=0.17)
     _save(fig, "figure3_strategy_gain_length_matching")
     plt.close(fig)
 
@@ -259,39 +281,40 @@ def figure4():
     fig, ax = plt.subplots(figsize=FIGSIZE)
     ax.hist(trimmed.loc[trimmed["is_convincing"] == 0, "word_count"], bins=bins, density=True,
             color=COLOR_BLUE, alpha=0.55, zorder=3,
-            label=f"Non-convincing (n={n_non_convincing:,}, {n_non_convincing/n_total*100:.1f}%)")
+            label=f"No Δ (n={n_non_convincing:,}, {n_non_convincing/n_total*100:.1f}%)")
     ax.hist(trimmed.loc[trimmed["is_convincing"] == 1, "word_count"], bins=bins, density=True,
             color=COLOR_ORANGE, alpha=0.55, zorder=4,
-            label=f"Convincing (n={n_convincing:,}, {n_convincing/n_total*100:.1f}%)")
+            label=f"Δ Awarded (n={n_convincing:,}, {n_convincing/n_total*100:.1f}%)")
 
     ax.axvline(mean_non_convincing, color=COLOR_BLUE, linestyle=(0, (5, 3)), linewidth=1.6, zorder=5)
     ax.axvline(mean_convincing, color=COLOR_ORANGE, linestyle=(0, (5, 3)), linewidth=1.6, zorder=5)
     ax.annotate(f"mean {mean_non_convincing:.0f}", xy=(mean_non_convincing, 1.0), xycoords=("data", "axes fraction"),
                 xytext=(-6, -4), textcoords="offset points", va="top", ha="right",
-                fontsize=9.5, color=COLOR_BLUE, fontweight="bold")
+                fontsize=12, color=COLOR_BLUE, fontweight="bold")
     ax.annotate(f"mean {mean_convincing:.0f}", xy=(mean_convincing, 1.0), xycoords=("data", "axes fraction"),
                 xytext=(6, -4), textcoords="offset points", va="top", ha="left",
-                fontsize=9.5, color=COLOR_ORANGE, fontweight="bold")
+                fontsize=12, color=COLOR_ORANGE, fontweight="bold")
 
-    ax.legend(loc="upper right", frameon=False, fontsize=10.5, bbox_to_anchor=(1.0, 0.92))
+    ax.legend(loc="upper right", frameon=False, fontsize=13, bbox_to_anchor=(1.0, 0.92))
     ax.set_xlim(0, 600)
-    ax.set_ylabel("Density", fontsize=11, color=INK_SECONDARY, labelpad=8)
+    ax.set_ylabel("Density", fontsize=13, color=INK_SECONDARY, labelpad=8)
     ax.set_yticks([])
     for spine in ["top", "right", "left"]:
         ax.spines[spine].set_visible(False)
     ax.spines["bottom"].set_color(GRIDLINE)
-    ax.set_xlabel("Comment word count (trimmed at 600 words)", fontsize=11, color=INK_SECONDARY, labelpad=8)
-    ax.tick_params(axis="x", length=0, labelsize=10.5)
+    ax.set_xlabel("Comment word count (trimmed at 600 words)", fontsize=13, color=INK_SECONDARY, labelpad=8)
+    ax.tick_params(axis="x", length=0, labelsize=12)
     ax.xaxis.grid(True, color=GRIDLINE, linewidth=1, zorder=0)
     ax.set_axisbelow(True)
 
     _header(fig, "Convincing Comments Are Much Longer",
-            "Word-count distribution by outcome, full dataset (n=3,971)")
-    _footer(fig, "Each class normalized separately (density, not raw counts); truncated at 600 words (excludes 1.4% of\n"
-                 "comments). Means shown are from the full, untruncated dataset. Source: 04.2_baseline_comparison.ipynb,\n"
-                 "cells 30–31. Full caveats in FIGURE_NOTES.md.")
+            "Word-count distribution by outcome, full dataset (n=3,971)",
+            show_title=False)
+    fig.text(0.07, 0.084, "Density normalized per class · Display truncated at 600 words (1.4% excluded) · Means from full dataset",
+             ha="left", va="bottom", fontsize=11, color=INK_SECONDARY, linespacing=1.3)
+    _footer(fig, "Source: 04.2_baseline_comparison.ipynb, cells 30–31.")
 
-    fig.subplots_adjust(left=0.07, right=0.95, top=0.80, bottom=0.21)
+    fig.subplots_adjust(left=0.07, right=0.95, top=0.88, bottom=0.22)
     _save(fig, "figure4_comment_length_by_outcome")
     plt.close(fig)
 
@@ -366,14 +389,11 @@ def figure5():
     ]
     ax.legend(handles=legend_handles, loc="lower right", frameon=False, fontsize=10.5)
 
-    _style_axes(ax, "Mean |SHAP value| (word_count excluded — see notes)", (0, 0.72))
+    _style_axes(ax, "Mean |SHAP value| (word_count excluded)", (0, 0.72))
 
-    _header(fig, "Refutation Retains More Model Importance After Length Matching",
-            "Mean |SHAP| per strategy, before vs. after length matching")
-    _footer(fig, "Fitted-model importance, not a causal effect. Refutation & justification had the weakest agreement with\n"
-                 "human scoring (05_rhetorical_scoring.ipynb). Source: 07_strategy_interpretation.ipynb, cell 36. Full caveats in FIGURE_NOTES.md.")
+    _footer(fig, "Fitted-model importance, not a causal effect. Source: 07_strategy_interpretation.ipynb, cell 36.")
 
-    fig.subplots_adjust(left=0.22, right=0.95, top=0.80, bottom=0.17)
+    fig.subplots_adjust(left=0.22, right=0.95, top=0.95, bottom=0.17)
     _save(fig, "figure5_refutation_vs_justification_shap")
     plt.close(fig)
 
@@ -455,12 +475,12 @@ def figure6():
               ncol=2, frameon=False, fontsize=9.5)
 
     _header(fig, "Strategy Importance Is Dataset-Dependent",
-            "Rank-biserial effect size (same method, both datasets) — rank 1 = strongest")
-    _footer(fig, "Not a simple refutation↔justification swap: justification leads by this metric in both datasets. Evidence is\n"
-                 "the biggest riser (6th → 2nd on WA); refutation is the biggest faller among previously-strong strategies (2nd → 4th).\n"
-                 "Source: 07 cell 39 (home), 08 cell 33 (WA). Full caveats in FIGURE_NOTES.md.")
+            "Rank-biserial effect size (same method, both datasets) — rank 1 = strongest",
+            show_title=False, subtitle_center=True)
+    _footer(fig, "Source: 07_strategy_interpretation.ipynb cell 39 (home), 08_wa_external_validation.ipynb cell 33 (WA).",
+            center=True)
 
-    fig.subplots_adjust(left=0.20, right=0.85, top=0.78, bottom=0.17)
+    fig.subplots_adjust(left=0.14, right=0.90, top=0.90, bottom=0.15)
     _save(fig, "figure6_strategy_ranking_cmv_vs_wa")
     plt.close(fig)
 
@@ -486,12 +506,12 @@ def figure7():
     for bar, val in zip(bars1, pr_auc):
         ax1.text(val + 0.01, bar.get_y() + bar.get_height() / 2, f"{val:.4f}",
                   va="center", ha="left", fontsize=12, color=INK_PRIMARY, fontweight="bold")
-    _no_skill_line(ax1, no_skill_pr_auc, f"No-skill = {no_skill_pr_auc:.3f}")
+    _no_skill_line(ax1, no_skill_pr_auc, f"No-skill = {no_skill_pr_auc:.3f}", fontsize=12)
     ax1.set_yticks(y_pos)
     ax1.set_yticklabels(labels, fontsize=11.5)
     ax1.invert_yaxis()
     _style_axes(ax1, "Held-out PR-AUC", (0, 0.72))
-    ax1.set_title("PR-AUC", fontsize=12.5, color=INK_SECONDARY, pad=10, loc="left")
+    ax1.set_title("PR-AUC", fontsize=14, color=INK_SECONDARY, pad=10, loc="left")
 
     bars2 = ax2.barh(y_pos, pairwise, color=colors, height=0.55, zorder=3)
     for bar, val in zip(bars2, pairwise):
@@ -499,23 +519,19 @@ def figure7():
                   va="center", ha="left", fontsize=12, color=INK_PRIMARY, fontweight="bold")
     # Chance line uses the same top-anchored convention as the PR-AUC panel's no-skill line
     # (avoids sitting on top of the bottom bar, which a bottom-anchored label did previously).
-    _no_skill_line(ax2, chance_pairwise, f"Chance = {chance_pairwise:.0f}%")
+    _no_skill_line(ax2, chance_pairwise, f"Chance = {chance_pairwise:.0f}%", fontsize=12)
     ax2.set_yticks(y_pos)
     ax2.set_yticklabels([])
     ax2.invert_yaxis()
     _style_axes(ax2, "Pairwise accuracy", (45, 68))
-    ax2.set_title("Pairwise accuracy", fontsize=12.5, color=INK_SECONDARY, pad=10, loc="left")
+    ax2.set_title("Pairwise accuracy", fontsize=14, color=INK_SECONDARY, pad=10, loc="left")
     # Literature reference moved out of the plotting region entirely (no shaded bands, no
     # floating in-panel labels, which collided with the bars/chance line) -- kept instead as
     # one line in the footer below, where there's established headroom.
 
-    _header(fig, "Rhetorical Signal Replicates on Winning Arguments",
-            "Same architecture, retrained on WA's own data — a methodology transfer, not an identical experiment")
-    _footer(fig, "Not zero-shot: new model fit on WA's own training split, evaluated on WA's own heldout split.\n"
-                 "Lit. reference (Labruna et al. 2026, different pipeline — context only): independent scoring\n"
-                 "53.8–56.7%, full method 60.6–64.5%. Source: 08_wa_external_validation.ipynb, cells 20, 38–39.")
+    _footer(fig, "Source: 08_wa_external_validation.ipynb, cells 20, 38–39.")
 
-    fig.subplots_adjust(left=0.20, right=0.97, top=0.76, bottom=0.21, wspace=0.35)
+    fig.subplots_adjust(left=0.20, right=0.97, top=0.88, bottom=0.16, wspace=0.35)
     _save(fig, "figure7_wa_external_validation")
     plt.close(fig)
 
