@@ -145,7 +145,7 @@ def _load_comment_word_counts():
 # Source: this work/04.2_baseline_comparison.ipynb, cells 9-10, 33
 # ---------------------------------------------------------------------------
 def figure1():
-    labels = ["Engineered pipeline\n(229 features)", "TF-IDF +\nLogistic Regression", "Word count alone\n(1 feature)"]
+    labels = ["Engineered\npipeline", "TF-IDF +\nLogistic Regression", "Word count alone\n(1 feature)"]
     values = [0.3848, 0.5119, 0.5256]
     colors = [COLOR_BLUE, COLOR_AQUA, COLOR_ORANGE]
     no_skill = 0.2031  # majority-class PR-AUC = test-fold positive rate
