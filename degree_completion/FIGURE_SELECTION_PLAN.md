@@ -132,7 +132,7 @@ an "export as-is" item still requires a short extraction/re-render step before i
 | **Export vs. redraw** | Redraw — the live table has no corresponding chart yet; a 3-bar chart with error bars is new work, not an export. |
 | **Effort** | Low–medium (~30–45 min — needs the mean±SD values pulled correctly, see caveat). |
 | **Priority** | **Essential.** |
-| **Caveats** | Column-order sensitivity is why these numbers are mean±SD at all (cells 11–14: reordering 237 identical columns swings PR-AUC by up to 0.0422) — the chart's error bars **are** that sensitivity, not sampling noise, and should be captioned as such if an examiner asks what the error bars represent. |
+| **Caveats** | Column-order sensitivity is why these numbers are mean±SD at all (cells 11–14: reordering 237 identical columns swings PR-AUC by up to 0.0482) — the chart's error bars **are** that sensitivity, not sampling noise, and should be captioned as such if an examiner asks what the error bars represent. |
 
 ---
 

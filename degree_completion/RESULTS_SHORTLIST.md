@@ -141,7 +141,7 @@ than any other feature family tested, including length itself.
 
 **Important methodological disclosure attached to this finding:** the underlying XGBoost+SMOTE
 pipeline on this correlated, 200+-column feature matrix is sensitive to column *order* — refitting
-identical data with only column order shuffled swings PR-AUC by as much as 0.0422, large enough to
+identical data with only column order shuffled swings PR-AUC by as much as 0.0482, large enough to
 rival some of the effects under study. Root-caused to XGBoost's deterministic tie-breaking among
 near-equal split gains on correlated features (not a SMOTE artifact). Every PR-AUC number from
 this notebook onward is reported as a mean±std over multiple column orderings specifically because

@@ -133,7 +133,7 @@ architecture throughout: `XGB (over)` + `SMOTE`, selected in `04.1`/`04.2`).
 **Error bars are ± 1 SD across 8 random orderings of the same feature columns, fitting the
 identical fixed architecture on the same train/test split each time — only column order changes.**
 `06` cells 11–14 found this exact pipeline is sensitive to column order (reshuffling alone swings
-PR-AUC by up to 0.0422 on an identical 237-column set), traced to XGBoost's deterministic
+PR-AUC by up to 0.0482 on an identical 237-column set), traced to XGBoost's deterministic
 tie-breaking among near-equal split gains on correlated features. **These are explicitly NOT
 bootstrap confidence intervals, and they are NOT evidence of statistical significance** — they
 describe sensitivity to an arbitrary implementation detail (column order), not sampling

@@ -206,7 +206,7 @@ existing engineered model.
 - Strategy scores alone: **PR-AUC 0.3538 ± 0.0079** — real standalone signal, between no-skill
   (0.2382) and the full model.
 - Methodological disclosure: this XGBoost+SMOTE pipeline, on 200+ correlated columns, is
-  sensitive to column *order* — reshuffling column order alone swings PR-AUC by up to 0.0422
+  sensitive to column *order* — reshuffling column order alone swings PR-AUC by up to 0.0482
   (traced to XGBoost's tie-breaking on correlated features, not a SMOTE artifact). Every PR-AUC
   number from here on is mean ± SD across multiple column orderings, never a single run.
 
@@ -411,7 +411,7 @@ established earlier in the talk; no new chart.
 
 **Slide text:**
 - On this correlated 200+-column feature matrix, reshuffling only column *order* (identical data,
-  identical architecture) swings PR-AUC by as much as **0.0422**.
+  identical architecture) swings PR-AUC by as much as **0.0482**.
 - Root cause: XGBoost's deterministic tie-breaking among near-equal split gains on correlated
   features — **not** a SMOTE artifact.
 - Every PR-AUC number from Slide 8 onward is reported as mean ± SD across multiple column

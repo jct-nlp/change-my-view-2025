@@ -211,7 +211,7 @@ beyond the existing engineered model.
 
 **Methodological disclosure (state this, don't footnote it):** the underlying XGBoost+SMOTE
 pipeline, on this correlated 200+-column feature matrix, is sensitive to column *order* —
-reshuffling only column order swings PR-AUC by as much as 0.0422. Root-caused to XGBoost's
+reshuffling only column order swings PR-AUC by as much as 0.0482. Root-caused to XGBoost's
 deterministic tie-breaking among near-equal split gains on correlated features (not a SMOTE
 artifact). Every PR-AUC number from this point on in the talk is reported as mean±SD over multiple
 column orderings for exactly this reason.

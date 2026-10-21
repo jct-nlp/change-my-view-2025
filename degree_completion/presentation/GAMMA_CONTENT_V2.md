@@ -174,7 +174,7 @@ comparison.ipynb` (TF-IDF baseline, word-count discovery, re-selection with word
   - Order-robust gain (mean ± SD across column orderings)
 - **What is spoken but not shown:** the three exact PR-AUC values (0.4467±0.0196 engineered
   alone, 0.5202±0.0177 with strategies, 0.3538±0.0079 strategies alone); the column-order
-  sensitivity finding itself (reshuffling column order alone swings PR-AUC by up to 0.0422,
+  sensitivity finding itself (reshuffling column order alone swings PR-AUC by up to 0.0482,
   root-caused to XGBoost's deterministic tie-breaking on correlated features, not a SMOTE
   artifact); that every PR-AUC number from this point in the talk onward is reported the same
   way, for exactly this reason.
@@ -317,7 +317,7 @@ material, not part of the timed narrative — but still prefer a compact table o
 
 - **Headline:** Column Order Alone Moves the Score
 - **Primary visual:** None approved; text-only.
-- **Minimal on-slide text:** Reordering columns alone swings PR-AUC by up to 0.0422
+- **Minimal on-slide text:** Reordering columns alone swings PR-AUC by up to 0.0482
 - **What is spoken but not shown:** the root cause (XGBoost's deterministic tie-breaking among
   near-equal split gains on correlated features, not a SMOTE artifact); that this is why every
   PR-AUC number from Slide 8 onward is mean±SD across orderings, never a single convenient run.

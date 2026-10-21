@@ -89,7 +89,7 @@ elaborated here and should be carried into the Discussion chapter:
   uncertainty intervals; only a few comparisons (the word-count discovery, the strategy-ablation
   gain) are strong enough to call decisive.
 - XGBoost+SMOTE results on the >200-column feature matrix are sensitive to feature-column order
-  (up to 0.0422 PR-AUC swing from reordering alone) — every relevant number from `06` onward is
+  (up to 0.0482 PR-AUC swing from reordering alone) — every relevant number from `06` onward is
   reported as mean±SD across orderings for this reason, not as a single run.
 - The WA external validation supports a strategy-level signal on a second dataset but does not
   include a length-controlled ablation comparable to `06`'s own — so the *incremental-beyond-length*
