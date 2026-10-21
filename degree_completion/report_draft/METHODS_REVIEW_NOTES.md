@@ -187,12 +187,19 @@ notebook, Methods chapter, and every presentation/planning document agree on 0.0
 | Model-selection grid table | §2.3 | `04.1_model_training.ipynb` cell 13 (`validation_results` or equivalent DataFrame). |
 | PR/ROC curve, selected pipeline | §2.3 | `04.1_model_training.ipynb` cell 17 — exists as an embedded image; content not yet extracted. |
 | Word-count-by-outcome figure | §2.4 | `04.2_baseline_comparison.ipynb` cells 30–31. A presentation-ready version of this already exists as `degree_completion/figures/figure4_comment_length_by_outcome.png`; per the task's own scope note, decide separately whether to reuse it as-is or build a report-specific version. |
-| Baseline comparison table | §2.4 | `04.2_baseline_comparison.ipynb` cells 9–10, 33, 77, 79. |
-| Length-matched-sample comparison table | §2.5 | `04.3_length_controlled_analysis.ipynb` cells 19–22 (its own sample) and `06_strategy_ablation.ipynb` cells 31–35 (the other sample) — side by side, to visually reinforce that they are not the same construction. |
-| Eight-strategy rubric + reliability table | §2.6 | Definitions: `05_rhetorical_scoring.ipynb` cell 1. Reliability: cells 28–40. |
+| Baseline comparison table | §2.4 | `04.2_baseline_comparison.ipynb` cells 9–10, 33, 77, 79. Partially covered by an existing chart, `degree_completion/figures/figure1_initial_model_comparison.png` — covers 3 of the 4 rows this table needs (engineered pipeline, TF-IDF, word-count-only; missing the word-count-augmented re-selection row, 0.4922), as a bar chart rather than a table. |
+| Length-matched-sample comparison table | §2.5 | `04.3_length_controlled_analysis.ipynb` cells 19–22 (its own sample) and `06_strategy_ablation.ipynb` cells 31–35 (the other sample) — side by side, to visually reinforce that they are not the same construction. The `06` half is already covered by an existing chart, `degree_completion/figures/figure3_strategy_gain_length_matching.png` (full-vs-matched strategy-score gain, 84% retention); no equivalent chart exists for `04.3`'s half. |
+| Eight-strategy rubric + reliability table | §2.6 | Definitions: `05_rhetorical_scoring.ipynb` cell 1. Reliability: cells 28–40. No existing figure covers this. |
 | SHAP / rank-biserial comparison table | §2.8 | `07_strategy_interpretation.ipynb` cells 36 (SHAP), 39 (effect size). A presentation-ready SHAP comparison chart already exists as `degree_completion/figures/figure5_refutation_vs_justification_shap.png` — again, decide separately whether to reuse or rebuild for the report. |
-| SHAP beeswarm plots | §2.8 | `07_strategy_interpretation.ipynb` cells 23 (full population), 35 (length-matched) — embedded images, not yet extracted; the project's own guidance (per `FIGURE_SELECTION_PLAN.md`) is that these may not be legible enough for print and a simplified comparison chart is preferable. |
-| Home-vs-WA construction comparison table | §2.9 | `02_data_annotation.ipynb` (home negative-sampling) vs. `08_wa_external_validation.ipynb` cells 5, 16, 18, 20 (WA corpus/split sizes) and its own markdown describing Jaccard-matched negatives. |
+| SHAP beeswarm plots | §2.8 | `07_strategy_interpretation.ipynb` cells 23 (full population), 35 (length-matched) — embedded images, not yet extracted; the project's own guidance (per `FIGURE_SELECTION_PLAN.md`) is that these may not be legible enough for print and a simplified comparison chart is preferable — `figure5_refutation_vs_justification_shap.png` (row above) is exactly that simplified alternative, already built. |
+| Home-vs-WA construction comparison table | §2.9 | `02_data_annotation.ipynb` (home negative-sampling) vs. `08_wa_external_validation.ipynb` cells 5, 16, 18, 20 (WA corpus/split sizes) and its own markdown describing Jaccard-matched negatives. No existing figure covers this specific construction-comparison content. |
+
+**Three approved figures not listed above because they show findings, not procedure, and belong in
+Results rather than Methods:** `figure2_strategy_incremental_value.png` (the §2.7 ablation headline
+gain), `figure6_strategy_ranking_cmv_vs_wa.png` (the §2.8/§2.9 cross-dataset strategy-ranking
+reversal), and `figure7_wa_external_validation.png` (the §2.9 WA feature-set comparison). Flagged
+here so it's clear they weren't missed — they're the right figures for Results, not omissions from
+this table.
 
 ## 6. Methods-subsection → notebook/cell mapping
 
