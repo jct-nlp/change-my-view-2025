@@ -256,8 +256,8 @@ def figure2():
     else:
         labels = ["Engineered features\n(no strategy scores)", "Engineered features\n+ 8 strategy scores",
                   "Strategy scores\nonly"]
-    means = [0.4467, 0.5202, 0.3538]
-    stds = [0.0196, 0.0177, 0.0079]
+    means = [0.4434, 0.5098, 0.3514]
+    stds = [0.0187, 0.0200, 0.0065]
     colors = [COLOR_BLUE, COLOR_ORANGE, COLOR_AQUA]
     no_skill = 0.2382  # test-fold positive rate, scored subset
 
@@ -275,7 +275,7 @@ def figure2():
     ax.plot([bracket_x, bracket_x], [0, 1], color=INK_MUTED, linewidth=1.3, zorder=2, clip_on=False)
     ax.plot([bracket_x - 0.01, bracket_x], [0, 0], color=INK_MUTED, linewidth=1.3, zorder=2, clip_on=False)
     ax.plot([bracket_x - 0.01, bracket_x], [1, 1], color=INK_MUTED, linewidth=1.3, zorder=2, clip_on=False)
-    ax.text(bracket_x + 0.012, 0.5, "+0.0735", va="center", ha="left", fontsize=S(14),
+    ax.text(bracket_x + 0.012, 0.5, "+0.0664", va="center", ha="left", fontsize=S(14),
             color=INK_PRIMARY, fontweight="bold", clip_on=False)
 
     _no_skill_line(ax, no_skill, f"No-skill = {no_skill:.3f}", fontsize=11)
@@ -289,7 +289,7 @@ def figure2():
     _style_axes(ax, "Held-out PR-AUC (mean ± SD)", (0, 0.78))
 
     if _cfg()["show_title"]:
-        _header(fig, "Strategy Scores Add +0.0735 PR-AUC", "Scored subset, n=2,753 (test: 592 comments)")
+        _header(fig, "Strategy Scores Add +0.0664 PR-AUC", "Scored subset, n=2,753 (test: 592 comments)")
         bottom = 0.17
     else:
         # No title/subtitle at top -- moved below the chart as a short explanation line instead.
@@ -298,8 +298,9 @@ def figure2():
         bottom = 0.22
     if _cfg()["verbose_footer"]:
         _footer(fig, "Source: this work/06_strategy_ablation.ipynb, cell 17 (headline_df). Column-order\n"
-                     "sensitivity documented in cells 11–14. Values verified 2026-10-14. Full caveats in\n"
-                     "FIGURE_NOTES.md.")
+                     "sensitivity documented in cells 11–14. Column-order-shuffle seed pinned to 42 (not\n"
+                     "this notebook's usual seed=0 default) so these numbers match the Length-Controlled\n"
+                     "Benchmark section exactly. Values verified 2026-10-25. Full caveats in FIGURE_NOTES.md.")
     else:
         _footer(fig, "Source: 06_strategy_ablation.ipynb, cell 17 (headline_df). Column-order sensitivity "
                      "documented in cells 11–14.")
