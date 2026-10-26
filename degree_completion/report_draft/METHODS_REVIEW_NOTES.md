@@ -27,6 +27,15 @@ report requires. No files were changed as a result of this check (the replicatio
 script, not against any notebook or committed result). This question is now closed — do not reopen
 it without a concrete new reason.
 
+> **Addendum (2026-10-25), unrelated to this question — reopens nothing above.** The baseline
+> numbers this resolution cites (0.4467/0.5202/+0.0735) are themselves now stale for an unrelated
+> reason: cell 17's column-order-shuffle seed was later pinned to 42 (was 0) so it would match the
+> Length-Controlled Benchmark section's own full-population numbers, which a presentation review
+> caught disagreeing with these despite describing the same comparison. Current values: 0.4434 /
+> 0.5098 / +0.0664. This resolution's own comparison (0.5202→0.5169, 0.4467→0.4858, the untrusted-
+> columns replication) was never rerun under seed=42 and is left as-is, unchanged by this addendum —
+> only the reference point shifted, not this section's closed finding.
+
 The original finding, preserved below for the record:
 
 - `04.1_model_training.ipynb`'s model-selection grid selects a 239-column "trusted+untrusted"
@@ -137,6 +146,16 @@ roughly 0.05". Verified the full re-execution changed nothing else: every other 
 the notebook, including cell 17's headline table (0.4467±0.0196 / 0.5202±0.0177 / 0.3538±0.0079),
 reproduced bit-for-bit identical to before. `02_METHODS.md` §2.7 already matches this (updated in
 the step above). **This item is now fully closed — notebook and report agree.**
+
+> **Addendum (2026-10-25), unrelated to this question — reopens nothing above.** Cell 17's headline
+> table quoted here as the bit-for-bit-reproduced value (0.4467±0.0196 / 0.5202±0.0177 /
+> 0.3538±0.0079) was accurate as of this 2026-10-20 re-execution, but cell 17's three calls were
+> later pinned to column-order-shuffle seed=42 (was 0) so this comparison would match the
+> Length-Controlled Benchmark section's own full-population numbers below, which a presentation
+> review caught disagreeing with these despite describing the same comparison. Current values:
+> 0.4434±0.0187 / 0.5098±0.0200 / 0.3514±0.0065, gain +0.0664. `02_METHODS.md` §2.7 updated to
+> match (2026-10-25). The 8-orderings-count fix this section documents is unaffected and still
+> closed — this addendum only concerns which seed numbered those 8 orderings.
 
 **Downstream documents — propagated (2026-10-21).** At your request, updated every other text
 reference to the old 0.0422 figure to 0.0482: `figures/FIGURE_NOTES.md`,

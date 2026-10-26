@@ -34,8 +34,8 @@ main message per slide. A few sections may need two visual slides, but keep the 
 | 3. Initial experiments and the length finding | 2:45–4:40 | 1:55 | Engineered PR-AUC 0.3848 vs TF-IDF 0.5119 vs word-count-only 0.5256; length histogram. Make clear these numbers are from the same original held-out test. | RQ1 |
 | 4. Central question: beyond length? | 4:40–5:10 | 0:30 | Explicit transition: predictive association with length is not sufficient to establish rhetorical signal. Pose the next test. | RQ2 |
 | 5. Eight strategies and measurement | 5:10–6:20 | 1:10 | One compact overview of all eight, 1–5 LLM scoring. Give most attention to **refutation** and **justification** as examples; do not spend equal time defining all eight. Mention small human check and limitations briefly, revisit near interpretation. | RQ2–3 |
-| 6. Strategy-combination results | 6:20–7:55 | 1:35 | PR-AUC 0.4467±0.0196 → 0.5202±0.0177 after adding eight scores; column-order sensitivity handled by reporting mean±SD. Simple bar/dot chart. | RQ2 |
-| 7. Length matching and compact model | 7:55–9:45 | 1:50 | Strategy-gain retention ~84% after length matching; nine features (eight scores + word count) PR-AUC 0.5379±0.0109 vs full 237 features 0.5202±0.0177. Avoid implying causal independence. | RQ2 |
+| 6. Strategy-combination results | 6:20–7:55 | 1:35 | PR-AUC 0.4434±0.0187 → 0.5098±0.0200 after adding eight scores; column-order sensitivity handled by reporting mean±SD. Simple bar/dot chart. | RQ2 |
+| 7. Length matching and compact model | 7:55–9:45 | 1:50 | Strategy-gain retention ~84% after length matching; nine features (eight scores + word count) PR-AUC 0.5379±0.0109 vs full 237 features 0.5098±0.0200. Avoid implying causal independence. | RQ2 |
 | 8. Refutation vs justification | 9:45–11:10 | 1:25 | Home data: refutation remains prominent after length control; justification loses much of its importance. Simplified before/after SHAP ranking, not two dense beeswarms unless readable. Mention that both are among the least reliable vs human scoring. | RQ3 |
 | 9. WA external validation and surprise | 11:10–13:10 | 2:00 | **Same preselected model architecture/configuration, refitted on WA training split and evaluated on WA held-out data; no new model-family/resampling selection on WA. NOT zero-shot.** Strategy signal persists; justification dominates instead of refutation. Sampling explanation is a hypothesis only. | RQ3 |
 | 10. Conclusions, contribution, limitations | 13:10–14:30 | 1:20 | Three answers to RQ1–RQ3; predictive not causal; delta proxy; measurement reliability; dataset/sampling differences; future test of sampling hypothesis. | All |
@@ -203,10 +203,10 @@ a mental state or definitive human annotations.
 beyond the existing engineered model.
 
 **Sequence of arguments:**
-- Engineered model alone (full population): PR-AUC **0.4467±0.0196**.
-- + 8 strategy scores: PR-AUC **0.5202±0.0177** (+0.0735) — a gain that clears the column-order
+- Engineered model alone (full population): PR-AUC **0.4434±0.0187**.
+- + 8 strategy scores: PR-AUC **0.5098±0.0200** (+0.0664) — a gain that clears the column-order
   noise band described below.
-- Strategy scores alone: PR-AUC **0.3538±0.0079** — real standalone signal, between no-skill
+- Strategy scores alone: PR-AUC **0.3514±0.0065** — real standalone signal, between no-skill
   (0.2382) and the full model.
 
 **Methodological disclosure (state this, don't footnote it):** the underlying XGBoost+SMOTE

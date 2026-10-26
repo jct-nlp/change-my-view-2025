@@ -344,9 +344,9 @@ described in this section is not a direct continuation of the exact feature set 
 `METHODS_REVIEW_NOTES.md` for a fuller account of this distinction and an open question about it.
 Combined with the eight strategy scores, the resulting representation totals 237 columns.
 
-The engineered-feature baseline alone achieves PR-AUC 0.4467 (± 0.0196, see below); adding the
-eight strategy scores raises this to 0.5202 (± 0.0177), a gain of 0.0735. The eight strategy scores
-alone, with no engineered features at all, achieve PR-AUC 0.3538 (± 0.0079) — a real, standalone
+The engineered-feature baseline alone achieves PR-AUC 0.4434 (± 0.0187, see below); adding the
+eight strategy scores raises this to 0.5098 (± 0.0200), a gain of 0.0664. The eight strategy scores
+alone, with no engineered features at all, achieve PR-AUC 0.3514 (± 0.0065) — a real, standalone
 predictive signal, positioned between this population's own no-skill baseline (0.2382) and the
 combined 237-column model.
 

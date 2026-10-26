@@ -169,11 +169,11 @@ comparison.ipynb` (TF-IDF baseline, word-count discovery, re-selection with word
 
 - **Headline:** Strategies Add Real Predictive Signal
 - **Primary visual:** `figure2_strategy_incremental_value.png` — large/centered, ~65% width. The
-  +0.0735 gain bracket is already drawn on the chart.
+  +0.0664 gain bracket is already drawn on the chart.
 - **Minimal on-slide text:**
   - Order-robust gain (mean ± SD across column orderings)
-- **What is spoken but not shown:** the three exact PR-AUC values (0.4467±0.0196 engineered
-  alone, 0.5202±0.0177 with strategies, 0.3538±0.0079 strategies alone); the column-order
+- **What is spoken but not shown:** the three exact PR-AUC values (0.4434±0.0187 engineered
+  alone, 0.5098±0.0200 with strategies, 0.3514±0.0065 strategies alone); the column-order
   sensitivity finding itself (reshuffling column order alone swings PR-AUC by up to 0.0482,
   root-caused to XGBoost's deterministic tie-breaking on correlated features, not a SMOTE
   artifact); that every PR-AUC number from this point in the talk onward is reported the same
@@ -305,7 +305,7 @@ material, not part of the timed narrative — but still prefer a compact table o
 
 - **Headline:** Nine Features Beat Two Hundred Thirty-Seven
 - **Primary visual:** None approved; a simple two-row table (9-feature vs. 237-feature PR-AUC).
-- **Minimal on-slide text:** 9 features: 0.5379±0.0109 · 237 features: 0.5202±0.0177
+- **Minimal on-slide text:** 9 features: 0.5379±0.0109 · 237 features: 0.5098±0.0200
 - **What is spoken but not shown:** that Random Forest edges out XGBoost on this 9-column set
   (0.5432±0.0065 vs. 0.5380±0.0108) — a gap smaller than either architecture's own order-induced
   spread, so not a confident win either way; XGBoost is kept for consistency with the rest of the

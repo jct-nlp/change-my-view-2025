@@ -128,7 +128,7 @@ an "export as-is" item still requires a short extraction/re-render step before i
 | **Exists already?** | As a live table, not a chart. |
 | **Source notebook/cell** | `06_strategy_ablation.ipynb` cell 17 (`headline_df`) — built on the order-robust evaluator defined in cells 10–15. |
 | **Demonstrates** | The project's cleanest "yes" result: adding strategy scores is a real, order-robust gain. |
-| **Key numbers it must show** | 0.4467±0.0196 → 0.5202±0.0177 (+0.0735); strategy-only 0.3538±0.0079; no-skill baseline 0.2382 (this test fold's own positive rate, per `06`'s convention — not the whole-dataset 0.161). |
+| **Key numbers it must show** | 0.4434±0.0187 → 0.5098±0.0200 (+0.0664); strategy-only 0.3514±0.0065; no-skill baseline 0.2382 (this test fold's own positive rate, per `06`'s convention — not the whole-dataset 0.161). |
 | **Export vs. redraw** | Redraw — the live table has no corresponding chart yet; a 3-bar chart with error bars is new work, not an export. |
 | **Effort** | Low–medium (~30–45 min — needs the mean±SD values pulled correctly, see caveat). |
 | **Priority** | **Essential.** |
@@ -160,7 +160,7 @@ an "export as-is" item still requires a short extraction/re-render step before i
 | **Exists already?** | As numbers inside prose/markdown summaries, not a dedicated chart. |
 | **Source notebook/cell** | `06_strategy_ablation.ipynb` cell 22–23 (cumulative family build, identifies `strategy scores + word_count` as the best combination) and cell 30 (9-column re-selection: RF 0.5432±0.0065 vs. XGB 0.5380±0.0108, order-robust). |
 | **Demonstrates** | A small, interpretable 9-feature model is not just competitive with but better than the full engineered+strategy set — a parsimony argument. |
-| **Key numbers it must show** | 9-feature PR-AUC 0.5379–0.5380±0.01 vs. full 237-feature 0.5202±0.0177. |
+| **Key numbers it must show** | 9-feature PR-AUC 0.5379–0.5380±0.01 vs. full 237-feature 0.5098±0.0200. |
 | **Export vs. redraw** | Redraw (new, simple). |
 | **Effort** | Low (~20 min). |
 | **Priority** | **Useful** — strong if there's time or as a backup slide for the "why not throw in everything" question; not required for the core RQ2/RQ3 arc. |

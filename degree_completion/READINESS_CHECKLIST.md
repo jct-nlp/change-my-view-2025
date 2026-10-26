@@ -33,7 +33,7 @@ running any new experiments or retraining any model.
 | Discussion — limitations | **Ready** | No | Comprehensive list already assembled, including the refutation/justification reliability caveat. |
 | Discussion — suggested improvements | **Ready** | No | Three concrete, explicitly-labeled-as-future-work items already identified; must be written as proposals, not completed work. |
 | References | **Needs writing or editing** | No | The four citations are verified (see dedicated rows below) but not yet formatted into an actual References-chapter bibliography. Citation style resolved: author-year (2026-10-17). See the task item below. |
-| Code/data access link | **Ready**, pending one decision | No | README.md already has complete, usable data-access instructions; needs a decision on whether to pin a specific commit/release for reproducibility (repo is still actively changing). |
+| Code/data access link | **Ready** | No | README.md already has complete, usable data-access instructions. Resolved 2026-10-26: the project is submitted as a zip (not hosted on GitHub), so there is no commit/release to pin — the zip itself is the fixed snapshot. |
 
 ## Cross-cutting items
 
@@ -80,8 +80,10 @@ is:
 1. **AI tools used — scope of the References line:** should it also name any AI coding assistant
    used while building the pipeline/notebooks, alongside Gemini's already-documented
    research-method role, or is Gemini-as-method the intended scope?
-2. **Repository pinning** — tag/cite a specific commit for the "link to reproducible code"
-   requirement, given the repo is still being actively edited?
+2. ~~**Repository pinning** — tag/cite a specific commit for the "link to reproducible code"
+   requirement, given the repo is still being actively edited?~~ — **resolved (2026-10-26):**
+   moot. The project is submitted as a zip archive, not a GitHub link, so there is no commit to
+   pin — the zip itself is the fixed snapshot.
 3. ~~**Figure style** — reuse raw notebook screenshots as-is, or redraw cleanly for the
    report/slides?~~ — **resolved.** All seven figures were redrawn cleanly (not raw
    screenshots) and have been reviewed and approved (2026-10-16).

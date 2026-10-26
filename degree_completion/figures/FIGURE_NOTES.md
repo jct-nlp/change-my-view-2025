@@ -102,22 +102,26 @@ question became whether anything *beyond* length also matters."
 ## Figure 2 — Incremental value of rhetorical strategies
 
 **Files:** `figure2_strategy_incremental_value.png` / `.svg`
-**On-chart title/subtitle:** "Strategy Scores Add +0.0735 PR-AUC" / "Scored subset, n=2,753 (test:
+**On-chart title/subtitle:** "Strategy Scores Add +0.0664 PR-AUC" / "Scored subset, n=2,753 (test:
 592 comments)"
 
 ### 1. Source notebook and exact cells
 `this work/06_strategy_ablation.ipynb`, cell 17 (`headline_df`), built on the order-robust
-evaluator in cells 10–15 and the column-order sensitivity check in cells 11–14.
+evaluator in cells 10–15 and the column-order sensitivity check in cells 11–14. Cell 17's
+column-order-shuffle seed is pinned to 42 for these three values specifically (not this notebook's
+usual seed=0 default elsewhere) — added 2026-10-25 so this "full population" comparison matches
+the Length-Controlled Benchmark section's own full-population numbers exactly (same split, same
+columns, same seed); see that cell's code comment for the full rationale.
 
 ### 2. Exact values used
 | Model | PR-AUC mean | PR-AUC SD |
 |---|---|---|
-| Engineered features (no strategy scores) | 0.4467 | 0.0196 |
-| Engineered features + 8 strategy scores | 0.5202 | 0.0177 |
-| Strategy scores only | 0.3538 | 0.0079 |
+| Engineered features (no strategy scores) | 0.4434 | 0.0187 |
+| Engineered features + 8 strategy scores | 0.5098 | 0.0200 |
+| Strategy scores only | 0.3514 | 0.0065 |
 | No-skill baseline (scored subset) | 0.2382 | — |
 
-Gain shown on-chart (bracket annotation): **+0.0735** (0.5202 − 0.4467).
+Gain shown on-chart (bracket annotation): **+0.0664** (0.5098 − 0.4434).
 
 ### 3. Dataset and evaluation population
 LLM-scored subset (comments ≥30 words, or any length if convincing): 2,753 comments, 400 threads.
@@ -141,12 +145,12 @@ uncertainty or a formal significance test. State this plainly if asked.
 
 ### 6. Methodological limitations
 - Both arms are evaluated on the LLM-scored subset, not the full dataset.
-- The +0.0735 gain is larger than the column-order noise band (combined SD of the two means being
+- The +0.0664 gain is larger than the column-order noise band (combined SD of the two means being
   compared), so it is not an ordering artifact — but it is a single dataset's result, not yet
   shown to replicate (replication is addressed by Figure 6/7, not this chart).
 - Strategy scores are LLM-generated measurements on a 1–5 rubric, not direct observations of a
   mental state or ground-truth human annotations (see Figure 5's reliability caveat).
-- "Strategy scores only" (0.3538) sits between no-skill and the full model — real standalone
+- "Strategy scores only" (0.3514) sits between no-skill and the full model — real standalone
   signal, but not a replacement for the engineered feature set.
 
 ### 7. One-sentence takeaway

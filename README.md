@@ -18,7 +18,7 @@ such as automated debate analysis, content moderation, and persuasive writing as
 
 More details can be found in the introduction section in the notebook located under "this work" directory.
 
-This repo contains the following:
+This project contains the following:
 1. `previous work/` - articles that inspired this project
 2. `data/` - raw and processed data files
 3. `this work/` - notebooks with the actual work, plus `common_functions.py` (shared helpers used across several notebooks)
@@ -34,7 +34,7 @@ pip install -r requirements.txt
 
 Each time you open a new terminal: `source .venv/bin/activate`
 
-Create a `.env` file in the repo root with:
+Create a `.env` file in the project root with:
 
 ```
 # Reddit API (only needed to re-run 01_data_download.ipynb)
@@ -83,7 +83,7 @@ predecessor's saved output, without re-running the whole chain.
 
 ## Raw Data
 
-The raw data files are not stored in this repository due to their size.
+The raw data files are not included in this zip due to their size.
 They are available on Google Drive (read-only, no sign-in required):
 
 **[Google Drive — raw data folder](https://drive.google.com/drive/folders/1HGik-4OXg2KFpvxPzaGUH625BrYynzmZ?usp=sharing)**

@@ -115,8 +115,8 @@ model produces a real, order-robust PR-AUC gain — and this gain survives lengt
 than any other feature family tested, including length itself.
 
 **Quantitative results:**
-- Full population: current model alone 0.4467±0.0196 PR-AUC → + 8 strategy scores 0.5202±0.0177
-  (**+0.0735**, clears the order-noise band). Strategy scores alone: 0.3538±0.0079 (real
+- Full population: current model alone 0.4434±0.0187 PR-AUC → + 8 strategy scores 0.5098±0.0200
+  (**+0.0664**, clears the order-noise band). Strategy scores alone: 0.3514±0.0065 (real
   standalone signal, between no-skill 0.2382 and the full model).
 - Best single combination found anywhere in the modeling work: **8 strategy scores + `word_count`
   alone (9 columns) = 0.5379±0.0109 PR-AUC**, beating every larger combination tested, including
@@ -351,7 +351,7 @@ scores plus `word_count` (9 columns total) — outperforms the full 237-column e
 strategy feature set, and does so with a small, interpretable, directly-explainable set of inputs.
 
 **Quantitative results:** 9-column combination: 0.5379±0.0109 PR-AUC (XGBoost, this project's
-architecture throughout) vs. the full 237-column set's 0.5202±0.0177 — a small model beating a much
+architecture throughout) vs. the full 237-column set's 0.5098±0.0200 — a small model beating a much
 larger one, not a close second. (Same number already appears in Finding 3; listed again here because
 it supports a distinct point.) **Architecture note:** `06` cells 28–30 re-ran the full
 classifier×resampling grid on just these 9 columns and found Random Forest edges out XGBoost here

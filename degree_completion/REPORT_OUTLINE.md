@@ -408,10 +408,10 @@ This is a single recurring gap, not eight separate ones — flagged once here, a
 
 ## 7. Link to code and data
 
-**Cover:** point to this repository (branch `final-project`), the notebook sequence in `this work/`
-in execution order (README.md's own table is already a ready-made roadmap), and the data-access
-instructions already written in `README.md` (Google Drive raw-data links; Winning Arguments corpus
-fetched automatically via `convokit`). **[VERIFIED]** — this section can largely reuse existing
-README content, adapted to the report's citation style, once a confirmed state of the repo is tied
-to a specific commit/release for reproducibility. **Decision needed:** whether to tag or cite a
-specific commit, since the repo is still actively being edited (this very task adds files to it).
+**Cover:** the project is submitted as a zip archive (code, notebooks, and `README.md`), not hosted
+online. State this directly, then point to the notebook sequence in `this work/` in execution order
+(README.md's own table is already a ready-made roadmap) and the data-access instructions already
+written in `README.md` (Google Drive raw-data links; Winning Arguments corpus fetched automatically
+via `convokit`). **[VERIFIED]** — this section can largely reuse existing README content, adapted to
+the report's citation style. No commit/release pinning is needed: the zip itself is the fixed,
+submitted snapshot.

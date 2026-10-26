@@ -201,9 +201,9 @@ strip if a visual anchor is wanted — not a chart.
 existing engineered model.
 
 **Slide text:**
-- Engineered model alone (scored population, n=2,753): **PR-AUC 0.4467 ± 0.0196**.
-- + 8 strategy scores: **PR-AUC 0.5202 ± 0.0177 (+0.0735)** — clears the column-order noise band.
-- Strategy scores alone: **PR-AUC 0.3538 ± 0.0079** — real standalone signal, between no-skill
+- Engineered model alone (scored population, n=2,753): **PR-AUC 0.4434 ± 0.0187**.
+- + 8 strategy scores: **PR-AUC 0.5098 ± 0.0200 (+0.0664)** — clears the column-order noise band.
+- Strategy scores alone: **PR-AUC 0.3514 ± 0.0065** — real standalone signal, between no-skill
   (0.2382) and the full model.
 - Methodological disclosure: this XGBoost+SMOTE pipeline, on 200+ correlated columns, is
   sensitive to column *order* — reshuffling column order alone swings PR-AUC by up to 0.0482
@@ -390,7 +390,7 @@ established earlier in the talk; no new chart.
 
 **Slide text:**
 - 9-column combination (8 strategy scores + `word_count`): **PR-AUC 0.5379 ± 0.0109** vs. the
-  full 237-column set's **0.5202 ± 0.0177** — a small, interpretable model beating a much larger
+  full 237-column set's **0.5098 ± 0.0200** — a small, interpretable model beating a much larger
   one, not a close second.
 - Architecture note: re-running the full classifier×resampler grid on just these 9 columns found
   Random Forest edges out XGBoost (0.5432 ± 0.0065 vs. 0.5380 ± 0.0108) — a gap smaller than
