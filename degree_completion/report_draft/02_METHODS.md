@@ -42,10 +42,12 @@ small, roughly fixed number of deltas while the number of non-convincing replies
 much the thread branches. This is relevant to any analysis that aggregates at the level of the
 original post rather than the individual comment, and is revisited where relevant in §2.2.
 
-[FIGURE PLACEHOLDER: End-to-end research pipeline diagram, showing the sequence data collection →
-annotation → feature engineering → model training and selection → baseline investigation →
-length-controlled analysis → rhetorical-strategy scoring → strategy ablation and interpretation →
-external validation, with the notebook responsible for each stage labeled.]
+[FIGURE: `figures/report/figure8_pipeline_diagram.png` — **Figure N.** The project's pipeline as
+four broad phases — data preparation, modeling and the length-confound discovery, rhetorical-
+strategy analysis, and external validation — each labeled with its governing notebook(s). The
+last three phases map one-to-one onto the project's three research questions (RQ1–RQ3, tagged on
+the diagram); data preparation is shared setup, not itself one of the three. The full
+nine-subsection breakdown is §2.1–§2.9 below.]
 
 ## 2.2 Feature Engineering
 
@@ -114,8 +116,32 @@ representation (the 187 components alone, with no handcrafted features) was also
 assess how much predictive value the handcrafted features add over embeddings alone. All three
 representations were carried forward as candidate feature sets into model selection.
 
-[TABLE PLACEHOLDER: Feature-family summary, listing each feature or feature group, its source
-notebook, its column count, and whether it is part of the trusted or untrusted set.]
+**Table N.** Feature-family summary. Column counts and the trusted/untrusted split are read
+directly from `04.1_model_training.ipynb` cell 6 (feature-matrix construction) and cell 7
+(`untrusted_encoded`); category counts for one-hot-encoded families are confirmed against the
+label definitions in `03.1_feature_engineering_part1.ipynb`.
+
+| Feature / feature group | Variants included | Source notebook(s) | Columns | Set |
+|---|---|---|---|---|
+| Sentiment (LLM, tone-focused) | comment, OP, diff | 03.1, 03.3 | 3 | Trusted |
+| Sentiment (VADER, lexicon-based) | comment only | 03.1 | 1 | Untrusted |
+| Tone (LLM, 6 categories, one-hot) | comment, OP | 03.1, 03.3 | 10 | Trusted |
+| Tone (RoBERTa emotion classifier, 7 categories, one-hot) | comment only | 03.1 | 6 | Untrusted |
+| Style / formality (LLM-assigned, binary) | comment, OP | 03.1, 03.3 | 2 | Trusted |
+| Style (BART-large-MNLI zero-shot, 2 categories, one-hot) | comment only | 03.1 | 1 | Untrusted |
+| Rhetorical appeals: ethos, pathos, logos (LLM, 0–1 scale) | comment, OP, diff | 03.2, 03.3 | 9 | Trusted |
+| Rhetorical appeals: ethos, pathos, logos (Empath lexicon) | comment only | 03.2 | 3 | Untrusted |
+| Adjective–adverb ratio | comment, OP, diff | 03.2, 03.3 | 3 | Trusted |
+| Readability: Flesch–Kincaid grade level | comment, OP, diff | 03.2, 03.3 | 3 | Trusted |
+| Readability: Flesch reading ease | comment only (no OP/diff counterpart — dropped as redundant with `fk_grade_level_op`, r = −0.905) | 03.2 | 1 | Trusted |
+| Evidence-marker count | comment, OP, diff | 03.2, 03.3 | 3 | Trusted |
+| Comment↔OP match indicators (sentiment, tone, style, ethos, pathos, logos) | boolean agreement | 03.3 | 6 | Trusted |
+| Persuasive-language detector output | comment only | 03.2 | 1 | Trusted |
+| Document embeddings (`BAAI/bge-base-en-v1.5`, PCA) | comment only | 03.2 | 187 | Trusted |
+| **Handcrafted total** | | | **41** | Trusted |
+| **Untrusted total** | | | **11** | Untrusted |
+| **Trusted (handcrafted + embeddings)** | | | **228** | — |
+| **Trusted + untrusted** | | | **239** | — |
 
 [FIGURE PLACEHOLDER: Feature correlation heatmap (handcrafted features, embeddings excluded),
 illustrating the redundancy among engineered features that becomes methodologically relevant in
@@ -185,6 +211,10 @@ Both simpler models outperformed the selected 239-feature engineered pipeline on
 fold: the TF-IDF baseline reached PR-AUC 0.5119, and the word-count-only model reached PR-AUC
 0.5256, against the engineered pipeline's 0.3848.
 
+[FIGURE: `figures/report/figure1_initial_model_comparison.png` — **Figure N.** Held-out PR-AUC for
+the originally selected engineered-feature pipeline, a TF-IDF baseline, and a word-count-only
+baseline, evaluated on the identical 709-comment test fold (`04.2_baseline_comparison.ipynb`).]
+
 This result prompted a diagnostic step rather than an immediate conclusion. Examining which tokens
 the TF-IDF model weighted most heavily revealed that the great majority were common stopwords, 
 together with the token "edit" (characteristic of Reddit's edit-marker convention) — a pattern more
@@ -214,8 +244,9 @@ turning point: it reframes the project's central question from whether textual f
 delta awards to which predictive signal, if any, remains once comment length is accounted for — the
 question addressed in §2.5 onward.
 
-[FIGURE PLACEHOLDER: Word-count distribution by outcome (non-convincing vs. convincing), with each
-class's mean indicated.]
+[FIGURE: `figures/report/figure4_comment_length_by_outcome.png` — **Figure N.** Word-count
+distribution by outcome for the full 3,971-comment dataset, with each class's mean indicated
+(`04.2_baseline_comparison.ipynb`).]
 
 [TABLE PLACEHOLDER: Baseline comparison — the originally selected engineered pipeline, the TF-IDF
 baseline, the word-count-only baseline, and the word-count-augmented re-selected pipeline, all
@@ -268,6 +299,12 @@ matched data.
 [TABLE PLACEHOLDER: The two length-matched sample constructions side by side — source notebook,
 base population, matching procedure, resulting sample size, and the specific question each is used
 to answer.]
+
+[FIGURE: `figures/report/figure3_strategy_gain_length_matching.png` — **Figure N.** The
+strategy-score PR-AUC gain reported in §2.7, recomputed on a length-matched sample within the
+2,753-comment scored population, showing how much of the gain survives length control
+(`06_strategy_ablation.ipynb`). Covers only the `06`-built sample described above, not the
+separate `04.3` sample.]
 
 ## 2.6 Rhetorical-Strategy Scoring
 
@@ -412,9 +449,11 @@ one of the two measures.
 [TABLE PLACEHOLDER: SHAP mean |value| and Mann–Whitney rank-biserial r for each of the eight
 strategies, full population and length-matched sample side by side, with FDR-significance flags.]
 
-[FIGURE PLACEHOLDER: SHAP summary (beeswarm) plots for the nine-feature model, full population and
-length-matched sample, or a simplified ranked comparison if the full beeswarm plots are not
-sufficiently legible for print.]
+[FIGURE: `figures/report/figure5_refutation_vs_justification_shap.png` — **Figure N.** Mean |SHAP|
+value for each of the eight rhetorical strategies, full population versus length-matched sample,
+for the nine-column selected model (`07_strategy_interpretation.ipynb`). A simplified ranked
+comparison, not the raw beeswarm plots, per the legibility concern noted above; `word_count` is
+excluded from the chart (see `FIGURE_NOTES.md`).]
 
 ## 2.9 External Validation on Winning Arguments
 

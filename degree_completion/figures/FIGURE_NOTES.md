@@ -1,4 +1,4 @@
-# Figure Notes — Seven Presentation Figures
+# Figure Notes — Eight Presentation Figures
 
 **Status:** 2026-10-15, final targeted refinement pass. Fixed Figure 7's overlapping literature-band
 labels and chance-line position (Priority 1); kept all eight strategies in Figure 6 and added a
@@ -11,7 +11,12 @@ near-identical Concession markers in Figure 5 apart for visibility (Priority 5).
 are unchanged from the prior pass, per instruction. See "Unresolved scientific or visualization
 issues" at the end of this document for the full list of what changed and why.
 
-Covers all seven figures identified as essential in
+**2026-10-26 addendum:** added Figure 8, the end-to-end pipeline diagram, resolving the one
+remaining "not yet built" figure placeholder in `METHODS_REVIEW_NOTES.md` §5. It is a schematic,
+not a data chart, so several of the per-figure subsections below (exact values, uncertainty)
+don't apply to it the way they do to Figures 1–7 — see its own entry for what's covered instead.
+
+Covers all seven data-driven figures identified as essential in
 `FIGURE_SELECTION_PLAN.md`. The charts themselves are kept deliberately lean — one title, one
 short subtitle, labeled bars/points, a compact source line. Everything else (full population and
 split definitions, exact metric definitions, every caveat, significance/reliability notes) lives
@@ -572,6 +577,61 @@ adding strategy scores pushes it to 0.59–0.60, and a compact four-feature 'rob
 58.7% pairwise accuracy — inside the literature's own benchmark range for simpler scoring methods,
 below their full method. Those literature numbers come from a different pipeline, so I'm showing
 them as context, not a direct comparison."
+
+---
+
+## Figure 8 — End-to-end pipeline diagram
+
+**Files:** `figure8_pipeline_diagram.png` / `.svg`
+**On-chart title/subtitle:** "Four-Phase Research Pipeline" / "Notebook(s) governing each phase"
+
+### 1. Source
+Conceptual schematic, not extracted from any notebook plot or cell output — mirrors
+`00_introduction.ipynb` §1.4's process overview and README.md's own notebook-sequence table. Added
+2026-10-26 (resolves the one remaining "not yet built" row in
+`report_draft/METHODS_REVIEW_NOTES.md` §5); simplified 2026-10-27 after review (see §5 below).
+
+### 2. Content
+Four boxes in a single row, each grouping several of `02_METHODS.md`'s nine subsections into one
+broader phase, labeled with its governing notebook range: (1) Data Preparation — 01–03.3; (2)
+Modeling & Length Confound — 04.1–04.3, tagged **RQ1**; (3) Rhetorical-Strategy Analysis — 05–07,
+tagged **RQ2**; (4) External Validation — 08, tagged **RQ3**. All four boxes share one uniform
+color. The RQ tags (added 2026-10-27) are the project's own three research questions, reused
+verbatim from the presentation's "Three Research Questions" slide — Data Preparation is left
+untagged since it's shared setup behind all three questions, not itself one of them. The full
+nine-subsection breakdown (§2.1–§2.9, including which notebook maps to which specific subsection)
+is left to the chapter text and the §6 mapping table below, not restated on the chart.
+
+### 3. Dataset and evaluation population
+Not applicable — this figure describes project structure, not a result.
+
+### 4. Metric definitions / Uncertainty / error bars
+Not applicable.
+
+### 5. Revision history
+**First version (2026-10-26):** nine boxes (one per Methods subsection), with the baseline-
+investigation box highlighted in orange as the project's "methodological pivot" (reusing this
+figure set's orange = headline-finding convention). **Revised the same week, 2026-10-27, after
+review:** simplified to the four-phase version described above. Two objections drove the change:
+(a) nine boxes with full citations was more detail than a high-level orientation figure needs,
+especially sitting right before the reader goes through §2.1–§2.9 in the same order; (b) the
+orange highlight borrowed this figure set's "headline finding" color convention for what is
+supposed to be a purely structural/procedural figure — the same Methods-vs-Results distinction
+used elsewhere to keep Figures 2, 6, and 7 out of this chapter. Both are addressed in the current
+version: fewer, broader boxes, and a single uniform color throughout.
+
+### 6. Methodological limitations
+None — it is a navigation aid, not a claim requiring a caveat. If the grouping of subsections into
+these four phases changes, update this diagram to match.
+
+### 7. One-sentence takeaway
+Four broad phases — prepare the data, model it and find the length confound, analyze rhetorical
+strategies, validate externally — each traceable to its own notebook(s).
+
+### 8. Suggested speaker notes (~15–20 seconds, if used on a slide)
+"Here's the shape of the whole project in four phases: prepare the data, build and evaluate
+models — which is where we found a length confound that reframed everything after it — analyze
+the rhetorical strategies, and validate externally on an independent dataset."
 
 ---
 

@@ -139,6 +139,11 @@ than any other feature family tested, including length itself.
 **Source:** `this work/06_strategy_ablation.ipynb` (primary); `04.3_length_controlled_analysis.ipynb`
 (separate background check only, see caveat above).
 
+[FIGURE (for Results, once drafted): `figures/report/figure2_strategy_incremental_value.png` —
+**Figure N.** Held-out PR-AUC for the engineered-feature baseline with and without the eight
+strategy scores, and for the strategy scores alone, on the 2,753-comment scored population; error
+bars show column-order sensitivity, not sampling uncertainty (`06_strategy_ablation.ipynb`).]
+
 **Important methodological disclosure attached to this finding:** the underlying XGBoost+SMOTE
 pipeline on this correlated, 200+-column feature matrix is sensitive to column *order* — refitting
 identical data with only column order shuffled swings PR-AUC by as much as 0.0482, large enough to
@@ -261,6 +266,16 @@ project tests it directly. **State this as an open hypothesis in the report, exp
 attributed as such, not as an established explanation.**
 
 **Source:** `this work/08_wa_external_validation.ipynb`.
+
+[FIGURE (for Results, once drafted): `figures/report/figure7_wa_external_validation.png` —
+**Figure N.** Held-out PR-AUC and pairwise accuracy for three feature-set configurations evaluated
+on Winning Arguments, with literature benchmark ranges shown for context
+(`08_wa_external_validation.ipynb`).]
+
+[FIGURE (for Results, once drafted): `figures/report/figure6_strategy_ranking_cmv_vs_wa.png` —
+**Figure N.** Rank-biserial effect size for each of the eight strategies, computed identically on
+the home dataset and the Winning Arguments corpus (`07_strategy_interpretation.ipynb`;
+`08_wa_external_validation.ipynb`).]
 
 **Why it matters:** honest external validation is exactly the kind of result that distinguishes a
 rigorous project from an overfit one — the structural claim ("rhetorical strategies carry

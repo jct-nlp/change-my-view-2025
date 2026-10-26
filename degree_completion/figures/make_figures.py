@@ -1,5 +1,5 @@
 """
-Generates all seven MSc-defense figures from verified notebook outputs, in two modes:
+Generates all eight MSc-defense figures from verified notebook outputs, in two modes:
 
     python make_figures.py                   # presentation only (default) -> figures/*.png/.svg
     python make_figures.py --mode report      # report only                -> figures/report/*.png/.svg
@@ -28,6 +28,7 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import matplotlib.lines as mlines
+import matplotlib.patches as mpatches
 import numpy as np
 import pandas as pd
 
@@ -681,7 +682,188 @@ def figure7():
     plt.close(fig)
 
 
-ALL_FIGURES = [figure1, figure2, figure3, figure4, figure5, figure6, figure7]
+
+# ---------------------------------------------------------------------------
+# Figure 8 -- End-to-end pipeline diagram
+# Conceptual: mirrors 00_introduction.ipynb Section 1.4 and README.md's own
+# notebook-sequence table. Not extracted from any notebook plot -- this is a
+# schematic, not a data chart. Four broad phases, each grouping several of
+# 02_METHODS.md's nine subsections, kept deliberately general (notebook
+# pointers only, no per-subsection breakdown, uniform color) -- a high-level
+# map, not a restatement of the chapter's own section structure.
+# ---------------------------------------------------------------------------
+def figure8():
+    # rq=None for Data Preparation -- it's shared setup, not itself one of the
+    # project's three research questions (see 00_introduction.ipynb Section 1.2 /
+    # the presentation's "Three Research Questions" slide for the RQ wording).
+    stages = [
+        ("Data\nPreparation", "01–03.3", None),
+        ("Modeling &\nLength Confound", "04.1–04.3", "RQ1"),
+        ("Rhetorical-Strategy\nAnalysis", "05–07", "RQ2"),
+        ("External\nValidation", "08", "RQ3"),
+    ]
+    n = len(stages)
+    col_x = [0.5 + i for i in range(n)]
+    box_w, box_h = 0.84, 0.92
+    y = 0.7
+
+    figsize = (10.5, 3.7) if MODE == "presentation" else (7.5, 3.9)
+    fig = plt.figure(figsize=figsize, facecolor=SURFACE)
+    top_frac = 0.72 if _cfg()["show_title"] else 0.88
+    bottom_frac = 0.26 if _cfg()["verbose_footer"] else 0.10
+    ax = fig.add_axes([0.03, bottom_frac, 0.94, top_frac - bottom_frac])
+    ax.set_xlim(0, n)
+    ax.set_ylim(0, 1.4)
+    ax.axis("off")
+
+    for x, (label, nb, rq) in zip(col_x, stages):
+        box = mpatches.FancyBboxPatch(
+            (x - box_w / 2, y - box_h / 2), box_w, box_h,
+            boxstyle="round,pad=0.015,rounding_size=0.07",
+            linewidth=1.6, edgecolor=COLOR_BLUE, facecolor="#EEF3FA", zorder=3)
+        ax.add_patch(box)
+        ax.text(x, y + 0.18, label, ha="center", va="center",
+                 fontsize=S(11.5), color=INK_PRIMARY, fontweight="bold",
+                 linespacing=1.25, zorder=4)
+        ax.text(x, y - 0.26, nb, ha="center", va="center",
+                 fontsize=S(9.5), color=INK_SECONDARY, zorder=4)
+        if rq:
+            # Small badge just above the box -- same placement convention as the
+            # stage-order numbers in this figure's earlier draft, kept only where
+            # it adds real information (which RQ this phase answers).
+            ax.text(x, y + box_h / 2 + 0.1, rq, ha="center", va="center",
+                     fontsize=S(9), color=COLOR_BLUE, fontweight="bold", zorder=4)
+
+    for xa, xb in zip(col_x[:-1], col_x[1:]):
+        ax.annotate("", xy=(xb - box_w / 2, y), xytext=(xa + box_w / 2, y),
+                     arrowprops=dict(arrowstyle="-|>", color=INK_MUTED, lw=1.6,
+                                      shrinkA=0, shrinkB=0, mutation_scale=16),
+                     zorder=2)
+
+    # Presentation mode has no title pinning the figure's left edge (unlike every
+    # other figure, which always shows a title), so a left-anchored footer alone
+    # skews the bbox_inches='tight' crop -- center it there instead. Report mode
+    # keeps the standard left-anchored footer under its left-anchored title.
+    footer_center = not _cfg()["show_title"]
+    if _cfg()["show_title"]:
+        _header(fig, "Four-Phase Research Pipeline",
+                "Notebook(s) governing each phase", subtitle_size=12)
+    if _cfg()["verbose_footer"]:
+        _footer(fig, "Schematic, not extracted from a notebook plot -- mirrors "
+                     "00_introduction.ipynb §1.4 and README.md's own notebook-sequence\n"
+                     "table (full nine-subsection breakdown: 02_METHODS.md §2.1–§2.9). The "
+                     "length confound discovered during modeling (phase 2)\n"
+                     "reframes every later phase's research question. Verified 2026-10-27.",
+                     center=footer_center)
+    else:
+        _footer(fig, "Schematic -- see README.md's notebook-sequence table.", center=footer_center)
+
+    _save(fig, "figure8_pipeline_diagram", facecolor=SURFACE)
+    plt.close(fig)
+
+
+# ---------------------------------------------------------------------------
+# Figure 9 -- Strategy ranking shift between datasets, by SHAP (not rank-biserial)
+# Source: this work/07_strategy_interpretation.ipynb cell 24 (home, full population),
+#         this work/08_wa_external_validation.ipynb cell 24 (WA, full population)
+# Same chart design as Figure 6, same highlighted strategies (refutation, justification,
+# evidence) -- replaces rank-biserial effect size with mean |SHAP| value, full population,
+# so this is directly comparable to Figure 5's own CMV SHAP numbers (its blue/full-population
+# dots). The length-matched version of this same comparison tells the same story (07 cell 36,
+# 08 cell 42) and is order-robustness-checked on both (08 cell 45).
+# ---------------------------------------------------------------------------
+def figure9():
+    # (strategy, home mean |SHAP| full population, wa mean |SHAP| full population)
+    data = [
+        ("refutation", 0.6034, 0.0904),
+        ("justification", 0.4156, 0.2798),
+        ("evidence", 0.3592, 0.2136),
+        ("concession", 0.3439, 0.1138),
+        ("simplification", 0.3193, 0.1554),
+        ("personal_narrative", 0.1853, 0.0861),
+        ("call_to_action", 0.1837, 0.1107),
+        ("question_asking", 0.1518, 0.0953),
+    ]
+    display_names = {
+        "refutation": "Refutation", "justification": "Justification", "concession": "Concession",
+        "simplification": "Simplification", "evidence": "Evidence", "call_to_action": "Call to Action",
+        "personal_narrative": "Personal Narrative", "question_asking": "Question Asking",
+    }
+    home_rank = {name: i + 1 for i, (name, v, *_ ) in enumerate(sorted(data, key=lambda row: row[1], reverse=True))}
+    wa_rank = {name: i + 1 for i, (name, _, v) in enumerate(sorted(data, key=lambda row: row[2], reverse=True))}
+
+    highlighted = {"refutation": COLOR_ORANGE, "evidence": COLOR_BLUE, "justification": COLOR_AQUA}
+    # refutation: drops from #1 (home) to #7 (WA) -- CMV's single most important strategy by
+    # SHAP becomes one of its least important on WA (order-robust: ranks 6th-8th of 8 across
+    # 8 column-order shuffles on WA, in both the full-population and length-matched fit --
+    # never higher than 6th; see 08 cell 45).
+    # justification: rises from #2 (home) to #1 (WA) -- edges out even word_count as WA's single
+    # most important feature, and order-robust at rank 1 in every one of 16 repeats across both
+    # WA samples (08 cell 45).
+    # evidence: rises from #3 (home) to #2 (WA), order-robust at rank 2 throughout.
+
+    fig, ax = plt.subplots(figsize=_cfg()["figsize"])
+    x_home, x_wa = 0.0, 1.0
+
+    for name, home_v, wa_v in data:
+        color = highlighted.get(name, COLOR_GRAY_LINE)
+        is_hi = name in highlighted
+        ax.plot([x_home, x_wa], [home_rank[name], wa_rank[name]],
+                color=color, linewidth=(2.6 if is_hi else 1.4), zorder=(4 if is_hi else 2),
+                alpha=(1.0 if is_hi else 0.85))
+        for x, rank in [(x_home, home_rank[name]), (x_wa, wa_rank[name])]:
+            ax.scatter([x], [rank], s=(110 if is_hi else 70),
+                       facecolors=color, edgecolors=color, linewidths=1.6,
+                       zorder=(5 if is_hi else 3))
+        label_color = INK_PRIMARY if is_hi else INK_MUTED
+        weight = "bold" if is_hi else "normal"
+        # Name only, on both sides -- no numeric SHAP value on the chart. The absolute values
+        # aren't comparable across the two independently-fit models (different class balance,
+        # different fitted trees), so showing them invites exactly the wrong-by-magnitude
+        # comparison this chart is meant to avoid; the chart conveys rank only, and the two
+        # sides' names/positions are already sufficient for that.
+        ax.annotate(display_names[name], xy=(x_home, home_rank[name]), xytext=(-10, 0),
+                    textcoords="offset points", va="center", ha="right", fontsize=S(11 if is_hi else 9.5),
+                    color=label_color, fontweight=weight)
+        ax.annotate(display_names[name], xy=(x_wa, wa_rank[name]), xytext=(10, 0),
+                    textcoords="offset points", va="center", ha="left", fontsize=S(11 if is_hi else 9.5),
+                    color=label_color, fontweight=weight)
+
+    ax.set_xlim(-0.55, 1.75)
+    ax.set_ylim(8.7, 0.3)
+    ax.set_xticks([x_home, x_wa])
+    ax.set_xticklabels(["CMV (home)", "Winning Arguments"], fontsize=S(13), fontweight="bold", color=INK_PRIMARY)
+    ax.set_yticks([])
+    for spine in ax.spines.values():
+        spine.set_visible(False)
+    ax.tick_params(axis="x", length=0, pad=10)
+    ax.tick_params(axis="y", length=0)
+
+    _header(fig, "SHAP Importance Is Also Dataset-Dependent",
+            "Mean |SHAP value|, full population (same method, both datasets) — rank 1 = strongest",
+            subtitle_center=True)
+    if _cfg()["verbose_footer"]:
+        _footer(fig, "Source: this work/07_strategy_interpretation.ipynb cell 24 (home, full population),\n"
+                     "this work/08_wa_external_validation.ipynb cell 24 (WA, full population). Refutation's rank\n"
+                     "is column-order-robust on WA (cell 45: 6th-8th of 8 across 8 column-order shuffles, never\n"
+                     "higher than 6th, in both this full-population fit and the length-matched one); justification\n"
+                     "and evidence are rank-1 and rank-2 in every one of those repeats. The length-matched version\n"
+                     "of this same comparison (07 cell 36, 08 cell 42) tells the same story, despite WA's matching\n"
+                     "being a weaker length control than CMV's (08 cell 36: removes 23% of WA's length confound\n"
+                     "vs. 79% of CMV's). Verified 2026-10-27.",
+                center=True)
+    else:
+        _footer(fig, "Source: 07_strategy_interpretation.ipynb cell 24 (home), 08_wa_external_validation.ipynb cell 24 (WA).",
+                center=True)
+
+    top = 0.78 if _cfg()["show_title"] else 0.90
+    bottom = 0.31 if _cfg()["verbose_footer"] else (0.17 if _cfg()["show_title"] else 0.15)
+    fig.subplots_adjust(left=0.14, right=0.90, top=top, bottom=bottom)
+    _save(fig, "figure9_strategy_ranking_shap_cmv_vs_wa")
+    plt.close(fig)
+
+
+ALL_FIGURES = [figure1, figure2, figure3, figure4, figure5, figure6, figure7, figure8, figure9]
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -697,4 +879,4 @@ if __name__ == "__main__":
         print(f"\n--- {mode} ---")
         for fn in ALL_FIGURES:
             fn()
-    print(f"\nAll seven figures generated for: {', '.join(modes)}.")
+    print(f"\nAll {len(ALL_FIGURES)} figures generated for: {', '.join(modes)}.")
