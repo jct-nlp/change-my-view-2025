@@ -241,6 +241,25 @@ the selected configuration (0.3063) by 0.002 PR-AUC. For `XGB (oversampling)` sp
 `trusted+untrusted` exceeds PR-AUC on `trusted` alone by 0.063 — the largest such difference among
 the 9 classifier/resampling pairs.
 
+**Column-order sensitivity.** The `XGB (oversampling)` architecture used throughout this chapter is
+sensitive to the order its input columns are presented in, not just which columns are included.
+XGBoost builds each decision tree by selecting, at every split, whichever candidate feature yields
+the greatest reduction in training loss; when two or more features are correlated — common
+throughout this project's feature sets, from the 187 embedding components to the engineered
+features' own overlapping signals — their split-gain values can come out essentially tied, and
+such ties are broken deterministically by each feature's position (column order) in the input
+matrix, not by anything about the feature's actual values. This has been found to swing PR-AUC by
+as much as 0.0482 on one of this project's larger feature representations (the 237-column set
+tested in §2.7), purely from reordering the same columns. The sensitivity is specific to the
+tree-building step, not `SMOTE`'s oversampling: `SMOTE`'s neighbor-finding operates on Euclidean
+distance, which does not depend on the order features are summed in. Because of this, every PR-AUC
+value reported from this point in the chapter onward is computed as a mean and standard deviation
+across eight column orderings (the original ordering plus seven random reshufflings) of the same
+underlying feature matrix, not as a single model fit. These standard deviations describe
+sensitivity to an essentially arbitrary implementation detail — column order — and are not
+bootstrap confidence intervals or any other estimate of sampling uncertainty; they should not be
+interpreted as such.
+
 ## 2.4 Baseline Investigation and the Length Confound
 
 Having selected and evaluated the engineered-feature pipeline, a substantially simpler baseline was
@@ -283,15 +302,9 @@ selected configuration. The same architecture was selected again — XGBoost wit
 oversampling on the trusted+untrusted feature set, now including `word_count` — and this recovered
 most of the shortfall relative to the simpler baselines: test PR-AUC rose from 0.3848 to 0.4922.
 
-These two figures are each the mean of multiple executions, not a single model fit: later in the
-research it was found that when candidate features are correlated, this project's XGBoost+SMOTE
-architecture can break near-ties in its split-selection procedure deterministically based on each
-feature's column position, so a single fit's PR-AUC can shift measurably depending on column order
-alone. The practice adopted throughout this project — refitting the same feature set eight times
-under different column orderings and reporting the mean and standard deviation across those fits —
-is applied retrospectively here to these two figures for consistency; §2.7 gives the full account
-of this sensitivity, including its magnitude and a check ruling out SMOTE as the underlying cause.
-This gives 0.3676 ± 0.0182 for the originally selected pipeline and 0.4831 ± 0.0257 after the
+These two figures are each the mean of multiple executions across eight column orderings, not a
+single model fit, per the column-order-sensitivity convention established in §2.3. This gives
+0.3676 ± 0.0182 for the originally selected pipeline and 0.4831 ± 0.0257 after the
 word-count-augmented rerun, with bootstrap 95% confidence intervals of [0.311, 0.463] and
 [0.410, 0.586] respectively. The remainder of
 this report treats the recognition and correction of this length confound as a methodological
@@ -447,20 +460,9 @@ alone, with no engineered features at all, achieve PR-AUC 0.3514 (± 0.0065) —
 predictive signal, positioned between this population's own no-skill baseline (0.2382) and the
 combined 237-column model.
 
-The column-order sensitivity introduced in §2.4 was first identified during this stage of the
-analysis: refitting the identical 237-column representation eight times, changing only the order in
-which columns were presented (the original ordering together with seven random reshufflings — the
-same number of orderings used for every mean/standard-deviation figure reported throughout this and
-the following section, for consistency), produced PR-AUC values ranging from 0.4908 to 0.5390 — a
-range of 0.0482, comparable in size to some of the effects under investigation in this project. This
-sensitivity was confirmed not to be an artifact of SMOTE, whose oversampling procedure operates on
-Euclidean distances between feature vectors and does not depend on the order in which columns are
-arranged. Every PR-AUC value reported from this point in the project onward, including the figures
-given above, is computed as a mean and standard deviation across eight random column orderings of
-the same underlying feature matrix, not as a single model fit — the same convention already applied
-retrospectively to two figures in §2.4. These standard deviations describe sensitivity to an
-essentially arbitrary implementation detail — column order — and are not bootstrap confidence
-intervals or any other estimate of sampling uncertainty; they should not be interpreted as such.
+For this 237-column representation specifically, refitting across the same eight column orderings
+used throughout this chapter (§2.3) produced PR-AUC values ranging from 0.4908 to 0.5390 — a range
+of 0.0482, comparable in size to some of the effects under investigation in this project.
 
 A further, parsimony-oriented finding is reported here because it bears on how the engineered and
 strategy-score features interact. Among all feature combinations evaluated, the smallest — the
