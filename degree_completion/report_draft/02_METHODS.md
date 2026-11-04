@@ -1,20 +1,22 @@
 # 2. Methods
 
 This chapter describes how the home dataset was constructed, how predictive features were
-engineered, how models were trained and evaluated, and how the project's later analyses — the
-baseline investigation that motivated a change in research direction, the length-controlled
-analysis, the rhetorical-strategy scoring and ablation, the strategy interpretation, and the
-external validation on an independent corpus — were carried out. Numerical detail is included
-where it is needed to define a dataset, procedure, or evaluation setting; the corresponding
-findings and their interpretation are reserved for the Results and Discussion chapters.
+engineered, and how models were trained and evaluated. It then describes how the project's later
+analyses were carried out: the baseline investigation that motivated a change in research
+direction, the length-controlled analysis, the rhetorical-strategy scoring and ablation, the
+strategy interpretation, and the external validation on an independent corpus. Numerical detail
+is included where it is needed to define a dataset, procedure, or evaluation setting; the
+corresponding findings and their interpretation are reserved for the Results and Discussion
+chapters.
 
 ## 2.1 Data Collection and Annotation
 
-Data collection targeted the top-ranked posts on r/changemyview, using the Reddit API via PRAW,
-with the collection approach adapted from the code released by Priniski and Horne (2018) for their
-own study of the same subreddit. Collection and loading yielded comment-level data from 425 posts,
-producing 3,974 raw comment rows. Each row corresponds to one reply (comment), not one post or one
-thread, since the per-comment delta award is the project's unit of prediction.
+Data collection targeted the top 500 all-time posts on r/changemyview, using the Reddit API via
+PRAW, with the collection approach adapted from the code released by Priniski and Horne (2018) for
+their own study of the same subreddit. After collection and loading, 425 of the 500 requested
+posts yielded usable comment-level data, producing 3,974 raw comment rows. Each row corresponds to
+one reply (comment), not one post or one thread, since the per-comment delta award is the
+project's unit of prediction.
 
 Three columns anchor each row: the original post's text (`original_post`), the preceding context
 of the same commenter's own prior turns in the thread (`thread_text`), and the comment's own
@@ -70,7 +72,7 @@ with six categories (logical, passionate, humorous, sarcastic, neutral, other), 
 the comment and the original post. Stylistic register was first estimated with a zero-shot
 `bart-large-mnli` classifier, which produced visibly incorrect labels on manual spot checks, and
 was replaced with an LLM-assigned formal/informal label. Rhetorical appeals — ethos, pathos, and
-logos — were first estimated using the Empath lexicon, which was found to track topic rather than
+logos — were first estimated using the Empath lexicon, which was found to track topic instead of
 rhetorical structure, and were replaced with LLM-assigned scores on a continuous 0–1 scale for each
 appeal; of these, the logos score showed the widest separation between convincing and
 non-convincing comments of any feature introduced at this stage.
@@ -79,7 +81,7 @@ Several other features were retained without this trial-and-replacement sequence
 adjective-to-adverb ratio computed with spaCy part-of-speech tagging; two readability measures
 (Flesch–Kincaid grade level and reading ease) computed with the `textstat` library; a count of
 evidence markers, using a keyword-stem method adapted directly from Priniski and Horne's (2018)
-own code, which constitutes a direct instance of code reuse rather than independent
+own code, which constitutes a direct instance of code reuse, not an independent
 re-implementation; the output of a HuggingFace persuasive-language detector
 (`chreh/persuasive_language_detector`); and document embeddings from the sentence-embedding model
 `BAAI/bge-base-en-v1.5` (native dimensionality 768), reduced via principal component analysis to
@@ -110,9 +112,9 @@ with the 187 embedding components, this constitutes a 228-feature "trusted" repr
 A further six features — a lexicon-based sentiment score, the earlier (rejected-in-favor-of-LLM)
 categorical tone and style labels, and the earlier-generation ethos, pathos, and logos scores —
 were formally flagged as **untrusted**, reflecting the diagnosed shortcomings described above, and
-recorded as such in a dedicated file rather than deleted from the dataset. The rationale for
+recorded as such in a dedicated file. The rationale for
 retaining rather than discarding them was to allow their marginal predictive value to be tested
-empirically during model selection (§2.3), rather than excluded by assumption. Encoding these six
+empirically during model selection (§2.3), instead of excluding them by assumption. Encoding these six
 raw features (two of which are categorical and together expand into more columns than one each)
 adds 11 columns, yielding a 239-feature "trusted+untrusted" representation. An "embeddings-only"
 representation (the 187 components alone, with no handcrafted features) was also constructed, to
@@ -122,9 +124,7 @@ representations were carried forward as candidate feature sets into model select
 **Table N.** Feature-family summary, with each family's source notebook and whether it belongs to
 the trusted or untrusted set. For the three one-hot-encoded rows, the category count in the
 feature-group name is the true number of labels the classifier assigns; "Columns" is one less per
-side, since the first category of each encoding is dropped as an implicit reference level (§2.2)
-— the two numbers describe different things (label cardinality vs. encoded representation size),
-not an inconsistency.
+side, since the first category of each encoding is dropped as an implicit reference level (§2.2).
 
 | Feature / feature group | Variants included | Source notebook(s) | Columns | Set |
 |---|---|---|---|---|
@@ -153,7 +153,7 @@ not an inconsistency.
 The prediction task is binary classification: given the representation of a comment (and,
 depending on feature-set variant, its relation to the original post), predict whether it was
 delta-awarded. Evaluation uses a thread-grouped 80/20 split (`GroupShuffleSplit`, grouped by
-discussion thread) rather than a simple random split, assigning 3,262 comments from 320 threads to
+discussion thread), assigning 3,262 comments from 320 threads to
 training and 709 comments from 81 threads to a held-out test set, with zero thread overlap between
 the two, confirmed programmatically. Grouping the split by thread matters because comments from the
 same thread share context — the same original post, often overlapping argumentative content, and
@@ -170,8 +170,7 @@ to the inner-training partition (no resampling, random undersampling, and SMOTE 
 the three feature-set variants from §2.2 (trusted, trusted+untrusted, embeddings-only). SMOTE and
 random undersampling were included because the positive class is a minority (roughly 16% of the
 full dataset); resampling strategies are a standard response to this kind of imbalance, and
-including "no resampling" as a condition allows their marginal value to be assessed empirically
-rather than assumed.
+including "no resampling" as a condition allows their marginal value to be assessed empirically.
 
 The primary selection and evaluation metric throughout this project is PR-AUC (average precision),
 not accuracy or ROC-AUC. This choice follows directly from the class imbalance: with positive
@@ -235,52 +234,65 @@ This validation fold's own no-skill PR-AUC baseline is 0.1690 (its own positive 
 whole-dataset rate of 0.1614, which this fold's rate differs from, consistent with how a
 thread-grouped split's fold-specific positive rate generally departs somewhat from the
 whole-dataset rate elsewhere in this report). All but one of the 27 combinations beat it; the sole
-exception is the weakest row, `RF (none) | embeddings-only` (0.1506), which falls below both this
+exception is the weakest row, `RF (no resampling) | embeddings-only` (0.1506), which falls below both this
 fold's own baseline (0.1690) and the whole-dataset rate (0.1614) — the only combination in the grid
-that fails to beat no-skill under either baseline. `RF (over) | embeddings-only` (0.3043) trails
-the selected configuration (0.3063) by 0.002 PR-AUC. For `XGB (over)` specifically, PR-AUC on
+that fails to beat no-skill under either baseline. `RF (oversampling) | embeddings-only` (0.3043) trails
+the selected configuration (0.3063) by 0.002 PR-AUC. For `XGB (oversampling)` specifically, PR-AUC on
 `trusted+untrusted` exceeds PR-AUC on `trusted` alone by 0.063 — the largest such difference among
 the 9 classifier/resampling pairs.
 
 ## 2.4 Baseline Investigation and the Length Confound
 
-Having selected and evaluated the engineered-feature pipeline, two substantially simpler models
-were evaluated on the identical 709-comment test fold, as a check on whether the engineered
-representation was adding value over much cheaper alternatives. The first used TF-IDF vectorization
-of the comment text alone, with a logistic regression classifier and no engineered features at all;
-the second used the comment's raw word count as a single feature, again with logistic regression.
-Both simpler models outperformed the selected 239-feature engineered pipeline on the same test
-fold: the TF-IDF baseline reached PR-AUC 0.5119, and the word-count-only model reached PR-AUC
-0.5256, against the engineered pipeline's 0.3848.
+Having selected and evaluated the engineered-feature pipeline, a substantially simpler baseline was
+evaluated on the identical 709-comment test fold, as a check on whether the engineered
+representation was adding value over a much cheaper alternative: TF-IDF vectorization of the
+comment text alone, with a logistic regression classifier and no engineered features at all. This
+baseline outperformed the selected 239-feature engineered pipeline on the same test fold, reaching
+PR-AUC 0.5119 against the engineered pipeline's 0.3848.
+
+This result prompted a diagnostic step: examining which tokens
+the TF-IDF model weighted most heavily revealed that the great majority were common stopwords,
+together with the token "edit" (characteristic of Reddit's edit-marker convention) — a pattern more
+consistent with the model tracking how much text a comment contains than with it tracking
+rhetorical content.
+
+This diagnostic finding motivated testing the role of comment length directly, in two ways. First,
+a second, even simpler baseline was evaluated: a single-feature logistic regression using only the
+comment's raw word count. This baseline outperformed TF-IDF too, reaching PR-AUC 0.5256 — the
+strongest of the three models compared so far, using the least information.
 
 [FIGURE: `figures/report/figure1_initial_model_comparison.png` — **Figure N.** Held-out PR-AUC for
 the originally selected engineered-feature pipeline, a TF-IDF baseline, and a word-count-only
 baseline, evaluated on the identical 709-comment test fold (`04.2_baseline_comparison.ipynb`).]
 
-This result prompted a diagnostic step rather than an immediate conclusion. Examining which tokens
-the TF-IDF model weighted most heavily revealed that the great majority were common stopwords, 
-together with the token "edit" (characteristic of Reddit's edit-marker convention) — a pattern more
-consistent with the model tracking how much text a comment contains than with it tracking
-rhetorical content. This motivated testing the role of comment length directly. Comment length and
-outcome are strongly associated in this dataset: the mean word count is 78.0 for non-convincing
-comments and 216.7 for convincing comments, a point-biserial correlation of 0.3716. To rule out the
-possibility that this association was purely an artifact of some discussion threads being
-systematically longer or more active than others (and hence containing both longer comments and
-more opportunities for a delta), a within-thread check was performed: restricting to the 200
-threads that contained at least one comment of each outcome class, the convincing comment was
-longer than that same thread's own average non-convincing comment in 153 of the 200 threads
+Second, the raw relationship between comment length and outcome was characterized directly:
+comment length and outcome are strongly associated in this dataset, with a mean word count of 78.0
+for non-convincing comments and 216.7 for convincing comments, a point-biserial correlation of
+0.3716. To rule out the possibility that this association was purely an artifact of some discussion
+threads being systematically longer or more active than others (and hence containing both longer
+comments and more opportunities for a delta), a within-thread check was performed: restricting to
+the 200 threads that contained at least one comment of each outcome class, the convincing comment
+was longer than that same thread's own average non-convincing comment in 153 of the 200 threads
 (76.5%).
 
 In response to this finding, `word_count` was added to the engineered feature set as an additional
 column, and the full 27-combination selection grid from §2.3 was rerun from scratch on the
 word-count-augmented feature sets, rather than simply appending the feature to the previously
-selected configuration. This recovered most of the shortfall relative to the simpler baselines:
-test PR-AUC rose from 0.3848 to 0.4922. Reporting these two figures as order-robust means with
-standard deviations computed over repeated column-order shufflings of the same underlying features
-(the motivation for this convention is described in §2.7) gives 0.3676 ± 0.0182 for the original
-selection and 0.4831 ± 0.0257 after the rerun, with bootstrap 95% confidence intervals of
-[0.311, 0.463] and [0.410, 0.586] respectively — intervals that barely overlap, making this the
-single most statistically decisive comparison produced anywhere in this project. The remainder of
+selected configuration. The same architecture was selected again — XGBoost with SMOTE
+oversampling on the trusted+untrusted feature set, now including `word_count` — and this recovered
+most of the shortfall relative to the simpler baselines: test PR-AUC rose from 0.3848 to 0.4922.
+
+These two figures are each the mean of multiple executions, not a single model fit: later in the
+research it was found that when candidate features are correlated, this project's XGBoost+SMOTE
+architecture can break near-ties in its split-selection procedure deterministically based on each
+feature's column position, so a single fit's PR-AUC can shift measurably depending on column order
+alone. The practice adopted throughout this project — refitting the same feature set eight times
+under different column orderings and reporting the mean and standard deviation across those fits —
+is applied retrospectively here to these two figures for consistency; §2.7 gives the full account
+of this sensitivity, including its magnitude and a check ruling out SMOTE as the underlying cause.
+This gives 0.3676 ± 0.0182 for the originally selected pipeline and 0.4831 ± 0.0257 after the
+word-count-augmented rerun, with bootstrap 95% confidence intervals of [0.311, 0.463] and
+[0.410, 0.586] respectively. The remainder of
 this report treats the recognition and correction of this length confound as a methodological
 turning point: it reframes the project's central question from whether textual features predict
 delta awards to which predictive signal, if any, remains once comment length is accounted for — the
@@ -291,17 +303,18 @@ distribution by outcome for the full 3,971-comment dataset, with each class's me
 (`04.2_baseline_comparison.ipynb`).]
 
 **Table N.** The four models discussed above, all evaluated on the identical 709-comment test
-fold (no-skill PR-AUC baseline 0.2031). Single-split point estimates; the order-robust means,
-standard deviations, and bootstrap 95% confidence intervals for the first and last rows are
-already given in the prose above and are not repeated here. F1 uses each model's own
-validation-tuned threshold, per §2.3's convention.
+fold (no-skill PR-AUC baseline 0.2031). Rows 1 and 4 use the order-sensitive XGBoost+SMOTE
+architecture (§2.7), so both of their metrics are reported as order-robust means ± SD across 8
+column-order shuffles. Rows 2–3 (logistic regression) have
+no such sensitivity and are reported as single-fit point estimates, which are already their stable
+values.
 
-| Model | PR-AUC | ROC-AUC | F1 |
-|---|---|---|---|
-| Originally selected engineered pipeline (XGBoost + SMOTE, trusted+untrusted) | 0.3848 | 0.6982 | 0.2513 |
-| TF-IDF + Logistic Regression | 0.5119 | 0.8150 | 0.1235 |
-| Word count alone (1 feature) | 0.5256 | 0.8294 | 0.2105 |
-| Word-count-augmented re-selected pipeline (XGBoost + SMOTE, trusted+untrusted + `word_count`) | 0.4922 | 0.8018 | 0.4144 |
+| Model | PR-AUC | ROC-AUC |
+|---|---|---|
+| Originally selected engineered pipeline (XGBoost + SMOTE, trusted+untrusted) | 0.3676 ± 0.0182 | 0.6903 ± 0.0096 |
+| TF-IDF + Logistic Regression | 0.5119 | 0.8150 |
+| Word count alone (1 feature) | 0.5256 | 0.8294 |
+| Word-count-augmented re-selected pipeline (XGBoost + SMOTE, trusted+untrusted + `word_count`) | 0.4831 ± 0.0257 | 0.7923 ± 0.0073 |
 
 ## 2.5 Length-Controlled Analysis
 
@@ -310,8 +323,9 @@ not on its own establish whether any part of the recovered performance reflects 
 length — in principle, a model's entire predictive value could still reduce to "longer comments are
 more often convincing." A dedicated length-controlled analysis was carried out on the full
 3,971-comment dataset to address this directly, using two different constructions to reduce the
-length imbalance between outcome classes: a loose word-count floor, which discards the shortest
-non-convincing comments and yields a sample of 1,638 comments, and a strict one-to-one length match,
+length imbalance between outcome classes: a loose word-count floor (84 words — the convincing
+group's own 25th percentile), which discards the shortest non-convincing comments and yields a
+sample of 1,638 comments, and a strict one-to-one length match,
 which pairs each convincing comment with a non-convincing comment of comparable length and yields a
 sample of 1,235 comments. For each of these two samples, and for the full, unmatched dataset, the
 lift of several models — TF-IDF, word-count-only, and the full engineered pipeline — over that
@@ -342,7 +356,8 @@ figures computed on the other as though they came from a single experiment. The 
 this section is built from the full 3,971-comment dataset using strict one-to-one length pairing,
 and it measures each individual model's own lift over no-skill, before and after matching. The
 sample described in §2.7 is built, separately, from the 2,753-comment rhetorical-scoring subset
-using decile-bin matching on word count, and it measures something narrower: not any individual
+(comments of at least 30 words, or any length if delta-awarded — §2.6) using decile-bin matching on
+word count, and it measures something narrower: not any individual
 model's overall lift, but specifically the *incremental* gain contributed by adding the eight
 strategy scores to an existing feature set, before and after that gain is recomputed on length-
 matched data.
