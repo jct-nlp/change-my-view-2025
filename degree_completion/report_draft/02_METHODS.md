@@ -42,7 +42,7 @@ is worth noting here because it bears on later feature-engineering choices: thre
 correlated with a thread's apparent convincing rate, since a thread typically yields at most a
 small, roughly fixed number of deltas while the number of non-convincing replies scales with how
 much the thread branches. This is relevant to any analysis that aggregates at the level of the
-original post rather than the individual comment, and is revisited where relevant in §2.2.
+original post, not the individual comment, and is revisited where relevant in §2.2.
 
 [FIGURE: `figures/report/figure8_pipeline_diagram.png` — **Figure N.** The project's pipeline as
 four broad phases — data preparation, modeling and the length-confound discovery, rhetorical-
@@ -56,7 +56,7 @@ nine-subsection breakdown is §2.1–§2.9 below.]
 Feature engineering proceeded in three stages, each implemented in its own notebook: a first pass
 building linguistic and stylistic features from the comment and the original post; a second pass
 adding large-language-model-derived features and document embeddings; and a third pass constructing
-features that relate each comment to its original post directly, rather than describing either side
+features that relate each comment to its original post directly, instead of describing either side
 in isolation.
 
 Several feature families went through a documented sequence of trial, diagnosis, and replacement,
@@ -113,7 +113,7 @@ A further six features — a lexicon-based sentiment score, the earlier (rejecte
 categorical tone and style labels, and the earlier-generation ethos, pathos, and logos scores —
 were formally flagged as **untrusted**, reflecting the diagnosed shortcomings described above, and
 recorded as such in a dedicated file. The rationale for
-retaining rather than discarding them was to allow their marginal predictive value to be tested
+retaining instead of discarding them was to allow their marginal predictive value to be tested
 empirically during model selection (§2.3), instead of excluding them by assumption. Encoding these six
 raw features (two of which are categorical and together expand into more columns than one each)
 adds 11 columns, yielding a 239-feature "trusted+untrusted" representation. An "embeddings-only"
@@ -181,7 +181,7 @@ class's true-negative rate. PR-AUC is sensitive specifically to the precision–
 the minority class and is the more informative metric under this kind of imbalance. The
 corresponding no-skill reference for a given evaluation fold is the PR-AUC achieved by a
 majority-class ("always predict negative") classifier, which is numerically equal to that fold's
-own positive rate; because the train/test split is grouped by thread rather than stratified by
+own positive rate; because the train/test split is grouped by thread, not stratified by
 label, a given fold's own positive rate can differ somewhat from the full dataset's 16.1% rate (the
 709-comment test fold used throughout this report has a positive rate of approximately 20.3%), and
 the appropriate no-skill baseline for any PR-AUC reported later in this report is that specific
@@ -268,7 +268,8 @@ baseline, evaluated on the identical 709-comment test fold (`04.2_baseline_compa
 Second, the raw relationship between comment length and outcome was characterized directly:
 comment length and outcome are strongly associated in this dataset, with a mean word count of 78.0
 for non-convincing comments and 216.7 for convincing comments, a point-biserial correlation of
-0.3716. To rule out the possibility that this association was purely an artifact of some discussion
+0.3716 (denoted r hereafter). To rule out the possibility that this association was
+purely an artifact of some discussion
 threads being systematically longer or more active than others (and hence containing both longer
 comments and more opportunities for a delta), a within-thread check was performed: restricting to
 the 200 threads that contained at least one comment of each outcome class, the convincing comment
@@ -277,7 +278,7 @@ was longer than that same thread's own average non-convincing comment in 153 of 
 
 In response to this finding, `word_count` was added to the engineered feature set as an additional
 column, and the full 27-combination selection grid from §2.3 was rerun from scratch on the
-word-count-augmented feature sets, rather than simply appending the feature to the previously
+word-count-augmented feature sets, instead of simply appending the feature to the previously
 selected configuration. The same architecture was selected again — XGBoost with SMOTE
 oversampling on the trusted+untrusted feature set, now including `word_count` — and this recovered
 most of the shortfall relative to the simpler baselines: test PR-AUC rose from 0.3848 to 0.4922.
@@ -345,47 +346,24 @@ selected a different architecture that, when evaluated on the corresponding test
 many candidate configurations (27) against a small validation partition (205 rows). By contrast,
 simply reusing the architecture already selected on the full dataset, without re-selecting, scored
 positively on the same matched test partition. This result is presented as a specific, worked
-illustration of a general methodological risk — model re-selection on small samples — rather than
-as evidence against re-selection as a practice in general.
+illustration of a general methodological risk — model re-selection on small samples — and not as
+evidence against re-selection as a practice in general.
 
-A second, separately constructed length-matched sample is introduced later in this report, within
-the rhetorical-scoring subset rather than the full dataset (§2.7). It is important to state clearly,
-here and wherever either sample's results are reported, that these are two distinct constructions
-answering two distinct questions, and that figures computed on one must not be combined with
-figures computed on the other as though they came from a single experiment. The sample described in
-this section is built from the full 3,971-comment dataset using strict one-to-one length pairing,
-and it measures each individual model's own lift over no-skill, before and after matching. The
-sample described in §2.7 is built, separately, from the 2,753-comment rhetorical-scoring subset
-(comments of at least 30 words, or any length if delta-awarded — §2.6) using decile-bin matching on
-word count, and it measures something narrower: not any individual
-model's overall lift, but specifically the *incremental* gain contributed by adding the eight
-strategy scores to an existing feature set, before and after that gain is recomputed on length-
-matched data.
+**Table N.** The two length-controlled samples used in this section, side by side (both built in
+`04.3_length_controlled_analysis.ipynb`, from the full 3,971-comment dataset).
 
-**Table N.** All three length-controlled samples used in this report, side by side. The `04.3`
-strict match and the `06` sample happen to share the same size (n = 1,235) despite being built
-from different populations — reading the "Used to answer" column is the way to tell which number
-in this report comes from which sample.
-
-| Sample | Source notebook | Base population | Matching procedure | n | `word_count` r (unmatched → matched) | Used to answer |
-|---|---|---|---|---|---|---|
-| Loose length floor | `04.3` | Full dataset (3,971) | Keep every convincing comment; restrict non-convincing comments to ≥ the convincing group's 25th-percentile length (84 words) | 1,638 | 0.372 → 0.093 | This section: each individual model's (TF-IDF, `word_count`, engineered pipeline) own lift over no-skill, before vs. after |
-| Strict 1:1 match | `04.3` | Full dataset (3,971) | Decile-bin match: convincing comments' `word_count` split into 10 deciles; non-convincing comments sampled from the matching bin | 1,235 | 0.372 → 0.066 | This section: same per-model lift comparison as above, under a stricter match |
-| Length-matched (scored population) | `06` | Scored population (2,753) | Same decile-bin procedure as `04.3`'s strict match, independently re-run within the smaller scored population (`04.3`'s own sample can't be reused — many of its matched rows fall under the ≥30-word scoring floor) | 1,235 | 0.288 → 0.061 | §2.7 / the figure below: the *incremental* PR-AUC gain from adding the eight strategy scores, before vs. after |
-
-[FIGURE: `figures/report/figure3_strategy_gain_length_matching.png` — **Figure N.** The
-strategy-score PR-AUC gain reported in §2.7, recomputed on a length-matched sample within the
-2,753-comment scored population, showing how much of the gain survives length control
-(`06_strategy_ablation.ipynb`). Covers only the `06`-built sample described above, not the
-separate `04.3` sample.]
+| Sample | Matching procedure | n | `word_count` r (unmatched → matched) |
+|---|---|---|---|
+| Loose length floor | Keep every convincing comment; restrict non-convincing comments to ≥ the convincing group's 25th-percentile length (84 words) | 1,638 | 0.372 → 0.093 |
+| Strict 1:1 match | Decile-bin match: convincing comments' `word_count` split into 10 equal-count bins; non-convincing comments sampled from the matching bin | 1,235 | 0.372 → 0.066 |
 
 ## 2.6 Rhetorical-Strategy Scoring
 
 The length-controlled analysis in §2.5 establishes that some non-length signal survives across
 several modeling approaches, but it does not characterize what that signal consists of. To
-investigate whether the manner in which an argument is constructed, rather than simply how much is
-written, carries predictive information, eight rhetorical strategies relevant to CMV-style
-argumentation were defined: justification, concession, evidence, refutation, personal narrative,
+investigate whether an argument's manner of construction carries predictive information beyond
+simply how much is written, eight rhetorical strategies relevant to CMV-style argumentation were
+defined: justification, concession, evidence, refutation, personal narrative,
 call-to-action, simplification, and question-asking. Each strategy is scored on an ordinal 1–5
 scale, independently of the others, by an LLM (Gemini). The general approach — using an LLM to
 assign numeric persuasion-strategy scores to naturally occurring text — follows the methodology
@@ -403,9 +381,9 @@ judgment, while the "or delta-awarded" clause ensures that no positive example i
 regardless of its length. Because the restriction disproportionately removes short, non-convincing
 comments while retaining every convincing comment, the resulting subset's convincing-comment
 prevalence (641 of 2,753 comments, 23.3%) is substantially higher than the full dataset's 16.1%.
-Any percentage computed within this scored subset in this report or elsewhere should be understood
-against this different, smaller-population denominator, and should not be compared directly to a
-whole-dataset percentage without noting the distinction.
+Later sections that report figures computed within this scored subset (§2.7 onward) use this
+subset's own denominator, not the full dataset's 16.1% — the two should not be read as directly
+comparable.
 
 The scoring prompt went through one documented revision. An initial version presented each comment
 to the LLM without including the original post it was replying to. Review of this initial pass
@@ -417,40 +395,36 @@ majority of comments under the revised prompt (6 of 14 reviewed rows increased, 
 consistent with the earlier, original-post-blind prompt having systematically under-detected
 refutation. The full scoring run used the revised, original-post-aware prompt.
 
-Two reliability checks were carried out, both explicitly described by the author as lightweight
-checks rather than a formal inter-annotator-agreement study. The first is a test-retest check: 200
+Two reliability checks were carried out, both explicitly framed as lightweight checks, not a
+formal inter-annotator-agreement study. The first is a test-retest check: 200
 comments were scored twice, independently, and the two passes were compared. Agreement was strong
 across all eight strategies, with 95–99% of repeat scores falling within one point of the original
 score (mean absolute difference between 0.14 and 0.41 depending on strategy). The second is a
-comparison against a single human judge's hand-scoring of 18 comments (9 convincing, 9 not).
-Agreement with this human judge was considerably weaker than the test-retest figures, and varied
-substantially by strategy; it was weakest specifically for refutation and justification, whose
-initial exact-match agreement with the LLM was 16.7% and 11.1% respectively. After the judge
-reviewed her own first-pass scores in light of the disagreements and revised some of them, exact-
-match agreement improved across all eight strategies (refutation to 27.8%, justification to
-22.2%), but refutation and justification remained the two hardest strategies to calibrate against
-human judgment even after this review, with the highest mean absolute difference (approximately
-0.89) of the eight strategies. This reliability pattern is directly relevant to results reported
-later in this project, since refutation and justification also prove to be the two strategies most
-central to the project's predictive and interpretive findings (§2.8); this connection is stated here
-because it should be considered alongside those findings, not treated only as a separate,
-after-the-fact limitation.
+comparison against a single human judge's hand-scoring of 18 comments (9 convincing, 9 not). These
+figures are the judge's final scores, after she reviewed her own first-pass disagreements with the
+LLM and corrected some of them; initial agreement was considerably weaker (exact-match as low as
+11.1%, for justification, before this review). At the same ±1-point tolerance used for the
+test-retest check above, final agreement reaches at least 83.3% for every strategy, with mean
+absolute differences between 0.28 and 0.89 — weakest specifically for refutation and justification,
+the two hardest strategies to calibrate against human judgment even after review. This reliability
+pattern is directly relevant to results reported later in this project, since refutation and
+justification also prove to be the two strategies most central to the project's predictive and
+interpretive findings (§2.8).
 
-**Table N.** The eight rhetorical strategies, with the test-retest (n = 200, same metric the prose
-above cites: percent of repeat scores within one point) and human-agreement (n = 18, before → after
-the judge's review of her own first-pass scores; exact-match percent, the metric the prose above
-cites) reliability figures for each.
+**Table N.** The eight rhetorical strategies, with the test-retest (n = 200) and human-agreement
+(n = 18, the judge's final scores after reviewing her own first-pass disagreements with the LLM —
+see prose above) reliability figures for each, both at the same ±1-point tolerance.
 
-| Strategy | Definition | Test-retest: within ±1 pt | Test-retest: mean abs. diff. | Human agreement: exact match (before → after) | Human agreement: mean abs. diff. (before → after) |
+| Strategy | Definition | Test-retest: within ±1 pt | Test-retest: mean abs. diff. | Human agreement: within ±1 pt | Human agreement: mean abs. diff. |
 |---|---|---|---|---|---|
-| Justification | Gives a reason or logical basis for the position, beyond simply asserting it | 98.5% | 0.29 | 11.1% → 22.2% | 1.39 → 0.89 |
-| Concession | Acknowledges a valid point, limitation, or partial truth in the opposing view before responding | 99.0% | 0.29 | 27.8% → 44.4% | 1.11 → 0.67 |
-| Evidence | Cites a concrete fact, statistic, study, source, or specific example to support a claim | 99.5% | 0.24 | 33.3% → 50.0% | 1.33 → 0.72 |
-| Refutation | Directly identifies and counters a specific flaw, assumption, or weak point in the original argument | 95.5% | 0.41 | 16.7% → 27.8% | 1.50 → 0.89 |
-| Personal narrative | Draws on the commenter's own lived experience to make the case | 99.5% | 0.14 | 77.8% (unchanged) | 0.28 (unchanged) |
-| Call-to-action | Offers a concrete alternative way to act on or think about the issue, not just criticism | 95.5% | 0.30 | 33.3% (unchanged) | 0.83 → 0.67 |
-| Simplification | Uses an analogy, thought experiment, or simplified restatement to make an abstract point concrete | 98.0% | 0.27 | 61.1% → 72.2% | 0.50 → 0.28 |
-| Question-asking | Poses a genuine question back to the original poster that probes an assumption or invites clarification | 98.0% | 0.16 | 77.8% (unchanged) | 0.28 (unchanged) |
+| Justification | Gives a reason or logical basis for the position, beyond simply asserting it | 98.5% | 0.29 | 88.9% | 0.89 |
+| Concession | Acknowledges a valid point, limitation, or partial truth in the opposing view before responding | 99.0% | 0.29 | 94.4% | 0.67 |
+| Evidence | Cites a concrete fact, statistic, study, source, or specific example to support a claim | 99.5% | 0.24 | 88.9% | 0.72 |
+| Refutation | Directly identifies and counters a specific flaw, assumption, or weak point in the original argument | 95.5% | 0.41 | 83.3% | 0.89 |
+| Personal narrative | Draws on the commenter's own lived experience to make the case | 99.5% | 0.14 | 94.4% | 0.28 |
+| Call-to-action | Offers a concrete alternative way to act on or think about the issue, not just criticism | 95.5% | 0.30 | 100.0% | 0.67 |
+| Simplification | Uses an analogy, thought experiment, or simplified restatement to make an abstract point concrete | 98.0% | 0.27 | 100.0% | 0.28 |
+| Question-asking | Poses a genuine question back to the original poster that probes an assumption or invites clarification | 98.0% | 0.16 | 94.4% | 0.28 |
 
 ## 2.7 Strategy Ablation
 
@@ -463,9 +437,8 @@ representation from §2.2 with `word_count` added (229 columns in total); it doe
 eleven untrusted-derived columns that formed part of the 239- and 240-feature representations
 selected and evaluated in §2.3 and §2.4. This is noted explicitly because it means the ablation
 described in this section is not a direct continuation of the exact feature set carried through
-§2.3–§2.4, but a related, narrower representation built specifically for this analysis; see
-`METHODS_REVIEW_NOTES.md` §1 for the full account — this was reviewed and the discrepancy was
-deliberately left as-is, a closed decision, not an open question. Combined with the eight strategy
+§2.3–§2.4, but a related, narrower representation built specifically for this analysis. Combined
+with the eight strategy
 scores, the resulting representation totals 237 columns.
 
 The engineered-feature baseline alone achieves PR-AUC 0.4434 (± 0.0187, see below); adding the
@@ -489,7 +462,7 @@ sensitivity was confirmed not to be an artifact of SMOTE, whose oversampling pro
 Euclidean distances between feature vectors and does not depend on the order in which columns are
 arranged. In light of this finding, every PR-AUC value reported from this point in the project
 onward, including the figures given above, is computed as a mean and standard deviation across
-eight random column orderings of the same underlying feature matrix, rather than as a single model
+eight random column orderings of the same underlying feature matrix, not as a single model
 fit. These standard deviations describe sensitivity to an essentially arbitrary implementation
 detail — column order — and are not bootstrap confidence intervals or any other estimate of
 sampling uncertainty; they should not be interpreted as such.
@@ -503,6 +476,25 @@ columns found that a random forest classifier performed comparably to the origin
 XGBoost configuration (0.5432 ± 0.0065 versus 0.5380 ± 0.0108) — a difference smaller than either
 classifier's own order-induced spread, and therefore not a basis for preferring one architecture
 over the other on this particular feature set.
+
+Whether the strategy-score gain survives length control — the same question §2.5 asked of
+`word_count`'s own contribution — was checked using a length-matched sample built specifically for
+this population, instead of reusing either sample from §2.5: `04.3`'s own matched samples cannot
+be reused here, since many of their matched rows fall under this section's ≥30-word scoring floor.
+The same decile-bin matching procedure used for `04.3`'s strict 1:1 match was independently re-run
+within the 2,753-comment scored population, yielding 1,235 comments — coincidentally the same size
+as §2.5's own strict-match sample, despite being built from a different, smaller base population;
+the two samples must not be confused or their figures combined. On this length-matched sample, the
+strategy-score gain drops from 0.0664 to 0.0557 PR-AUC, an 84% retention — far less erosion than
+`word_count`'s own lift or the engineered pipeline's own lift, both of which collapsed to about 18%
+of their full-dataset values under `04.3`'s strict matching (§2.5). This indicates the
+strategy-score signal is not primarily a proxy for comment length, unlike most other signal
+examined in this project.
+
+[FIGURE: `figures/report/figure3_strategy_gain_length_matching.png` — **Figure N.** The
+strategy-score PR-AUC gain reported above, recomputed on the length-matched sample within the
+2,753-comment scored population, showing how much of the gain survives length control
+(`06_strategy_ablation.ipynb`).]
 
 ## 2.8 Strategy Interpretation
 
@@ -530,7 +522,7 @@ reliance, not a demonstrated causal mechanism — and the two measures are not g
 with one another, nor are they intended as interchangeable. In this project, these two measures
 produce a genuine point of disagreement about which single strategy is most important even on the
 home dataset's full population; this is reported directly, as an aspect of the interpretive findings
-to be resolved (or left open) in Results and Discussion, rather than papered over by relying on only
+to be resolved (or left open) in Results and Discussion, not papered over by relying on only
 one of the two measures.
 
 **Table N.** Both interpretive measures, full population and length-matched sample, for all eight
@@ -550,7 +542,7 @@ significance.
 | Simplification | 0.3193 | 0.3383 | 0.1944* | 0.0789* |
 | Question-asking | 0.1518 | 0.1806 | 0.0069 | −0.0345 |
 
-One row is worth flagging rather than leaving implicit: `personal_narrative`'s rank-biserial effect
+One row is worth flagging, not leaving implicit: `personal_narrative`'s rank-biserial effect
 is not significant on the full population but *is* significant, and negative, on the length-matched
 sample (r = −0.0859) — the only strategy whose significance status and sign both shift between the
 two populations. This is reported here as a fact about the data, not interpreted; the interpretive
@@ -609,7 +601,7 @@ WA, since it is the metric reported in the published literature this analysis is
 of them falling in the held-out split used to compute this metric.
 
 One limitation of this external validation is stated directly here, because it bears on how the
-WA results should be read rather than being a matter solely for the Discussion chapter: this
+WA results should be read, not just a matter for the Discussion chapter: this
 analysis supports the broader claim that rhetorical-strategy scores carry predictive information in
 a second, independently constructed dataset, but it does not, by itself, establish that their
 *incremental* predictive contribution specifically beyond comment length replicates to the same
