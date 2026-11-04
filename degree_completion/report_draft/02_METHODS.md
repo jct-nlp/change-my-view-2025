@@ -339,9 +339,9 @@ more often convincing." A dedicated length-controlled analysis was carried out o
 3,971-comment dataset to address this directly, using two different constructions to reduce the
 length imbalance between outcome classes: a loose word-count floor (84 words — the convincing
 group's own 25th percentile), which discards the shortest non-convincing comments and yields a
-sample of 1,638 comments, and a strict one-to-one length match,
-which pairs each convincing comment with a non-convincing comment of comparable length and yields a
-sample of 1,235 comments. For each of these two samples, and for the full, unmatched dataset, the
+sample of 1,638 comments, and a strict decile-bin length match, which bins convincing comments'
+`word_count` into ten equal-count groups and samples a matching number of non-convincing comments
+from each group, yielding a sample of 1,235 comments. For each of these two samples, and for the full, unmatched dataset, the
 lift of several models — TF-IDF, word-count-only, and the full engineered pipeline — over that
 sample's own no-skill baseline was computed, allowing each model's apparent skill before and after
 length control to be compared directly.
@@ -368,7 +368,7 @@ evidence against re-selection as a practice in general.
 | Sample | Matching procedure | n | `word_count` r (unmatched → matched) |
 |---|---|---|---|
 | Loose length floor | Keep every convincing comment; restrict non-convincing comments to ≥ the convincing group's 25th-percentile length (84 words) | 1,638 | 0.372 → 0.093 |
-| Strict 1:1 match | Decile-bin match: convincing comments' `word_count` split into 10 equal-count bins; non-convincing comments sampled from the matching bin | 1,235 | 0.372 → 0.066 |
+| Strict decile-bin match | Decile-bin match: convincing comments' `word_count` split into 10 equal-count bins; non-convincing comments sampled from the matching bin | 1,235 | 0.372 → 0.066 |
 
 ## 2.6 Rhetorical-Strategy Scoring
 
@@ -454,15 +454,11 @@ described in this section is not a direct continuation of the exact feature set 
 with the eight strategy
 scores, the resulting representation totals 237 columns.
 
-The engineered-feature baseline alone achieves PR-AUC 0.4434 (± 0.0187, see below); adding the
+The engineered-feature baseline alone achieves PR-AUC 0.4434 (± 0.0187); adding the
 eight strategy scores raises this to 0.5098 (± 0.0200), a gain of 0.0664. The eight strategy scores
 alone, with no engineered features at all, achieve PR-AUC 0.3514 (± 0.0065) — a real, standalone
 predictive signal, positioned between this population's own no-skill baseline (0.2382) and the
 combined 237-column model.
-
-For this 237-column representation specifically, refitting across the same eight column orderings
-used throughout this chapter (§2.3) produced PR-AUC values ranging from 0.4908 to 0.5390 — a range
-of 0.0482, comparable in size to some of the effects under investigation in this project.
 
 A further, parsimony-oriented finding is reported here because it bears on how the engineered and
 strategy-score features interact. Among all feature combinations evaluated, the smallest — the
@@ -474,12 +470,12 @@ XGBoost configuration (0.5432 ± 0.0065 versus 0.5380 ± 0.0108) — a differenc
 classifier's own order-induced spread, and therefore not a basis for preferring one architecture
 over the other on this particular feature set.
 
-Whether the strategy-score gain survives length control — the same question §2.5 asked of
-`word_count`'s own contribution — was checked using a length-matched sample built specifically for
-this population, instead of reusing either sample from §2.5: `04.3`'s own matched samples cannot
-be reused here, since many of their matched rows fall under this section's ≥30-word scoring floor.
-The same decile-bin matching procedure used for `04.3`'s strict 1:1 match was independently re-run
-within the 2,753-comment scored population, yielding 1,235 comments — coincidentally the same size
+This gain's survival under length control is the most direct test of this project's central
+claim — that rhetorical-strategy scores carry real signal beyond comment length, not just another
+proxy for it — mirroring the same test §2.5 applied to `word_count`'s own contribution. It was
+checked using a length-matched sample built specifically for this 2,753-comment population: the
+same decile-bin matching procedure used for `04.3`'s strict decile-bin match (§2.5) was independently re-run
+here, yielding 1,235 comments — coincidentally the same size
 as §2.5's own strict-match sample, despite being built from a different, smaller base population;
 the two samples must not be confused or their figures combined. On this length-matched sample, the
 strategy-score gain drops from 0.0664 to 0.0557 PR-AUC, an 84% retention — far less erosion than
@@ -549,7 +545,8 @@ discussion belongs in Results/Discussion, not Methods.
 value for each of the eight rhetorical strategies, full population versus length-matched sample,
 for the nine-column selected model (`07_strategy_interpretation.ipynb`). A simplified ranked
 comparison, not the raw beeswarm plots, per the legibility concern noted above; `word_count` is
-excluded from the chart (see `FIGURE_NOTES.md`).]
+excluded from the chart, since the comparison is among the eight strategies themselves, not
+against the length confound already established in §2.4.]
 
 ## 2.9 External Validation on Winning Arguments
 
