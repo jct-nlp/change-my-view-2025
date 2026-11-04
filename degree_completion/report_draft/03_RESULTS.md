@@ -38,9 +38,7 @@ that motivated this section, on the identical 709-comment test fold (no-skill PR
 | TF-IDF + Logistic Regression | 0.5119 | 0.8150 |
 | Word count alone (1 feature) | 0.5256 | 0.8294 |
 
-[FIGURE: `figures/report/figure1_initial_model_comparison.png` — **Figure N.** Held-out PR-AUC for
-the engineered-feature pipeline, the TF-IDF baseline, and the word-count-only baseline, on the
-identical 709-comment test fold (`04.2_baseline_comparison.ipynb`).]
+These three values are plotted in Figure 1 (§2.4).
 
 Inspecting the TF-IDF model's coefficients showed that the great majority of its most heavily
 weighted tokens were common stopwords, together with the token "edit" — a pattern more consistent
@@ -67,11 +65,7 @@ gap any single 709-comment split proves beyond its own sampling noise.
 
 Comment length and outcome are strongly associated in the full 3,971-comment dataset: convincing
 comments average 216.7 words against 78.0 for non-convincing comments, a point-biserial correlation
-of r = 0.3716 (p = 2.92 × 10⁻¹³⁰).
-
-[FIGURE: `figures/report/figure4_comment_length_by_outcome.png` — **Figure N.** Word-count
-distribution by outcome for the full 3,971-comment dataset, with each class's mean indicated
-(`04.2_baseline_comparison.ipynb`).]
+of r = 0.3716 (p = 2.92 × 10⁻¹³⁰). This distribution, by outcome, is shown in Figure 4 (§2.4).
 
 Two within-thread checks rule out this association being purely an artifact of some threads being
 systematically longer or more active than others. A fixed-effects check, demeaning both word count
@@ -236,9 +230,7 @@ within it (`06_strategy_ablation.ipynb`).
 | Full scored population | 2,753 | 0.2052 | 0.2716 | 0.0664 |
 | Length-matched (within scored population) | 1,235 | 0.0629 | 0.1186 | 0.0557 |
 
-[FIGURE: `figures/report/figure3_strategy_gain_length_matching.png` — **Figure N.** The
-strategy-score PR-AUC gain, full population versus length-matched sample
-(`06_strategy_ablation.ipynb`).]
+This gain is plotted in Figure 3 (§2.7), alongside the retention percentage discussed below.
 
 Both arms' overall lift collapses sharply once length is matched (69% and 56% reductions,
 respectively), consistent with the pattern already established in §3.1.4: length is still doing
@@ -307,9 +299,7 @@ the eight strategies under comparison). `*` marks FDR < 0.05 significance
 | Simplification | 0.3193 | 0.3383 | 0.1944* | 0.0789* |
 | Question-asking | 0.1518 | 0.1806 | 0.0069 | −0.0345 |
 
-[FIGURE: `figures/report/figure5_refutation_vs_justification_shap.png` — **Figure N.** Mean |SHAP|
-value for each of the eight rhetorical strategies, full population versus length-matched sample,
-for the nine-column model (`07_strategy_interpretation.ipynb`).]
+The SHAP columns of this table are plotted in Figure 5 (§2.8).
 
 On the full population, refutation has the highest SHAP importance among the eight strategies
 (0.6034, roughly 1.5× the next-highest), while justification has the largest rank-biserial effect
