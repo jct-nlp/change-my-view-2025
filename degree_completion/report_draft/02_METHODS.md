@@ -447,25 +447,20 @@ alone, with no engineered features at all, achieve PR-AUC 0.3514 (± 0.0065) —
 predictive signal, positioned between this population's own no-skill baseline (0.2382) and the
 combined 237-column model.
 
-A methodological finding from this stage of the analysis is reported here because it applies to
-every PR-AUC figure from this point in the project onward. XGBoost constructs each decision tree by
-selecting, at every split, whichever candidate feature yields the greatest reduction in training
-loss; when two or more features are correlated with one another — as many of the 237 columns in
-this representation are — their split-gain values can be close to tied, and such ties are broken
-deterministically according to each feature's position (column order) in the input matrix.
-Refitting the identical 237-column representation eight times, changing only the order in which
-columns were presented (the original ordering together with seven random reshufflings — the same
-number of orderings used for every mean/standard-deviation figure reported throughout this and the
-following section, for consistency), produced PR-AUC values ranging from 0.4908 to 0.5390 — a range
-of 0.0482, comparable in size to some of the effects under investigation in this project. This
+The column-order sensitivity introduced in §2.4 was first identified during this stage of the
+analysis: refitting the identical 237-column representation eight times, changing only the order in
+which columns were presented (the original ordering together with seven random reshufflings — the
+same number of orderings used for every mean/standard-deviation figure reported throughout this and
+the following section, for consistency), produced PR-AUC values ranging from 0.4908 to 0.5390 — a
+range of 0.0482, comparable in size to some of the effects under investigation in this project. This
 sensitivity was confirmed not to be an artifact of SMOTE, whose oversampling procedure operates on
 Euclidean distances between feature vectors and does not depend on the order in which columns are
-arranged. In light of this finding, every PR-AUC value reported from this point in the project
-onward, including the figures given above, is computed as a mean and standard deviation across
-eight random column orderings of the same underlying feature matrix, not as a single model
-fit. These standard deviations describe sensitivity to an essentially arbitrary implementation
-detail — column order — and are not bootstrap confidence intervals or any other estimate of
-sampling uncertainty; they should not be interpreted as such.
+arranged. Every PR-AUC value reported from this point in the project onward, including the figures
+given above, is computed as a mean and standard deviation across eight random column orderings of
+the same underlying feature matrix, not as a single model fit — the same convention already applied
+retrospectively to two figures in §2.4. These standard deviations describe sensitivity to an
+essentially arbitrary implementation detail — column order — and are not bootstrap confidence
+intervals or any other estimate of sampling uncertainty; they should not be interpreted as such.
 
 A further, parsimony-oriented finding is reported here because it bears on how the engineered and
 strategy-score features interact. Among all feature combinations evaluated, the smallest — the
