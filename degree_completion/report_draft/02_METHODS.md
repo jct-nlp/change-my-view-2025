@@ -33,15 +33,24 @@ with a readability measure computed later in the pipeline. This left a final dat
 comments, of which 641 were delta-awarded (16.1%) and 3,330 were not (83.9%).
 
 The target label, `is_convincing`, is derived directly from whether a comment received a delta
-from the original poster. Non-convincing (negative) examples are simply the other replies already
-present in the same threads; no additional filtering or matching was applied to select which
-replies would serve as negative examples. This is a deliberate point of contrast with the external
-validation corpus described in §2.9, whose negative examples are instead selected to be topically
-similar to the corresponding positive example. One structural property of the resulting dataset
-is worth noting here because it bears on later feature-engineering choices: thread size is
-correlated with a thread's apparent convincing rate, since a thread typically yields at most a
-small, roughly fixed number of deltas while the number of non-convincing replies scales with how
-much the thread branches. This is relevant to any analysis that aggregates at the level of the
+from the original poster. Not every comment in a thread becomes a row, and the two classes are
+selected differently. A delta-awarded comment becomes a positive row regardless of where it sits
+in the thread; any of its own descendant replies are discarded. A non-convincing comment becomes a
+negative row only if it is a *leaf* — it has no replies of its own — in the thread tree; a
+non-convincing comment that has further replies underneath it does not itself become a row, only
+its descendant leaves do. (The one exception is a leaf that is itself the parent of a delta-awarded
+comment removed by the rule above: it is excluded rather than added as a negative row, since it was
+never evaluated as a final, unanswered reply.) No topical filtering or matching was applied to
+select which leaf comments would serve as negative examples among those eligible. This is a
+deliberate point of contrast with the external validation corpus described in §2.9, whose negative
+examples are instead selected to be topically similar to the corresponding positive example. One
+structural property of the resulting dataset is worth noting here because it bears on later
+feature-engineering choices: because negative examples are drawn only from leaves while a thread
+typically yields at most a small, roughly fixed number of deltas regardless of its size, the number
+of negative rows per thread scales with how much the thread branches while the number of positive
+rows barely does — so thread size ends up structurally correlated with a thread's apparent
+convincing rate, busier threads showing a lower rate almost by construction, independent of
+anything about persuasion. This is relevant to any analysis that aggregates at the level of the
 original post, not the individual comment, and is revisited where relevant in §2.2.
 
 [FIGURE: `figures/report/figure8_pipeline_diagram.png` — **Figure N.** The project's pipeline as
@@ -475,14 +484,12 @@ claim — that rhetorical-strategy scores carry real signal beyond comment lengt
 proxy for it — mirroring the same test §2.5 applied to `word_count`'s own contribution. It was
 checked using a length-matched sample built specifically for this 2,753-comment population: the
 same decile-bin matching procedure used for `04.3`'s strict decile-bin match (§2.5) was independently re-run
-here, yielding 1,235 comments — coincidentally the same size
-as §2.5's own strict-match sample, despite being built from a different, smaller base population;
-the two samples must not be confused or their figures combined. On this length-matched sample, the
+here, yielding 1,235 comments. On this length-matched sample, the
 strategy-score gain drops from 0.0664 to 0.0557 PR-AUC, an 84% retention — far less erosion than
 `word_count`'s own lift or the engineered pipeline's own lift, both of which collapsed to about 18%
 of their full-dataset values under `04.3`'s strict matching (§2.5). This indicates the
-strategy-score signal is not primarily a proxy for comment length, unlike most other signal
-examined in this project.
+strategy-score signal is not primarily a proxy for comment length, unlike previous signal
+examined.
 
 [FIGURE: `figures/report/figure3_strategy_gain_length_matching.png` — **Figure N.** The
 strategy-score PR-AUC gain reported above, recomputed on the length-matched sample within the
@@ -514,9 +521,9 @@ the outcome. Neither is a causal-effect estimate — both describe observed asso
 reliance, not a demonstrated causal mechanism — and the two measures are not guaranteed to agree
 with one another, nor are they intended as interchangeable. In this project, these two measures
 produce a genuine point of disagreement about which single strategy is most important even on the
-home dataset's full population; this is reported directly, as an aspect of the interpretive findings
-to be resolved (or left open) in Results and Discussion, not papered over by relying on only
-one of the two measures.
+home dataset's full population; this is reported directly, as a genuine methodological tension the
+Discussion chapter treats as unresolved, not papered over by relying on only one of the two
+measures.
 
 **Table N.** Both interpretive measures, full population and length-matched sample, for all eight
 strategies (`word_count`'s own SHAP value — 1.0245 full population, 0.8402 matched — is omitted
@@ -538,15 +545,11 @@ significance.
 One row is worth flagging, not leaving implicit: `personal_narrative`'s rank-biserial effect
 is not significant on the full population but *is* significant, and negative, on the length-matched
 sample (r = −0.0859) — the only strategy whose significance status and sign both shift between the
-two populations. This is reported here as a fact about the data, not interpreted; the interpretive
-discussion belongs in Results/Discussion, not Methods.
+two populations.
 
 [FIGURE: `figures/report/figure5_refutation_vs_justification_shap.png` — **Figure N.** Mean |SHAP|
 value for each of the eight rhetorical strategies, full population versus length-matched sample,
-for the nine-column selected model (`07_strategy_interpretation.ipynb`). A simplified ranked
-comparison, not the raw beeswarm plots, per the legibility concern noted above; `word_count` is
-excluded from the chart, since the comparison is among the eight strategies themselves, not
-against the length confound already established in §2.4.]
+for the nine-column selected model (`07_strategy_interpretation.ipynb`).]
 
 ## 2.9 External Validation on Winning Arguments
 
@@ -560,7 +563,10 @@ substantively comparable to the corresponding winning reply, matched by Jaccard 
 the same thread, whereas the home dataset's non-convincing comments are simply the other,
 unfiltered replies already present in the same threads (§2.1). This difference in how negative
 examples are constructed is a methodologically important point of contrast between the two
-datasets, revisited in the Results and Discussion chapters.
+datasets, revisited in the Results and Discussion chapters. The two datasets also differ in which
+replies are eligible at all: WA's winner/loser pairs are restricted to direct top-level replies to
+the original post (exactly one level below it), whereas the home dataset includes every reply in a
+thread regardless of its nesting depth.
 
 A total of 8,106 comments, spanning 3,051 original posts, were collected and scored on the same
 eight-strategy rubric, using the same scoring infrastructure described in §2.6. Ten comments were
@@ -569,19 +575,27 @@ These were evaluated on WA's own native training and held-out partitions — the
 corpus is distributed with, and the same partition on which its own published benchmark figures are
 computed — comprising 6,584 comments for training and 1,512 for evaluation.
 
-The training and evaluation protocol is stated precisely here because an imprecise description
-would misrepresent what was actually done. The model architecture and training configuration
-already selected on the home dataset (`RobustScaler`, SMOTE oversampling, and XGBoost) were reused
-unchanged on WA, with no new architecture selection, hyperparameter search, or feature-set tuning
-performed using WA data. However, a new model instance was then fit on WA's own native training
-split and evaluated on WA's own native held-out split. This procedure — reusing a previously
-selected modeling configuration, but fitting new model parameters on the new dataset's own training
-data — is a transfer of the modeling procedure, not a zero-shot evaluation of the model originally
-fitted on the home dataset, and it should not be described as zero-shot transfer or as applying a
-frozen model to WA. A separate, exploratory notebook does evaluate genuine zero-shot transfer (the
-home-dataset-trained model applied directly to WA with no refitting at all); that analysis,
-together with two other exploratory checks in the same notebook, is excluded from the scope of this
-report.
+The model architecture and training configuration already selected on the home dataset
+(`RobustScaler`, SMOTE oversampling, and XGBoost) were reused unchanged on WA, with no new
+architecture selection, hyperparameter search, or feature-set tuning performed using WA data. A new
+model instance was then fit on WA's own native training split and evaluated on WA's own native
+held-out split. This is a transfer of the modeling procedure — reusing a previously selected
+configuration but fitting new parameters on the new dataset's own training data. Because WA was
+scored only on the eight-strategy rubric described above, not the full engineered-feature pipeline
+from §2.2, the feature set used for this fit is the nine-column model (the eight strategy scores
+plus `word_count`) identified in §2.7 as the home dataset's own strongest-performing combination,
+not the larger 237-column representation. A smaller set of narrower feature-set configurations
+(`word_count` alone, the eight strategy scores alone, and other subsets of the nine columns) was
+also evaluated on WA using the same order-robust procedure as §2.7, to check whether the
+representation selected on the home dataset is also the strongest-performing one on an
+independently constructed dataset.
+
+The same two interpretive analyses described in §2.8 — a SHAP tree-explainer analysis and a
+Mann–Whitney rank-biserial effect-size comparison, each computed on the full scored population and
+on a length-matched sample — were repeated on WA, fitted to this same nine-column model, to compare
+which individual strategies the two analyses rank as most important on WA against the ranking
+already reported for the home dataset in §2.8. The resulting cross-dataset strategy-importance
+comparison is reported in the Results chapter, not here.
 
 Because WA's class balance and negative-sampling procedure differ substantially from the home
 dataset's, raw PR-AUC values are not directly comparable between the two datasets without reference
@@ -591,8 +605,12 @@ baselines (roughly 0.20–0.24 depending on the specific fold) reported for the 
 elsewhere in this chapter. Pairwise accuracy — the proportion of winner/loser pairs for which the
 model scores the actual winning reply higher than the actual losing reply — is also reported for
 WA, since it is the metric reported in the published literature this analysis is compared against
-(Labruna et al., 2026). WA's own pairing procedure yields 4,263 winner/loser pairs overall, with 805
-of them falling in the held-out split used to compute this metric.
+(Labruna et al., 2026). WA's own pairing procedure yields 4,263 winner/loser pairs overall, of which 807 fall in the
+held-out split — the same heldout pair count reported in the published literature. Of the ten
+comments dropped earlier for an unparseable LLM response, four fall in the held-out split, and
+each belongs to a different pair whose other side was also dropped, removing two complete pairs
+from the held-out split; the remaining 805 held-out pairs, both sides scored, are used to compute
+this metric.
 
 One limitation of this external validation is stated directly here, because it bears on how the
 WA results should be read, not just a matter for the Discussion chapter: this
@@ -603,17 +621,27 @@ extent documented for the home dataset in §2.7. No length-controlled ablation c
 described there was performed on WA; establishing that stronger, more specific claim would require
 such an analysis, which falls outside the scope of the present external-validation check.
 
-**Table N.** The two datasets' construction, side by side — the negative-example row is the single
-most consequential difference between them, discussed above.
+**Table N.** How each dataset's underlying corpus was constructed, side by side — the
+negative-example row is the single most consequential difference between them, discussed above.
 
 | | Home dataset | Winning Arguments (WA) |
 |---|---|---|
 | Source | r/changemyview, collected directly via the Reddit API (PRAW) | r/changemyview-derived, accessed via ConvoKit (Tan, Niculae, Danescu-Niculescu-Mizil, and Lee, 2016) |
-| Unit of construction | Comment-level — every reply in a thread is its own labeled row | Winner/loser pair-level — each original post contributes one matched pair |
-| Positive (convincing) examples | Comment awarded a delta | Reply labeled the pair's winner |
-| Negative (non-convincing) examples | All other replies already present in the same thread, unfiltered | The single reply most topically similar (Jaccard similarity) to the winner, among replies that did not win |
-| Size | 3,971 comments, 425 original posts | 8,096 scored comments (8,106 collected, 10 dropped for unparseable LLM responses), 3,051 original posts |
-| Class balance | 641 convincing (16.1%) | Near-balanced by construction (~52% positive — see no-skill baseline below) |
-| Train/test split | This project's own thread-grouped 80/20 split: 3,262 train / 709 test | WA's native distributed split (not re-split by this project): 6,584 train / 1,512 heldout |
-| No-skill PR-AUC baseline | ≈0.20–0.24, depending on the specific fold | 0.5291 (heldout fold's own positive rate) |
-| Paired design | No — comments are evaluated individually, not as pairs | Yes — 4,263 winner/loser pairs total, 805 in the heldout split |
+| Unit of construction | Comment-level — not every reply becomes a row (see the two rows below) | Winner/loser pair-level — each winning reply is matched with one topically similar losing reply; an original post can contribute more than one pair |
+| Reply depth eligible | Any reply in the thread, regardless of nesting depth | Direct top-level replies to the original post only (exactly one level below it) — matching the original WA paper's own framing of a pair as two arguments made directly in response to the same post |
+| Positive (convincing) examples | Comment awarded a delta, regardless of its position in the thread; its own descendant replies are discarded | Comment awarded a delta (therefore marked as the pair's winning reply) |
+| Negative (non-convincing) examples | Only thread-ending *leaf* comments (no replies of their own) among the non-convincing comments; a non-convincing comment with further replies underneath it is excluded entirely, not included as its own row | The single reply most topically similar (Jaccard similarity) to the winner, among replies that did not win |
+| Class balance | 641 convincing (16.1%) | 4,240 winning comments (52.3%), 3,866 losing comments — close to, but not exactly, balanced. Pairs themselves are exactly 1:1 by construction, but a losing reply can be the closest topical match for more than one winning pair and is stored once rather than once per pair (338 of 4,263 losing slots are such reused comments, versus only 22 of 4,263 winning slots), so deduplicating pairs down to individual comments leaves more unique winning comments than unique losing ones |
+| Paired design | No — comments are evaluated individually, not as pairs | Yes — 4,263 winner/loser pairs total |
+
+**Table N+1.** How this project used each dataset for the external-validation check described in
+this section — these are this project's own analysis choices, not properties of either corpus as
+originally constructed.
+
+| | Home dataset | Winning Arguments (WA) |
+|---|---|---|
+| Comments/posts scored | 2,753 comments, 400 original posts (§2.6 scored subset, not the full 3,971-comment dataset) | 8,096 scored comments (8,106 collected, 10 dropped for unparseable LLM responses), 3,051 original posts |
+| Train/test split | This project's own thread-grouped 80/20 split of the 2,753-comment scored population (§2.7): 2,161 train / 592 test — not the full-dataset 3,262/709 split used in §2.3–§2.4 | WA's native distributed split (not re-split by this project): 6,584 train / 1,512 heldout |
+| Positive rate actually scored/evaluated | 23.3% (641 of 2,753 — the §2.6 scored subset's own rate, not the full dataset's 16.1%) | 52.9% in the heldout split used here, close to but not identical to the 52.3% rate across the whole WA corpus (Table N) — this fold-to-fold variation (train alone is 52.2%) reflects how the reused losing comments happen to fall across original posts, not an effect of this project's train/heldout split or the ten dropped comments |
+| No-skill PR-AUC baseline (this project's model) | 0.2382 (the 592-comment test fold's own positive rate, §2.7) | 0.5291 (heldout fold's own positive rate) |
+| Pairs evaluated for pairwise accuracy | N/A — not a paired evaluation | 805 of the native 807 held-out pairs — 2 pairs lost both sides to the unparseable-response drop |

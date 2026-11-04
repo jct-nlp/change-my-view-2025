@@ -508,7 +508,10 @@ def figure5():
         _footer(fig, "Fitted-model importance, not a causal effect. Source: 07_strategy_interpretation.ipynb, cell 36.")
 
     top = 0.80 if _cfg()["show_title"] else 0.95
-    fig.subplots_adjust(left=0.22, right=0.95, top=top, bottom=0.17)
+    # Report mode's 4-line verbose footer needs more clearance than presentation's 1-line
+    # trimmed footer, or the x-axis label overlaps the footer's first line.
+    bottom = 0.24 if _cfg()["verbose_footer"] else 0.17
+    fig.subplots_adjust(left=0.22, right=0.95, top=top, bottom=bottom)
     _save(fig, "figure5_refutation_vs_justification_shap")
     plt.close(fig)
 

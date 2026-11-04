@@ -212,8 +212,9 @@ notebook, Methods chapter, and every presentation/planning document agree on 0.0
 - Single subreddit, single platform, English-only dataset; thread size structurally correlates with
   a thread's apparent convincing rate (noted in §2.1).
 - `refutation_reannotation/` was not referenced anywhere in this chapter, consistent with its
-  out-of-scope status. `wa_quick_experiments.ipynb` was referenced only to explain why its
-  zero-shot finding is excluded from this report's scope, not to report any of its results.
+  out-of-scope status. `wa_quick_experiments.ipynb` is uncommitted and is no longer referenced in
+  §2.9 (removed 2026-11-04); it was never part of the committed project, so it should not be cited
+  as a report artifact.
 
 ## 5. Suggested figures and tables, with notebook sources
 
@@ -316,3 +317,16 @@ are still staged for the not-yet-drafted Results chapter and currently have no o
 those caveats; drop the pointer from each once its caveats are folded into Results prose the same
 way Methods absorbed 1/3/4/5's. All nine report-mode PNG/SVGs regenerated; no numeric values
 changed, footer text only.
+
+## 10. §2.8 SHAP-vs-Mann-Whitney disagreement — phrasing pending Discussion, not yet final (2026-11-04)
+
+§2.8 reports a genuine disagreement between SHAP and the Mann-Whitney rank-biserial effect size
+over which single strategy is most important, even on the home dataset's full population (SHAP:
+`refutation`; rank-biserial: `justification`, r=0.358). The chapter currently states this will be
+treated **as an unresolved methodological tension** in Discussion — a provisional choice, not a
+final one: you have not yet decided whether Discussion will instead take an explicit stance on
+which measure to trust more (or why). **Action needed: once the Discussion chapter is drafted,
+revisit `02_METHODS.md` §2.8's exact wording** (currently: "...this is reported directly, as a
+genuine methodological tension the Discussion chapter treats as unresolved, not papered over by
+relying on only one of the two measures.") and change it back to an explicit-resolution framing if
+Discussion ends up taking a side after all.
