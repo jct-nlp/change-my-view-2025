@@ -125,7 +125,10 @@ recorded as such in a dedicated file. The rationale for
 retaining instead of discarding them was to allow their marginal predictive value to be tested
 empirically during model selection (§2.3), instead of excluding them by assumption. Encoding these six
 raw features (two of which are categorical and together expand into more columns than one each)
-adds 11 columns, yielding a 239-feature "trusted+untrusted" representation. An "embeddings-only"
+adds 11 columns, yielding a 239-feature "trusted+untrusted" representation — the 41 trusted and 11
+untrusted handcrafted columns together total 52 handcrafted features, matching the "52 handcrafted
+features" figure used in the project's presentation, which does not itself separate the trusted and
+untrusted subsets. An "embeddings-only"
 representation (the 187 components alone, with no handcrafted features) was also constructed, to
 assess how much predictive value the handcrafted features add over embeddings alone. All three
 representations were carried forward as candidate feature sets into model selection.
@@ -170,6 +173,16 @@ sometimes near-duplicate phrasing across replies — so a standard random split 
 thread-specific information between training and test examples, inflating apparent performance in
 a way that would not generalize to genuinely unseen discussions.
 
+This split protects against thread-level leakage specifically; it does not retroactively correct a
+separate limitation in how two of §2.2's feature-engineering steps were fit. The categorical
+one-hot encoder (comment and original-post tone and style labels) and the PCA reduction of the
+document embeddings were both fit on the full, unsplit dataset during feature engineering, before
+any train/test division existed, here and in every notebook that rebuilds this feature matrix.
+Neither step uses the `is_convincing` label — both are unsupervised transformations of the input
+text alone — so this does not constitute label leakage, but it is a methodological limitation: the
+fitted encoding and the embeddings' principal-component basis were informed by feature values from
+rows that later became test-set rows, rather than from training data alone.
+
 Model and feature-set selection used a further, inner split carved from the training data using
 the same thread-grouping logic (2,629 comments from 256 threads for inner training; 633 comments
 from 64 threads for validation), so that the 709-comment test set was not consulted during
@@ -187,14 +200,27 @@ examples at roughly 16–20% depending on the specific split, a classifier that 
 positive class can already achieve high accuracy, and ROC-AUC can look favorable even when
 precision on the minority class is poor, because ROC-AUC is computed against the (large) majority
 class's true-negative rate. PR-AUC is sensitive specifically to the precision–recall trade-off on
-the minority class and is the more informative metric under this kind of imbalance. The
-corresponding no-skill reference for a given evaluation fold is the PR-AUC achieved by a
-majority-class ("always predict negative") classifier, which is numerically equal to that fold's
-own positive rate; because the train/test split is grouped by thread, not stratified by
-label, a given fold's own positive rate can differ somewhat from the full dataset's 16.1% rate (the
-709-comment test fold used throughout this report has a positive rate of approximately 20.3%), and
-the appropriate no-skill baseline for any PR-AUC reported later in this report is that specific
-fold's own rate, not the whole-dataset rate.
+the minority class and is the more informative metric under this kind of imbalance. PR-AUC's
+no-skill reference value is the positive-class prevalence: for any classifier whose score does not
+discriminate between the two classes at all — the same score, or scores drawn without regard to the
+true label, assigned to every instance — the area under the resulting precision–recall curve
+reduces exactly to that fold's own positive rate. In this project, that reference is computed for a
+given evaluation fold via a `DummyClassifier` configured to the `most_frequent` strategy (labeled
+"majority-class" in this report's tables): its `predict_proba` output is a single constant value for
+every instance in the fold, so its PR-AUC is numerically exactly equal to the fold's own positive
+rate. This is a consequence of the score being non-discriminating, not of the classifier's hard
+class decision; a classifier evaluated only on its hard 0/1 label — one that always outputs the
+negative label and never predicts the positive class at any threshold — has recall 0 and an
+undefined (or, by convention, zero) precision at its one operating point, not a precision equal to
+the positive rate. A second dummy baseline, `DummyClassifier(strategy="stratified")`, instead draws
+a random hard guess per instance matching the training class frequencies; on the 709-comment home
+test fold this reaches PR-AUC 0.2013, close to but not exactly equal to that fold's own 0.2031
+positive rate, since it is an actual random classifier rather than a constant, non-discriminating
+score. Because the
+train/test split is grouped by thread, not stratified by label, a given fold's own positive rate can
+differ somewhat from the full dataset's 16.1% rate (the 709-comment test fold used throughout this
+report has a positive rate of approximately 20.3%), and the appropriate no-skill baseline for any
+PR-AUC reported later in this report is that specific fold's own rate, not the whole-dataset rate.
 
 Selection on the inner validation split identified XGBoost with SMOTE oversampling, on the
 239-feature trusted+untrusted representation, as the best-performing combination. This
@@ -262,12 +288,17 @@ as much as 0.0482 on one of this project's larger feature representations (the 2
 tested in §2.7), purely from reordering the same columns. The sensitivity is specific to the
 tree-building step, not `SMOTE`'s oversampling: `SMOTE`'s neighbor-finding operates on Euclidean
 distance, which does not depend on the order features are summed in. Because of this, every PR-AUC
-value reported from this point in the chapter onward is computed as a mean and standard deviation
-across eight column orderings (the original ordering plus seven random reshufflings) of the same
-underlying feature matrix, not as a single model fit. These standard deviations describe
-sensitivity to an essentially arbitrary implementation detail — column order — and are not
-bootstrap confidence intervals or any other estimate of sampling uncertainty; they should not be
-interpreted as such.
+value reported from this point in the chapter onward **for an evaluation of this order-sensitive
+`XGB (oversampling)` architecture** is computed as a mean and standard deviation across eight column
+orderings (the original ordering plus seven random reshufflings) of the same underlying feature
+matrix, not as a single model fit. This does not apply to the logistic-regression-based baselines
+(TF-IDF, `word_count` alone) or the dummy classifiers compared against it throughout this report:
+those models have no column-order degree of freedom — a convex solver and a label-only classifier
+are both order-invariant by construction — and continue to be reported as single-fit point
+estimates, typically alongside a bootstrap 95% confidence interval instead (§2.4). These standard
+deviations describe sensitivity to an essentially arbitrary implementation detail — column order —
+and are not bootstrap confidence intervals or any other estimate of sampling uncertainty; they
+should not be interpreted as such.
 
 ## 2.4 Baseline Investigation and the Length Confound
 
@@ -350,7 +381,12 @@ length imbalance between outcome classes: a loose word-count floor (84 words —
 group's own 25th percentile), which discards the shortest non-convincing comments and yields a
 sample of 1,638 comments, and a strict decile-bin length match, which bins convincing comments'
 `word_count` into ten equal-count groups and samples a matching number of non-convincing comments
-from each group, yielding a sample of 1,235 comments. For each of these two samples, and for the full, unmatched dataset, the
+from each group, yielding a sample of 1,235 comments. Both samples are constructed using the very
+outcome label and length values later evaluated, before being split, by the same thread-grouped
+methodology as §2.3, into train and test partitions; each resulting test partition is accordingly a
+partition of a controlled, outcome-balanced evaluation sample, not a naturally distributed held-out
+population, and its own no-skill baseline differs from the full dataset's for that reason. For each
+of these two samples, and for the full, unmatched dataset, the
 lift of several models — TF-IDF, word-count-only, and the full engineered pipeline — over that
 sample's own no-skill baseline was computed, allowing each model's apparent skill before and after
 length control to be compared directly.
@@ -479,6 +515,13 @@ XGBoost configuration (0.5432 ± 0.0065 versus 0.5380 ± 0.0108) — a differenc
 classifier's own order-induced spread, and therefore not a basis for preferring one architecture
 over the other on this particular feature set.
 
+Unlike the classifier-and-resampling grid search in §2.3, which uses a dedicated inner-validation
+split the test set never touches, this feature-family comparison was evaluated directly against
+this section's own held-out test partition, across every candidate feature-set configuration
+considered. The nine-column combination is accordingly the product of an exploratory, test-informed
+search over feature combinations rather than a single evaluation of a feature set chosen
+independently of the test data; its reported PR-AUC should be read with that qualification in mind.
+
 This gain's survival under length control is the most direct test of this project's central
 claim — that rhetorical-strategy scores carry real signal beyond comment length, not just another
 proxy for it — mirroring the same test §2.5 applied to `word_count`'s own contribution. It was
@@ -596,6 +639,14 @@ on a length-matched sample — were repeated on WA, fitted to this same nine-col
 which individual strategies the two analyses rank as most important on WA against the ranking
 already reported for the home dataset in §2.8. The resulting cross-dataset strategy-importance
 comparison is reported in the Results chapter, not here.
+
+Because that comparison surfaces a reversal in which strategy ranks highest (§2.8), an obvious
+question is whether a strategy's score is simply less reliably assigned on WA than on the home
+dataset. The same test-retest design used for the home dataset's own reliability check (§2.6) was
+therefore repeated here: 200 WA comments were scored twice, independently, and the two passes
+compared. Every strategy proved more internally consistent on WA than on the home dataset,
+ruling out scoring unreliability as an explanation for the ranking differences reported in the
+Results chapter.
 
 Because WA's class balance and negative-sampling procedure differ substantially from the home
 dataset's, raw PR-AUC values are not directly comparable between the two datasets without reference

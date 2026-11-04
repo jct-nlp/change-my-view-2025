@@ -33,12 +33,15 @@ that motivated this section, on the identical 709-comment test fold (no-skill PR
 
 | Model | PR-AUC | ROC-AUC |
 |---|---|---|
-| Majority-class (no-skill) | 0.2031 | 0.5000 |
+| Majority-class (no-skill reference) | 0.2031 | 0.5000 |
 | Selected engineered pipeline (XGBoost + SMOTE, trusted+untrusted) | 0.3848 | 0.6982 |
 | TF-IDF + Logistic Regression | 0.5119 | 0.8150 |
 | Word count alone (1 feature) | 0.5256 | 0.8294 |
 
-These three values are plotted in Figure 1 (§2.4).
+The "majority-class" row is this fold's positive-class prevalence, realized via a
+non-discriminating constant-score classifier rather than a hard always-negative decision rule (its
+PR-AUC equals the fold's positive rate for that reason, not because it never predicts the positive
+class; see §2.3). The three non-reference values are plotted in Figure 1 (§2.4).
 
 Inspecting the TF-IDF model's coefficients showed that the great majority of its most heavily
 weighted tokens were common stopwords, together with the token "edit" — a pattern more consistent
@@ -84,7 +87,10 @@ Two length-matched samples were constructed from the full 3,971-comment dataset 
 each model's apparent skill depends on length: a loose floor keeping every convincing comment and
 restricting non-convincing comments to at least the convincing group's own 25th-percentile length
 (84 words; 1,638 comments), and a strict decile-bin match sampling non-convincing comments from the
-same length deciles as convincing comments in matching counts (1,235 comments). For each sample,
+same length deciles as convincing comments in matching counts (1,235 comments). Because both
+samples are themselves built from the outcome label and length values under study, their test
+partitions are controlled, outcome-balanced evaluation samples rather than naturally distributed
+held-out populations (§2.5). For each sample,
 and for the full dataset, each model's PR-AUC lift over that sample's own test-fold no-skill
 baseline — not the whole-sample rate, which can drift from the actual test-fold rate on a split
 this small — was computed for TF-IDF, word count alone, and the engineered pipeline.
@@ -246,25 +252,49 @@ effect on persuasion.
 
 ### 3.2.4 Compact models
 
+The two compact configurations reported in this subsection were identified by different routes, and
+the distinction matters for how each should be read. The nine-column combination was found by
+directly comparing many candidate feature-family configurations against this population's own
+held-out test partition and keeping whichever scored highest (§2.7) — an exploratory, test-informed
+search, not a single evaluation of an independently chosen feature set. The four-column robust core,
+reported below, was instead chosen by a fixed statistical criterion established in §3.2.5 — the
+three strategies whose Mann-Whitney effect size remained significant both before and after length
+matching — rather than by searching for the best-scoring subset; its PR-AUC is a single confirmatory
+evaluation of that already-chosen configuration, not the winner of a comparison across many
+candidates. That selection criterion was itself computed on the same test partition used for every
+evaluation in this chapter, rather than on an independent validation sample, so the robust core's
+selection is not fully insulated from the test set either — just in this narrower, criterion-based
+sense, not via a PR-AUC search. The classifier/resampling comparisons reported alongside both
+configurations, by contrast, do use a genuine inner-validation split once the feature set itself is
+fixed.
+
 Building up from the strategy scores alone, family by family (mirroring the engineered-feature
 ablation methodology of §3.1), identified a configuration smaller than the full 237-column set that
 exceeds it: the eight strategy scores together with `word_count` alone, nine columns in total,
-reached order-robust PR-AUC **0.5379 ± 0.0109** — the highest PR-AUC of any configuration tested
-against the full scored population in this project, ahead of the 237-column combination (0.5098 ±
-0.0200). Re-running the classifier/resampling grid restricted to these nine columns found Random
-Forest with oversampling scoring comparably to the originally selected XGBoost configuration (0.5432
-± 0.0065 versus 0.5380 ± 0.0108) — a difference smaller than either architecture's own order-induced
-spread, and not a basis for preferring one over the other on this feature set; XGBoost was retained
-for consistency with the rest of the project.
+reached order-robust PR-AUC **0.5379 ± 0.0109**, ahead of the full 237-column combination (0.5098 ±
+0.0200). A second, independent estimate of this same nine-column configuration, computed in the
+course of the pruning check described below, gave a consistent 0.5380 ± 0.0108 on the identical test
+fold — a noise-level difference between the two estimates, itself illustrating the column-order
+spread discussed throughout this section. (A four-column subset of this same model, reported below,
+reaches a nominally higher PR-AUC still, but not distinguishably so; the two should be read
+together, not as an unqualified ranking.) Re-running the classifier/resampling grid restricted to
+the nine columns found Random Forest with oversampling
+scoring comparably to the originally selected XGBoost configuration (0.5432 ± 0.0065 versus 0.5380 ±
+0.0108) — a difference smaller than the combined order-noise band of the two architectures compared,
+and not a basis for preferring one over the other on this feature set; XGBoost was retained for
+consistency with the rest of the project.
 
-A four-column subset of this nine-column model — refutation, justification, simplification, and
+A four-column subset of the nine-column model — refutation, justification, simplification, and
 `word_count`, the three strategies that remained statistically significant both before and after
 length matching in the univariate comparison reported in §3.2.5 — was tested directly by dropping
 the remaining five strategies individually, in combination, and all at once. Every tested removal
-moved PR-AUC by at most −0.016, within the nine-column baseline's own order-induced spread, so none
-of these differences is itself a confirmed effect. The four-column combination reached order-robust
-PR-AUC **0.5489 ± 0.0046**, nominally the highest of any configuration tested but not distinguishably
-better than the nine-column model given the overlapping noise bands. The honest reading is that
+moved PR-AUC by at most −0.016, smaller than the combined order-noise band of the configurations
+being compared (the sum of their two respective SDs), so none of these differences is itself a
+confirmed effect. The four-column combination reached order-robust PR-AUC **0.5489 ± 0.0046** — a
+higher point estimate than either of the nine-column estimates above, and in that sense the highest
+raw PR-AUC among the configurations evaluated against this population, but not distinguishably
+better than the nine-column model once the two configurations' combined order-noise band (0.0046 +
+0.0108 = 0.0154, against a gap of only 0.0109) is taken into account. The honest reading is that
 question-asking, personal narrative, and evidence can be dropped without a measurable cost to
 predictive power, not that the four-column model is confirmed superior. This four-feature
 combination — referred to below as the robust core — was fixed in advance of the external
@@ -350,6 +380,12 @@ column orderings; this SD describes sensitivity to column order, not sampling un
 should not be read as a bootstrap confidence interval or any other such estimate. Both sources of
 uncertainty are independent of each other and both bear on how confidently the refutation/
 justification pattern in §3.2.6 should be stated.
+
+Whether that specific pattern — refutation as the most length-robust strategy, justification as the
+most length-confounded one — reflects something general about rhetorical persuasion on CMV, or
+instead reflects a property of how this dataset's own non-convincing examples happen to be
+selected, is the question §3.3 turns to next, using an independently constructed corpus built with
+a different negative-example methodology.
 
 ## 3.3 RQ3: Cross-Corpus Evaluation on Winning Arguments
 
@@ -486,9 +522,10 @@ dataset. The ranking reversal does not appear to be a scoring-reliability artifa
 ### 3.3.5 Pre-specified features versus configurations explored on WA
 
 The four-feature robust core (refutation, justification, simplification, `word_count`) was fixed in
-advance of this external evaluation, by the criterion established on the home dataset in §3.2.4 —
-the three strategies that remained statistically significant both before and after length matching
-there. It is not the single best-performing configuration found on WA: a narrower, eight-column
+advance of this external evaluation — though not before the home-corpus statistical analysis that
+identified it (§3.2.4, §3.2.5) — by a criterion established there: the three strategies whose
+Mann-Whitney effect size remained statistically significant both before and after length matching,
+not a search for the best-scoring feature subset. It is not the single best-performing configuration found on WA: a narrower, eight-column
 configuration dropping only call-to-action (identified by searching WA's own pruning results, not by
 any criterion fixed in advance) reached a slightly higher PR-AUC (0.5937 versus the robust core's
 0.5919) and pairwise accuracy (59.10% versus 58.68%). This gap is comparable in size to this
