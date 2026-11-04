@@ -101,7 +101,10 @@ comment-side, original-post-side, and difference variants of sentiment, rhetoric
 readability measures together with evidence-marker counts; 6 boolean comment–post match
 indicators; 3 additional scalar features (two formality indicators and the persuasive-language
 detector output); and 10 one-hot-encoded columns produced by encoding the two six-category tone
-labels (comment-side and original-post-side) with the first category of each dropped. Together
+labels (comment-side and original-post-side), with the first category of each dropped as the
+implicit reference level — standard practice to avoid the linear dependency a full one-hot
+encoding would introduce, since a row's remaining encoded columns already determine membership in
+the dropped category when all of them are zero. Together
 with the 187 embedding components, this constitutes a 228-feature "trusted" representation.
 
 A further six features — a lexicon-based sentiment score, the earlier (rejected-in-favor-of-LLM)
@@ -116,36 +119,34 @@ representation (the 187 components alone, with no handcrafted features) was also
 assess how much predictive value the handcrafted features add over embeddings alone. All three
 representations were carried forward as candidate feature sets into model selection.
 
-**Table N.** Feature-family summary. Column counts and the trusted/untrusted split are read
-directly from `04.1_model_training.ipynb` cell 6 (feature-matrix construction) and cell 7
-(`untrusted_encoded`); category counts for one-hot-encoded families are confirmed against the
-label definitions in `03.1_feature_engineering_part1.ipynb`.
+**Table N.** Feature-family summary, with each family's source notebook and whether it belongs to
+the trusted or untrusted set. For the three one-hot-encoded rows, the category count in the
+feature-group name is the true number of labels the classifier assigns; "Columns" is one less per
+side, since the first category of each encoding is dropped as an implicit reference level (§2.2)
+— the two numbers describe different things (label cardinality vs. encoded representation size),
+not an inconsistency.
 
 | Feature / feature group | Variants included | Source notebook(s) | Columns | Set |
 |---|---|---|---|---|
 | Sentiment (LLM, tone-focused) | comment, OP, diff | 03.1, 03.3 | 3 | Trusted |
 | Sentiment (VADER, lexicon-based) | comment only | 03.1 | 1 | Untrusted |
-| Tone (LLM, 6 categories, one-hot) | comment, OP | 03.1, 03.3 | 10 | Trusted |
-| Tone (RoBERTa emotion classifier, 7 categories, one-hot) | comment only | 03.1 | 6 | Untrusted |
+| Tone (LLM, 6 categories, one-hot) | comment, OP | 03.1, 03.3 | 10 (2 sides × 5, first category dropped per side) | Trusted |
+| Tone (RoBERTa emotion classifier, 7 categories, one-hot) | comment only | 03.1 | 6 (1 side × 6, first category dropped) | Untrusted |
 | Style / formality (LLM-assigned, binary) | comment, OP | 03.1, 03.3 | 2 | Trusted |
-| Style (BART-large-MNLI zero-shot, 2 categories, one-hot) | comment only | 03.1 | 1 | Untrusted |
+| Style (BART-large-MNLI zero-shot, 2 categories, one-hot) | comment only | 03.1 | 1 (1 side × 1, first category dropped) | Untrusted |
 | Rhetorical appeals: ethos, pathos, logos (LLM, 0–1 scale) | comment, OP, diff | 03.2, 03.3 | 9 | Trusted |
 | Rhetorical appeals: ethos, pathos, logos (Empath lexicon) | comment only | 03.2 | 3 | Untrusted |
 | Adjective–adverb ratio | comment, OP, diff | 03.2, 03.3 | 3 | Trusted |
 | Readability: Flesch–Kincaid grade level | comment, OP, diff | 03.2, 03.3 | 3 | Trusted |
 | Readability: Flesch reading ease | comment only (no OP/diff counterpart — dropped as redundant with `fk_grade_level_op`, r = −0.905) | 03.2 | 1 | Trusted |
 | Evidence-marker count | comment, OP, diff | 03.2, 03.3 | 3 | Trusted |
-| Comment↔OP match indicators (sentiment, tone, style, ethos, pathos, logos) | boolean agreement | 03.3 | 6 | Trusted |
+| Comment↔OP match indicators (sentiment, tone, style, ethos, pathos, logos) | boolean agreement, computed from original comment/OP values, not derived from the "diff" columns above (bucketed same/different, not a thresholded difference) | 03.3 | 6 | Trusted |
 | Persuasive-language detector output | comment only | 03.2 | 1 | Trusted |
 | Document embeddings (`BAAI/bge-base-en-v1.5`, PCA) | comment only | 03.2 | 187 | Trusted |
-| **Handcrafted total** | | | **41** | Trusted |
-| **Untrusted total** | | | **11** | Untrusted |
+| **Handcrafted Trusted Total** | | | **41** | Trusted |
+| **Handcrafted Untrusted Total** | | | **11** | Untrusted |
 | **Trusted (handcrafted + embeddings)** | | | **228** | — |
 | **Trusted + untrusted** | | | **239** | — |
-
-[FIGURE PLACEHOLDER: Feature correlation heatmap (handcrafted features, embeddings excluded),
-illustrating the redundancy among engineered features that becomes methodologically relevant in
-§2.7.]
 
 ## 2.3 Model Training and Evaluation Methodology
 
@@ -193,12 +194,53 @@ configuration was then evaluated once on the held-out 709-comment test set, achi
 This number, and its subsequent revision after the length confound described in §2.4 was
 discovered, together motivate the remainder of this chapter.
 
-[TABLE PLACEHOLDER: Model-selection grid summary — three classifiers × three resampling conditions
-× three feature-set variants, with inner-validation PR-AUC for each of the 27 combinations and the
-selected configuration indicated.]
+**Table N.** The full 27-combination inner-validation grid, sorted by PR-AUC. These are
+**validation**-set scores, used only for selection — not the 0.3848 **test**-set PR-AUC reported
+above for the selected configuration, which this grid does not itself contain (the selected row's
+own validation PR-AUC is 0.3063; the test-set figure comes from a separate, one-time evaluation
+after selection, described in the paragraph above). ROC-AUC is included as the secondary metric
+discussed earlier in this section; PR-AUC alone decided selection.
 
-[FIGURE PLACEHOLDER: Precision–recall curve and ROC curve for the selected pipeline, evaluated on
-the held-out test set.]
+| Classifier | Resampling | Feature set | Validation PR-AUC | Validation ROC-AUC |
+|---|---|---|---|---|
+| **XGBoost** | **SMOTE oversampling** | **trusted+untrusted** | **0.3063** | **0.6952** |
+| Random Forest | SMOTE oversampling | embeddings-only | 0.3043 | 0.6455 |
+| Random Forest | SMOTE oversampling | trusted+untrusted | 0.2961 | 0.7088 |
+| Random Forest | Random undersampling | trusted+untrusted | 0.2957 | 0.6933 |
+| XGBoost | SMOTE oversampling | embeddings-only | 0.2952 | 0.6551 |
+| Random Forest | Random undersampling | trusted | 0.2886 | 0.6989 |
+| Random Forest | SMOTE oversampling | trusted | 0.2879 | 0.6999 |
+| XGBoost | No resampling | trusted | 0.2845 | 0.6983 |
+| XGBoost | No resampling | trusted+untrusted | 0.2816 | 0.7070 |
+| Random Forest | Random undersampling | embeddings-only | 0.2673 | 0.6413 |
+| XGBoost | Random undersampling | trusted | 0.2628 | 0.6659 |
+| Logistic Regression | SMOTE oversampling | trusted+untrusted | 0.2574 | 0.6774 |
+| Logistic Regression | SMOTE oversampling | trusted | 0.2530 | 0.6748 |
+| XGBoost | Random undersampling | embeddings-only | 0.2485 | 0.6140 |
+| XGBoost | Random undersampling | trusted+untrusted | 0.2461 | 0.6308 |
+| XGBoost | SMOTE oversampling | trusted | 0.2436 | 0.6411 |
+| Random Forest | No resampling | trusted | 0.2420 | 0.6157 |
+| Logistic Regression | No resampling | trusted | 0.2353 | 0.6587 |
+| Logistic Regression | No resampling | trusted+untrusted | 0.2347 | 0.6589 |
+| Random Forest | No resampling | trusted+untrusted | 0.2285 | 0.6082 |
+| Logistic Regression | SMOTE oversampling | embeddings-only | 0.2285 | 0.6473 |
+| XGBoost | No resampling | embeddings-only | 0.2224 | 0.5963 |
+| Logistic Regression | No resampling | embeddings-only | 0.2095 | 0.6302 |
+| Logistic Regression | Random undersampling | trusted | 0.1816 | 0.5537 |
+| Logistic Regression | Random undersampling | trusted+untrusted | 0.1814 | 0.5541 |
+| Logistic Regression | Random undersampling | embeddings-only | 0.1786 | 0.5477 |
+| Random Forest | No resampling | embeddings-only | 0.1506 | 0.4468 |
+
+This validation fold's own no-skill PR-AUC baseline is 0.1690 (its own positive rate — not the
+whole-dataset rate of 0.1614, which this fold's rate differs from, consistent with how a
+thread-grouped split's fold-specific positive rate generally departs somewhat from the
+whole-dataset rate elsewhere in this report). All but one of the 27 combinations beat it; the sole
+exception is the weakest row, `RF (none) | embeddings-only` (0.1506), which falls below both this
+fold's own baseline (0.1690) and the whole-dataset rate (0.1614) — the only combination in the grid
+that fails to beat no-skill under either baseline. `RF (over) | embeddings-only` (0.3043) trails
+the selected configuration (0.3063) by 0.002 PR-AUC. For `XGB (over)` specifically, PR-AUC on
+`trusted+untrusted` exceeds PR-AUC on `trusted` alone by 0.063 — the largest such difference among
+the 9 classifier/resampling pairs.
 
 ## 2.4 Baseline Investigation and the Length Confound
 
@@ -248,9 +290,18 @@ question addressed in §2.5 onward.
 distribution by outcome for the full 3,971-comment dataset, with each class's mean indicated
 (`04.2_baseline_comparison.ipynb`).]
 
-[TABLE PLACEHOLDER: Baseline comparison — the originally selected engineered pipeline, the TF-IDF
-baseline, the word-count-only baseline, and the word-count-augmented re-selected pipeline, all
-evaluated on the identical test fold.]
+**Table N.** The four models discussed above, all evaluated on the identical 709-comment test
+fold (no-skill PR-AUC baseline 0.2031). Single-split point estimates; the order-robust means,
+standard deviations, and bootstrap 95% confidence intervals for the first and last rows are
+already given in the prose above and are not repeated here. F1 uses each model's own
+validation-tuned threshold, per §2.3's convention.
+
+| Model | PR-AUC | ROC-AUC | F1 |
+|---|---|---|---|
+| Originally selected engineered pipeline (XGBoost + SMOTE, trusted+untrusted) | 0.3848 | 0.6982 | 0.2513 |
+| TF-IDF + Logistic Regression | 0.5119 | 0.8150 | 0.1235 |
+| Word count alone (1 feature) | 0.5256 | 0.8294 | 0.2105 |
+| Word-count-augmented re-selected pipeline (XGBoost + SMOTE, trusted+untrusted + `word_count`) | 0.4922 | 0.8018 | 0.4144 |
 
 ## 2.5 Length-Controlled Analysis
 
@@ -296,9 +347,16 @@ model's overall lift, but specifically the *incremental* gain contributed by add
 strategy scores to an existing feature set, before and after that gain is recomputed on length-
 matched data.
 
-[TABLE PLACEHOLDER: The two length-matched sample constructions side by side — source notebook,
-base population, matching procedure, resulting sample size, and the specific question each is used
-to answer.]
+**Table N.** All three length-controlled samples used in this report, side by side. The `04.3`
+strict match and the `06` sample happen to share the same size (n = 1,235) despite being built
+from different populations — reading the "Used to answer" column is the way to tell which number
+in this report comes from which sample.
+
+| Sample | Source notebook | Base population | Matching procedure | n | `word_count` r (unmatched → matched) | Used to answer |
+|---|---|---|---|---|---|---|
+| Loose length floor | `04.3` | Full dataset (3,971) | Keep every convincing comment; restrict non-convincing comments to ≥ the convincing group's 25th-percentile length (84 words) | 1,638 | 0.372 → 0.093 | This section: each individual model's (TF-IDF, `word_count`, engineered pipeline) own lift over no-skill, before vs. after |
+| Strict 1:1 match | `04.3` | Full dataset (3,971) | Decile-bin match: convincing comments' `word_count` split into 10 deciles; non-convincing comments sampled from the matching bin | 1,235 | 0.372 → 0.066 | This section: same per-model lift comparison as above, under a stricter match |
+| Length-matched (scored population) | `06` | Scored population (2,753) | Same decile-bin procedure as `04.3`'s strict match, independently re-run within the smaller scored population (`04.3`'s own sample can't be reused — many of its matched rows fall under the ≥30-word scoring floor) | 1,235 | 0.288 → 0.061 | §2.7 / the figure below: the *incremental* PR-AUC gain from adding the eight strategy scores, before vs. after |
 
 [FIGURE: `figures/report/figure3_strategy_gain_length_matching.png` — **Figure N.** The
 strategy-score PR-AUC gain reported in §2.7, recomputed on a length-matched sample within the
@@ -363,8 +421,21 @@ central to the project's predictive and interpretive findings (§2.8); this conn
 because it should be considered alongside those findings, not treated only as a separate,
 after-the-fact limitation.
 
-[TABLE PLACEHOLDER: The eight rhetorical strategies, with a one-sentence definition for each, and
-the test-retest and human-agreement reliability figures for each strategy.]
+**Table N.** The eight rhetorical strategies, with the test-retest (n = 200, same metric the prose
+above cites: percent of repeat scores within one point) and human-agreement (n = 18, before → after
+the judge's review of her own first-pass scores; exact-match percent, the metric the prose above
+cites) reliability figures for each.
+
+| Strategy | Definition | Test-retest: within ±1 pt | Test-retest: mean abs. diff. | Human agreement: exact match (before → after) | Human agreement: mean abs. diff. (before → after) |
+|---|---|---|---|---|---|
+| Justification | Gives a reason or logical basis for the position, beyond simply asserting it | 98.5% | 0.29 | 11.1% → 22.2% | 1.39 → 0.89 |
+| Concession | Acknowledges a valid point, limitation, or partial truth in the opposing view before responding | 99.0% | 0.29 | 27.8% → 44.4% | 1.11 → 0.67 |
+| Evidence | Cites a concrete fact, statistic, study, source, or specific example to support a claim | 99.5% | 0.24 | 33.3% → 50.0% | 1.33 → 0.72 |
+| Refutation | Directly identifies and counters a specific flaw, assumption, or weak point in the original argument | 95.5% | 0.41 | 16.7% → 27.8% | 1.50 → 0.89 |
+| Personal narrative | Draws on the commenter's own lived experience to make the case | 99.5% | 0.14 | 77.8% (unchanged) | 0.28 (unchanged) |
+| Call-to-action | Offers a concrete alternative way to act on or think about the issue, not just criticism | 95.5% | 0.30 | 33.3% (unchanged) | 0.83 → 0.67 |
+| Simplification | Uses an analogy, thought experiment, or simplified restatement to make an abstract point concrete | 98.0% | 0.27 | 61.1% → 72.2% | 0.50 → 0.28 |
+| Question-asking | Poses a genuine question back to the original poster that probes an assumption or invites clarification | 98.0% | 0.16 | 77.8% (unchanged) | 0.28 (unchanged) |
 
 ## 2.7 Strategy Ablation
 
@@ -378,8 +449,9 @@ eleven untrusted-derived columns that formed part of the 239- and 240-feature re
 selected and evaluated in §2.3 and §2.4. This is noted explicitly because it means the ablation
 described in this section is not a direct continuation of the exact feature set carried through
 §2.3–§2.4, but a related, narrower representation built specifically for this analysis; see
-`METHODS_REVIEW_NOTES.md` for a fuller account of this distinction and an open question about it.
-Combined with the eight strategy scores, the resulting representation totals 237 columns.
+`METHODS_REVIEW_NOTES.md` §1 for the full account — this was reviewed and the discrepancy was
+deliberately left as-is, a closed decision, not an open question. Combined with the eight strategy
+scores, the resulting representation totals 237 columns.
 
 The engineered-feature baseline alone achieves PR-AUC 0.4434 (± 0.0187, see below); adding the
 eight strategy scores raises this to 0.5098 (± 0.0200), a gain of 0.0664. The eight strategy scores
@@ -446,8 +518,28 @@ home dataset's full population; this is reported directly, as an aspect of the i
 to be resolved (or left open) in Results and Discussion, rather than papered over by relying on only
 one of the two measures.
 
-[TABLE PLACEHOLDER: SHAP mean |value| and Mann–Whitney rank-biserial r for each of the eight
-strategies, full population and length-matched sample side by side, with FDR-significance flags.]
+**Table N.** Both interpretive measures, full population and length-matched sample, for all eight
+strategies (`word_count`'s own SHAP value — 1.0245 full population, 0.8402 matched — is omitted
+from this table for the same reason it's excluded from the figure below: it dwarfs every
+strategy's and isn't itself one of the eight strategies under comparison). `*` marks FDR < 0.05
+significance.
+
+| Strategy | SHAP, full population | SHAP, length-matched | Rank-biserial r, full population | Rank-biserial r, length-matched |
+|---|---|---|---|---|
+| Justification | 0.4156 | 0.1956 | 0.3584* | 0.1309* |
+| Concession | 0.3439 | 0.3445 | 0.1481* | 0.0206 |
+| Evidence | 0.3592 | 0.3090 | 0.1018* | −0.0322 |
+| Refutation | 0.6034 | 0.5193 | 0.3149* | 0.1540* |
+| Personal narrative | 0.1853 | 0.2168 | −0.0217 | −0.0859* |
+| Call-to-action | 0.1837 | 0.2707 | 0.1584* | 0.0592 |
+| Simplification | 0.3193 | 0.3383 | 0.1944* | 0.0789* |
+| Question-asking | 0.1518 | 0.1806 | 0.0069 | −0.0345 |
+
+One row is worth flagging rather than leaving implicit: `personal_narrative`'s rank-biserial effect
+is not significant on the full population but *is* significant, and negative, on the length-matched
+sample (r = −0.0859) — the only strategy whose significance status and sign both shift between the
+two populations. This is reported here as a fact about the data, not interpreted; the interpretive
+discussion belongs in Results/Discussion, not Methods.
 
 [FIGURE: `figures/report/figure5_refutation_vs_justification_shap.png` — **Figure N.** Mean |SHAP|
 value for each of the eight rhetorical strategies, full population versus length-matched sample,
@@ -510,5 +602,17 @@ extent documented for the home dataset in §2.7. No length-controlled ablation c
 described there was performed on WA; establishing that stronger, more specific claim would require
 such an analysis, which falls outside the scope of the present external-validation check.
 
-[TABLE PLACEHOLDER: Home dataset versus Winning Arguments, side by side — construction method,
-size, negative-example construction, and no-skill baseline for each.]
+**Table N.** The two datasets' construction, side by side — the negative-example row is the single
+most consequential difference between them, discussed above.
+
+| | Home dataset | Winning Arguments (WA) |
+|---|---|---|
+| Source | r/changemyview, collected directly via the Reddit API (PRAW) | r/changemyview-derived, accessed via ConvoKit (Tan, Niculae, Danescu-Niculescu-Mizil, and Lee, 2016) |
+| Unit of construction | Comment-level — every reply in a thread is its own labeled row | Winner/loser pair-level — each original post contributes one matched pair |
+| Positive (convincing) examples | Comment awarded a delta | Reply labeled the pair's winner |
+| Negative (non-convincing) examples | All other replies already present in the same thread, unfiltered | The single reply most topically similar (Jaccard similarity) to the winner, among replies that did not win |
+| Size | 3,971 comments, 425 original posts | 8,096 scored comments (8,106 collected, 10 dropped for unparseable LLM responses), 3,051 original posts |
+| Class balance | 641 convincing (16.1%) | Near-balanced by construction (~52% positive — see no-skill baseline below) |
+| Train/test split | This project's own thread-grouped 80/20 split: 3,262 train / 709 test | WA's native distributed split (not re-split by this project): 6,584 train / 1,512 heldout |
+| No-skill PR-AUC baseline | ≈0.20–0.24, depending on the specific fold | 0.5291 (heldout fold's own positive rate) |
+| Paired design | No — comments are evaluated individually, not as pairs | Yes — 4,263 winner/loser pairs total, 805 in the heldout split |

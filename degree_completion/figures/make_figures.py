@@ -234,8 +234,7 @@ def figure1():
             "Held-out PR-AUC, same 709-comment test set for all three models", subtitle_size=15)
     if _cfg()["verbose_footer"]:
         _footer(fig, "Source: this work/04.2_baseline_comparison.ipynb, cells 9–10 (engineered pipeline,\n"
-                     "TF-IDF) and 33 (word count). PR-AUC values and no-skill baseline verified 2026-10-14.\n"
-                     "Full caveats in FIGURE_NOTES.md.")
+                     "TF-IDF) and 33 (word count).")
     else:
         _footer(fig, "Source: 04.2_baseline_comparison.ipynb, cells 9–10, 33.")
 
@@ -301,7 +300,7 @@ def figure2():
         _footer(fig, "Source: this work/06_strategy_ablation.ipynb, cell 17 (headline_df). Column-order\n"
                      "sensitivity documented in cells 11–14. Column-order-shuffle seed pinned to 42 (not\n"
                      "this notebook's usual seed=0 default) so these numbers match the Length-Controlled\n"
-                     "Benchmark section exactly. Values verified 2026-10-25. Full caveats in FIGURE_NOTES.md.")
+                     "Benchmark section exactly. Full caveats in FIGURE_NOTES.md.")
     else:
         _footer(fig, "Source: 06_strategy_ablation.ipynb, cell 17 (headline_df). Column-order sensitivity "
                      "documented in cells 11–14.")
@@ -350,8 +349,7 @@ def figure3():
     if _cfg()["verbose_footer"]:
         _footer(fig, "Source: this work/06_strategy_ablation.ipynb, cells 32 (decile-bin matching) and 35\n"
                      "(length_benchmark_df). Matched by word-count decile bin, not exact-length pairs; a\n"
-                     "separate, non-comparable sample exists in 04.3 (not used here). Verified 2026-10-14.\n"
-                     "Full caveats in FIGURE_NOTES.md.")
+                     "separate, non-comparable sample exists in 04.3 (not used here).")
     else:
         _footer(fig, "Matched by word-count decile bin, not exact-length pairs. A separate, non-comparable sample exists\n"
                      "in 04.3 (not used here). Source: 06_strategy_ablation.ipynb, cells 32, 35.")
@@ -415,7 +413,7 @@ def figure4():
         _footer(fig, "Source: this work/04.2_baseline_comparison.ipynb, cells 30–31. Means from the full\n"
                      "dataset; display trimmed at <600 words (excludes 56 comments, 1.4%, per the\n"
                      "notebook's own cutoff). Shapes shown as density, not raw counts — legend states\n"
-                     "actual class sizes. Verified 2026-10-14. Full caveats in FIGURE_NOTES.md.")
+                     "actual class sizes.")
     else:
         _footer(fig, "Source: 04.2_baseline_comparison.ipynb, cells 30–31.")
 
@@ -505,7 +503,7 @@ def figure5():
         _footer(fig, "Source: this work/07_strategy_interpretation.ipynb, cell 36 (shap_comparison).\n"
                      "Fitted-model importance, not a causal effect. Strategy scores are LLM-generated;\n"
                      "refutation and justification had the weakest agreement with human scoring\n"
-                     "(05_rhetorical_scoring.ipynb). Verified 2026-10-14. Full caveats in FIGURE_NOTES.md.")
+                     "(05_rhetorical_scoring.ipynb).")
     else:
         _footer(fig, "Fitted-model importance, not a causal effect. Source: 07_strategy_interpretation.ipynb, cell 36.")
 
@@ -598,8 +596,8 @@ def figure6():
         _footer(fig, "Source: this work/07_strategy_interpretation.ipynb cell 39 (home, full population),\n"
                      "this work/08_wa_external_validation.ipynb cell 33 (WA, full population). Justification\n"
                      "leads by this metric in both datasets; refutation leads by SHAP importance at home only\n"
-                     "(Figure 5) — the two methods disagree on CMV's top strategy. Verified 2026-10-14. Full\n"
-                     "caveats in FIGURE_NOTES.md.",
+                     "(Figure 5) — the two methods disagree on CMV's top strategy. Full caveats in\n"
+                     "FIGURE_NOTES.md.",
                 center=True)
     else:
         _footer(fig, "Source: 07_strategy_interpretation.ipynb cell 39 (home), 08_wa_external_validation.ipynb cell 33 (WA).",
@@ -671,7 +669,7 @@ def figure7():
                      f"(Labruna et al. 2026, Table 1): independent scoring {lit_independent[0]:.2f}–"
                      f"{lit_independent[1]:.2f}%, full MS-PS method {lit_full[0]:.2f}–{lit_full[1]:.2f}% —\n"
                      "context only, not a like-for-like comparison. Excludes exploratory\n"
-                     "wa_quick_experiments.ipynb results. Verified 2026-10-14. Full caveats in FIGURE_NOTES.md.")
+                     "wa_quick_experiments.ipynb results. Full caveats in FIGURE_NOTES.md.")
     else:
         _footer(fig, "Source: 08_wa_external_validation.ipynb, cells 20, 38–39.")
 
@@ -753,7 +751,7 @@ def figure8():
                      "00_introduction.ipynb §1.4 and README.md's own notebook-sequence\n"
                      "table (full nine-subsection breakdown: 02_METHODS.md §2.1–§2.9). The "
                      "length confound discovered during modeling (phase 2)\n"
-                     "reframes every later phase's research question. Verified 2026-10-27.",
+                     "reframes every later phase's research question.",
                      center=footer_center)
     else:
         _footer(fig, "Schematic -- see README.md's notebook-sequence table.", center=footer_center)
@@ -850,7 +848,7 @@ def figure9():
                      "and evidence are rank-1 and rank-2 in every one of those repeats. The length-matched version\n"
                      "of this same comparison (07 cell 36, 08 cell 42) tells the same story, despite WA's matching\n"
                      "being a weaker length control than CMV's (08 cell 36: removes 23% of WA's length confound\n"
-                     "vs. 79% of CMV's). Verified 2026-10-27.",
+                     "vs. 79% of CMV's).",
                 center=True)
     else:
         _footer(fig, "Source: 07_strategy_interpretation.ipynb cell 24 (home), 08_wa_external_validation.ipynb cell 24 (WA).",

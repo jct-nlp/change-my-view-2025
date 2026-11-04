@@ -1,4 +1,4 @@
-# Figure Notes — Eight Presentation Figures
+# Figure Notes — Nine Presentation Figures
 
 **Status:** 2026-10-15, final targeted refinement pass. Fixed Figure 7's overlapping literature-band
 labels and chance-line position (Priority 1); kept all eight strategies in Figure 6 and added a
@@ -15,6 +15,16 @@ issues" at the end of this document for the full list of what changed and why.
 remaining "not yet built" figure placeholder in `METHODS_REVIEW_NOTES.md` §5. It is a schematic,
 not a data chart, so several of the per-figure subsections below (exact values, uncertainty)
 don't apply to it the way they do to Figures 1–7 — see its own entry for what's covered instead.
+
+**2026-10-28 addendum:** added Figure 9, a SHAP-based parallel to Figure 6's rank-biserial
+CMV-vs-WA strategy-ranking comparison. Originally built during presentation work and then dropped
+from the slides specifically — not the report — to avoid introducing a third statistical framework
+(after SHAP and rank-biserial are each already used once) into a time-constrained 15-minute talk.
+Decided 2026-10-28 to include it in the written report, where that time/complexity constraint
+doesn't apply and where §2.8 already commits to showing both SHAP and rank-biserial for the home-
+population comparison — Figure 9 completes that same two-metric pattern for the cross-dataset
+comparison. Like Figures 2, 6, and 7, it shows a finding (not procedure), so it belongs in Results,
+not Methods — staged as a caption in `RESULTS_SHORTLIST.md` Finding 5 until Results is drafted.
 
 Covers all seven data-driven figures identified as essential in
 `FIGURE_SELECTION_PLAN.md`. The charts themselves are kept deliberately lean — one title, one
@@ -632,6 +642,95 @@ strategies, validate externally — each traceable to its own notebook(s).
 "Here's the shape of the whole project in four phases: prepare the data, build and evaluate
 models — which is where we found a length confound that reframed everything after it — analyze
 the rhetorical strategies, and validate externally on an independent dataset."
+
+---
+
+## Figure 9 — SHAP-based strategy-ranking differences between datasets (CMV vs. WA)
+
+**Files:** `figure9_strategy_ranking_shap_cmv_vs_wa.png` / `.svg`
+**On-chart title/subtitle:** "SHAP Importance Is Also Dataset-Dependent" / "Mean |SHAP value|,
+full population (same method, both datasets) — rank 1 = strongest"
+
+### 1. Source notebook and exact cells
+Home (CMV): `this work/07_strategy_interpretation.ipynb`, cell 24 (full-population mean |SHAP|).
+WA: `this work/08_wa_external_validation.ipynb`, cell 24 (full-population mean |SHAP|, same
+method). Order-robustness check: `08` cell 45 (8 column-order shuffles, both the full-population
+and length-matched fits). Independently re-verified against both cells' live output 2026-10-28 —
+WA-side values and the order-robustness claim matched the code's own comments exactly.
+
+### 2. Exact values used
+| Strategy | CMV mean \|SHAP\| | WA mean \|SHAP\| |
+|---|---|---|
+| Refutation | 0.6034 | 0.0904 |
+| Justification | 0.4156 | 0.2798 |
+| Evidence | 0.3592 | 0.2136 |
+| Concession | 0.3439 | 0.1138 |
+| Simplification | 0.3193 | 0.1554 |
+| Personal Narrative | 0.1853 | 0.0861 |
+| Call to Action | 0.1837 | 0.1107 |
+| Question Asking | 0.1518 | 0.0953 |
+
+No numeric SHAP values are shown on the chart itself — only rank (1–8) — since the absolute values
+aren't comparable across two independently-fit models with different class balance and different
+fitted trees; showing magnitudes would invite a wrong-by-scale comparison the chart is meant to
+avoid.
+
+### 3. Dataset and evaluation population
+Same two populations and same fitted models as Figures 5–7: home — the 2,753-row scored
+population's held-out test fold; WA — WA's native heldout fold. Full-population fits only on this
+chart (not the length-matched variant, which tells the same story per the footer).
+
+### 4. Metric definitions
+Mean absolute SHAP value per feature, identical definition and computation to Figure 5 — how much
+a feature moves the fitted model's output, on average, across test-set comments. `word_count` is
+excluded from both sides' ranking (ranks among the 8 strategies only, matching `07`'s own
+reporting convention), consistent with Figure 5's exclusion of it for the same reason.
+
+### 5. Uncertainty / order-robustness
+Refutation's WA rank is checked across 8 random column-order shufflings (`08` cell 45, both
+full-population and length-matched fits): ranks 6th–8th of 8 in every repeat, never higher than
+6th — the collapse from CMV's #1 is not a column-order artifact. Justification and evidence are
+rank-1 and rank-2 respectively in every one of those same 16 repeats (8 shuffles × 2 populations) —
+also not artifacts.
+
+### 6. Methodological limitations
+- **This is the SHAP-side parallel to Figure 6, not a replacement for it.** The two figures use
+  different metrics (SHAP vs. Mann-Whitney rank-biserial) and tell related but not identical
+  stories — see the comparison note below.
+- SHAP importance is not a causal-effect estimate (same caveat as Figure 5).
+- Strategy scores are LLM-generated measurements on a 1–5 rubric (same reliability caveat as
+  Figures 5/6 — refutation and justification were the two strategies hardest to calibrate against
+  human judgment, per `05_rhetorical_scoring.ipynb`'s validation).
+- WA's length-matching removes a smaller share of its length confound than CMV's own matching does
+  (23% vs. 79%, per `08` cell 36) — a weaker control, though the chart only uses the full-population
+  fit, not the length-matched one, so this caveat is about a claim this chart does *not* make, not
+  about the chart's own content.
+
+### 7. Comparison with Figure 6 (rank-biserial)
+Both figures answer "does dataset-dependence replicate" but disagree on *how much* refutation
+suffers: by rank-biserial (Figure 6), refutation drops from 2nd (home) to 4th (WA) — still
+mid-pack. By SHAP (this figure), refutation drops from 1st (home) to order-robustly 6th–8th (WA) —
+near the bottom. Justification is #1 by rank-biserial in both datasets (stable throughout); by
+SHAP it rises from 2nd (home) to 1st (WA) — strong in both, but not already-#1 at home the way
+rank-biserial shows it. Both metrics agree directionally (refutation weakens, justification and
+evidence strengthen, moving toward WA) but disagree on magnitude and on CMV's own top strategy —
+this is the same SHAP-vs-rank-biserial disagreement already disclosed for the home-population
+comparison in `02_METHODS.md` §2.8, now shown to persist in the cross-dataset comparison too.
+
+### 8. One-sentence takeaway
+By SHAP, refutation's importance collapses far more severely on Winning Arguments than the
+rank-biserial comparison (Figure 6) suggests — a second, independent statistical lens on the same
+"which strategy generalizes" question, largely agreeing with Figure 6's direction but not its
+magnitude.
+
+### 9. Suggested speaker notes (~30–35 seconds, if used — currently cut from the presentation to
+avoid a third statistical framework in a 15-minute talk; written for report/Q&A use)
+"We can ask the same cross-dataset question a different way — not by effect size, but by how much
+the fitted model actually relies on each strategy, via SHAP. The story rhymes with the rank-biserial
+version: justification and evidence come out stronger on WA, refutation weaker. But by this metric,
+refutation's fall is much steeper — from the single most relied-on strategy at home to one of the
+least relied-on on WA, consistently across every column ordering we checked. The two statistical
+lenses agree on direction, not on how dramatic the reversal is."
 
 ---
 

@@ -277,6 +277,19 @@ on Winning Arguments, with literature benchmark ranges shown for context
 the home dataset and the Winning Arguments corpus (`07_strategy_interpretation.ipynb`;
 `08_wa_external_validation.ipynb`).]
 
+[FIGURE (for Results, once drafted): `figures/report/figure9_strategy_ranking_shap_cmv_vs_wa.png`
+— **Figure N.** Mean |SHAP| rank (not magnitude — the two fitted models' SHAP values aren't
+comparable in absolute terms) for each of the eight strategies, computed identically on the home
+dataset and the Winning Arguments corpus (`07_strategy_interpretation.ipynb`;
+`08_wa_external_validation.ipynb`). The SHAP-side parallel to the figure above — added to the
+report 2026-10-28 (decided to cut from the presentation only, to avoid a third statistical
+framework in a time-constrained talk). Agrees with the rank-biserial figure on direction
+(refutation weakens on WA, justification/evidence strengthen) but shows a steeper collapse for
+refutation (1st→order-robustly 6th–8th, vs. 2nd→4th by rank-biserial) — worth stating both
+figures' numbers together, not picking one, the same way §2.8 already declines to pick between
+SHAP and rank-biserial for the home-population comparison. See `FIGURE_NOTES.md`'s Figure 9 entry
+for the full comparison write-up.]
+
 **Why it matters:** honest external validation is exactly the kind of result that distinguishes a
 rigorous project from an overfit one — the structural claim ("rhetorical strategies carry
 length-independent signal") replicates cleanly; the more specific claim ("refutation is *the*
