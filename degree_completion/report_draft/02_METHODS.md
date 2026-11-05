@@ -356,19 +356,10 @@ question addressed in §2.5 onward.
 distribution by outcome for the full 3,971-comment dataset, with each class's mean indicated
 (`04.2_baseline_comparison.ipynb`).]
 
-**Table N.** The four models discussed above, all evaluated on the identical 709-comment test
-fold (no-skill PR-AUC baseline 0.2031). Rows 1 and 4 use the order-sensitive XGBoost+SMOTE
-architecture (§2.7), so both of their metrics are reported as order-robust means ± SD across 8
-column-order shuffles. Rows 2–3 (logistic regression) have
-no such sensitivity and are reported as single-fit point estimates, which are already their stable
-values.
-
-| Model | PR-AUC | ROC-AUC |
-|---|---|---|
-| Originally selected engineered pipeline (XGBoost + SMOTE, trusted+untrusted) | 0.3676 ± 0.0182 | 0.6903 ± 0.0096 |
-| TF-IDF + Logistic Regression | 0.5119 | 0.8150 |
-| Word count alone (1 feature) | 0.5256 | 0.8294 |
-| Word-count-augmented re-selected pipeline (XGBoost + SMOTE, trusted+untrusted + `word_count`) | 0.4831 ± 0.0257 | 0.7923 ± 0.0073 |
+These four models — both their single-fit point estimates and, for the order-sensitive engineered
+pipeline, its order-robust mean ± SD — are tabulated together in the Results chapter (Table N,
+§3.1.2; the word-count-augmented re-selected pipeline's figures are discussed in §3.1.4), rather
+than repeated here.
 
 ## 2.5 Length-Controlled Analysis
 

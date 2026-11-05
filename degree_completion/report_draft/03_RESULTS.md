@@ -29,14 +29,17 @@ logistic regression using only the comment's raw word count reached PR-AUC 0.525
 of the three models, using the least information.
 
 **Table N.** Held-out PR-AUC and ROC-AUC for the engineered-feature pipeline and the two baselines
-that motivated this section, on the identical 709-comment test fold (no-skill PR-AUC 0.2031).
+that motivated this section, on the identical 709-comment test fold (no-skill PR-AUC 0.2031). The
+engineered pipeline is the only order-sensitive row (§2.3, §2.7); its order-robust mean ± SD across
+eight column-order shuffles is given alongside its single-fit point estimate. The other three rows
+have no column-order degree of freedom and are reported as single-fit point estimates only.
 
-| Model | PR-AUC | ROC-AUC |
-|---|---|---|
-| Majority-class (no-skill reference) | 0.2031 | 0.5000 |
-| Selected engineered pipeline (XGBoost + SMOTE, trusted+untrusted) | 0.3848 | 0.6982 |
-| TF-IDF + Logistic Regression | 0.5119 | 0.8150 |
-| Word count alone (1 feature) | 0.5256 | 0.8294 |
+| Model | PR-AUC | PR-AUC (order-robust mean ± SD) | ROC-AUC | ROC-AUC (order-robust mean ± SD) |
+|---|---|---|---|---|
+| Majority-class (no-skill reference) | 0.2031 | n/a (order-invariant) | 0.5000 | n/a (order-invariant) |
+| Selected engineered pipeline (XGBoost + SMOTE, trusted+untrusted) | 0.3848 | 0.3676 ± 0.0182 | 0.6982 | 0.6903 ± 0.0096 |
+| TF-IDF + Logistic Regression | 0.5119 | n/a (order-invariant) | 0.8150 | n/a (order-invariant) |
+| Word count alone (1 feature) | 0.5256 | n/a (order-invariant) | 0.8294 | n/a (order-invariant) |
 
 The "majority-class" row is this fold's positive-class prevalence, realized via a
 non-discriminating constant-score classifier rather than a hard always-negative decision rule (its
@@ -53,16 +56,16 @@ above the raw label's own correlation with length (r = 0.3716, §3.1.3) — so s
 real predictive signal, not only a length proxy, and removing them did not isolate a
 length-independent rhetorical signal.
 
-Applying the order-robust and bootstrap-based reliability checks introduced in §2.3 to this
-comparison gives two further qualifications. First, the engineered pipeline's single-order point
-estimate (0.3848) sits toward the high end of what the architecture actually produces: averaged
-over eight column-order shuffles, it comes to 0.3676 ± 0.0182, since XGBoost's tie-breaking among
-this feature set's many correlated columns is itself sensitive to column order (§2.3; the mechanism
-is set out fully in §2.7, which first identified it). Second, the bootstrap 95% confidence intervals
-for the engineered pipeline ([0.311, 0.463]) and TF-IDF ([0.430, 0.603]) overlap substantially. The
-ranking "word count beats TF-IDF beats the engineered pipeline" is this test fold's best
-point-estimate ordering, consistent across every variant of the comparison tried, but it is not a
-gap any single 709-comment split proves beyond its own sampling noise.
+Two further qualifications apply to this comparison. First, the engineered pipeline's single-fit
+point estimate (0.3848) sits toward the high end of what the architecture actually produces across
+column orderings — the order-robust mean in Table N (0.3676 ± 0.0182) is about one SD lower — since
+XGBoost's tie-breaking among this feature set's many correlated columns is itself sensitive to
+column order (§2.3; the mechanism is set out fully in §2.7, which first identified it). Second, a
+bootstrap-based reliability check (§2.3) gives 95% confidence intervals of [0.311, 0.463] for the
+engineered pipeline and [0.430, 0.603] for TF-IDF, which overlap substantially. The ranking "word
+count beats TF-IDF beats the engineered pipeline" is this test fold's best point-estimate ordering,
+consistent across every variant of the comparison tried, but it is not a gap any single
+709-comment split proves beyond its own sampling noise.
 
 ### 3.1.3 Comment-length distributions and within-thread evidence
 
