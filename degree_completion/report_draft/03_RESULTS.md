@@ -41,26 +41,27 @@ have no column-order degree of freedom and are reported as single-fit point esti
 | TF-IDF + Logistic Regression | 0.5119 | n/a (order-invariant) | 0.8150 | n/a (order-invariant) |
 | Word count alone (1 feature) | 0.5256 | n/a (order-invariant) | 0.8294 | n/a (order-invariant) |
 
-The "majority-class" row is this fold's positive-class prevalence, realized via a
-non-discriminating constant-score classifier rather than a hard always-negative decision rule (its
-PR-AUC equals the fold's positive rate for that reason, not because it never predicts the positive
-class; see §2.3). The three non-reference values are plotted in Figure 1 (§2.4).
+The "majority-class" row is this fold's own positive-class prevalence, not a property of a hard
+always-negative decision rule (§2.3). The three non-reference values are plotted in Figure 1
+(§2.4).
 
 Inspecting the TF-IDF model's coefficients showed that the great majority of its most heavily
 weighted tokens were common stopwords, together with the token "edit" — a pattern more consistent
 with the model tracking how much text a comment contains than with it tracking rhetorical content.
-A follow-up check refitting TF-IDF with English stopwords removed found that this did not close the
+A follow-up check, refitting TF-IDF with English stopwords removed, found that this did not close the
 gap to `word_count`: PR-AUC fell from 0.5119 to 0.4394, and the correlation between the model's
 predicted probability and raw word count only dropped from r = 0.8433 to r = 0.7417 — still far
-above the raw label's own correlation with length (r = 0.3716, §3.1.3) — so stopwords were carrying
-real predictive signal, not only a length proxy, and removing them did not isolate a
-length-independent rhetorical signal.
+above the raw label's own correlation with length (r = 0.3716, §3.1.3) — so stopword removal did not
+cleanly separate a length-independent rhetorical signal from a length-proxy effect: the lost
+predictive power is at least as consistent with stopwords being an unusually reliable length-tracking
+channel — common function words appear in nearly every sentence and scale smoothly with length,
+unlike sparser content words — as it is with them holding genuinely separate, non-length content.
 
 Two further qualifications apply to this comparison. First, the engineered pipeline's single-fit
 point estimate (0.3848) sits toward the high end of what the architecture actually produces across
 column orderings — the order-robust mean in Table N (0.3676 ± 0.0182) is about one SD lower — since
 XGBoost's tie-breaking among this feature set's many correlated columns is itself sensitive to
-column order (§2.3; the mechanism is set out fully in §2.7, which first identified it). Second, a
+column order, with the mechanism set out fully in §2.3. Second, a
 bootstrap-based reliability check (§2.3) gives 95% confidence intervals of [0.311, 0.463] for the
 engineered pipeline and [0.430, 0.603] for TF-IDF, which overlap substantially. The ranking "word
 count beats TF-IDF beats the engineered pipeline" is this test fold's best point-estimate ordering,
@@ -120,7 +121,7 @@ involved are small (1,235–1,638 rows).
 
 Re-running the full 27-combination selection grid (§2.3) from scratch on the strict decile-matched
 sample illustrates a distinct methodological risk rather than a substantive finding about length.
-The grid's winner by validation PR-AUC on this sample (`RF (none) | embeddings-only`, validation
+The grid's winner by validation PR-AUC on this sample (`RF (no resampling) | embeddings-only`, validation
 PR-AUC 0.6656 against a 205-row validation set) scored PR-AUC 0.4518 on the corresponding test
 partition — *below* that partition's own no-skill baseline of 0.4679, a lift of −0.0162. Simply
 reusing the architecture already selected on the full dataset (XGBoost + SMOTE, trusted+untrusted),
@@ -134,8 +135,7 @@ full dataset with `word_count` folded in as an additional candidate feature, via
 trusted+untrusted, now 240 features including `word_count`), and test PR-AUC rose from 0.3848 to
 **0.4922** — closing most of the gap to TF-IDF (0.5119). Order-robust means move in the same
 direction (0.3676 ± 0.0182 to 0.4831 ± 0.0257), and the two configurations' bootstrap 95%
-confidence intervals, [0.311, 0.463] and [0.410, 0.586], barely overlap — the most statistically
-decisive single comparison reported in this section. `word_count` is accordingly treated as a
+confidence intervals, [0.311, 0.463] and [0.410, 0.586], barely overlap. `word_count` is accordingly treated as a
 first-class engineered feature in every analysis from §2.5 onward, not only as an external
 reference point.
 
@@ -174,19 +174,20 @@ difference 0.14–0.41). A comparison against a single human judge's hand-scorin
 convincing, 9 not), after the judge reviewed her own first-pass disagreements with the LLM, found
 at least 83.3% agreement within one point for every strategy (mean absolute difference 0.28–0.89).
 
-**Table N.** Reliability figures for each strategy, both at the ±1-point tolerance used throughout
-(`05_rhetorical_scoring.ipynb`).
+**Table N.** Reliability figures for each strategy (definitions in Methods, Table N, §2.6), test-retest
+(n = 200) and human agreement (n = 18 — the judge's final scores after reviewing her own first-pass
+disagreements with the LLM), both at the same ±1-point tolerance (`05_rhetorical_scoring.ipynb`).
 
-| Strategy | Test-retest: within ±1 pt | Human agreement: within ±1 pt | Human agreement: mean abs. diff. |
-|---|---|---|---|
-| Justification | 98.5% | 88.9% | 0.89 |
-| Concession | 99.0% | 94.4% | 0.67 |
-| Evidence | 99.5% | 88.9% | 0.72 |
-| Refutation | 95.5% | 83.3% | 0.89 |
-| Personal narrative | 99.5% | 94.4% | 0.28 |
-| Call-to-action | 95.5% | 100.0% | 0.67 |
-| Simplification | 98.0% | 100.0% | 0.28 |
-| Question-asking | 98.0% | 94.4% | 0.28 |
+| Strategy | Test-retest: within ±1 pt | Test-retest: mean abs. diff. | Human agreement: within ±1 pt | Human agreement: mean abs. diff. |
+|---|---|---|---|---|
+| Justification | 98.5% | 0.29 | 88.9% | 0.89 |
+| Concession | 99.0% | 0.29 | 94.4% | 0.67 |
+| Evidence | 99.5% | 0.24 | 88.9% | 0.72 |
+| Refutation | 95.5% | 0.41 | 83.3% | 0.89 |
+| Personal narrative | 99.5% | 0.14 | 94.4% | 0.28 |
+| Call-to-action | 95.5% | 0.30 | 100.0% | 0.67 |
+| Simplification | 98.0% | 0.27 | 100.0% | 0.28 |
+| Question-asking | 98.0% | 0.16 | 94.4% | 0.28 |
 
 Refutation and justification are the two strategies with the weakest human-judge agreement (lowest
 within-±1 rates and, tied, the highest mean absolute difference of the eight). As shown below, they

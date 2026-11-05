@@ -383,11 +383,10 @@ sample's own no-skill baseline was computed, allowing each model's apparent skil
 length control to be compared directly.
 
 Across all three models tested, apparent predictive lift drops substantially once length is
-controlled for — typically by roughly three-quarters to seven-eighths, depending on the specific
-model and the strictness of the matching — but in no case falls to zero or below. This pattern
-indicates that some predictive signal beyond raw length survives length control for every approach
-tested, though the degree of that survival differs considerably between models and is, on its own,
-modest in absolute terms. A further, separately noted methodological result from this analysis
+controlled for, but in no case falls to zero or below — some predictive signal beyond raw length
+survives length control for every approach tested, though modest in absolute terms; the exact lift
+figures for each sample are reported in Results §3.1.4. A further, separately noted methodological
+result from this analysis
 concerns the risk of re-selecting a model on a small sample: re-running the complete 27-combination
 selection grid from §2.3 from scratch on the small (1,235-row) strictly length-matched sample
 selected a different architecture that, when evaluated on the corresponding test partition, scored
@@ -427,7 +426,11 @@ delta-awarded, yielding a scored population of 2,753 comments across 400 origina
 of the full 3,971-comment dataset, not the full dataset itself. This restriction reflects a
 judgment that very short comments carry too little content for a meaningful rhetorical-strategy
 judgment, while the "or delta-awarded" clause ensures that no positive example is discarded
-regardless of its length. Because the restriction disproportionately removes short, non-convincing
+regardless of its length. One consequence of that clause is worth stating directly: 42 of the 641
+delta-awarded comments (6.6%) are themselves under 30 words, the shortest at 2 words, and were
+scored on the full eight-strategy rubric regardless — a rubric built for comments with enough
+content to exhibit more than one strategy at once has correspondingly little to work with on these
+particular rows. Because the restriction disproportionately removes short, non-convincing
 comments while retaining every convincing comment, the resulting subset's convincing-comment
 prevalence (641 of 2,753 comments, 23.3%) is substantially higher than the full dataset's 16.1%.
 Later sections that report figures computed within this scored subset (§2.7 onward) use this
@@ -445,35 +448,31 @@ consistent with the earlier, original-post-blind prompt having systematically un
 refutation. The full scoring run used the revised, original-post-aware prompt.
 
 Two reliability checks were carried out, both explicitly framed as lightweight checks, not a
-formal inter-annotator-agreement study. The first is a test-retest check: 200
-comments were scored twice, independently, and the two passes were compared. Agreement was strong
-across all eight strategies, with 95–99% of repeat scores falling within one point of the original
-score (mean absolute difference between 0.14 and 0.41 depending on strategy). The second is a
-comparison against a single human judge's hand-scoring of 18 comments (9 convincing, 9 not). These
-figures are the judge's final scores, after she reviewed her own first-pass disagreements with the
-LLM and corrected some of them; initial agreement was considerably weaker (exact-match as low as
-11.1%, for justification, before this review). At the same ±1-point tolerance used for the
-test-retest check above, final agreement reaches at least 83.3% for every strategy, with mean
-absolute differences between 0.28 and 0.89 — weakest specifically for refutation and justification,
-the two hardest strategies to calibrate against human judgment even after review. This reliability
-pattern is directly relevant to results reported later in this project, since refutation and
-justification also prove to be the two strategies most central to the project's predictive and
-interpretive findings (§2.8).
+formal inter-annotator-agreement study: a test-retest check (200 comments scored twice,
+independently, and the two passes compared) and a comparison against a single human judge's
+hand-scoring of 18 comments (9 convincing, 9 not). The human-agreement figures are the judge's
+final scores, after she reviewed her own first-pass disagreements with the LLM and corrected some
+of them; initial agreement was considerably weaker (exact-match as low as 11.1%, for
+justification, before this review). Agreement is strong on the test-retest check across all eight
+strategies, and weaker but still reasonable on the human-agreement check, worst specifically for
+refutation and justification — the two hardest strategies to calibrate against human judgment even
+after review. This reliability pattern is directly relevant to results reported later in this
+project, since refutation and justification also prove to be the two strategies most central to
+the project's predictive and interpretive findings (§2.8). Exact reliability figures for each
+strategy are given in Results, Table N (§3.2.1).
 
-**Table N.** The eight rhetorical strategies, with the test-retest (n = 200) and human-agreement
-(n = 18, the judge's final scores after reviewing her own first-pass disagreements with the LLM —
-see prose above) reliability figures for each, both at the same ±1-point tolerance.
+**Table N.** The eight rhetorical strategies and their definitions.
 
-| Strategy | Definition | Test-retest: within ±1 pt | Test-retest: mean abs. diff. | Human agreement: within ±1 pt | Human agreement: mean abs. diff. |
-|---|---|---|---|---|---|
-| Justification | Gives a reason or logical basis for the position, beyond simply asserting it | 98.5% | 0.29 | 88.9% | 0.89 |
-| Concession | Acknowledges a valid point, limitation, or partial truth in the opposing view before responding | 99.0% | 0.29 | 94.4% | 0.67 |
-| Evidence | Cites a concrete fact, statistic, study, source, or specific example to support a claim | 99.5% | 0.24 | 88.9% | 0.72 |
-| Refutation | Directly identifies and counters a specific flaw, assumption, or weak point in the original argument | 95.5% | 0.41 | 83.3% | 0.89 |
-| Personal narrative | Draws on the commenter's own lived experience to make the case | 99.5% | 0.14 | 94.4% | 0.28 |
-| Call-to-action | Offers a concrete alternative way to act on or think about the issue, not just criticism | 95.5% | 0.30 | 100.0% | 0.67 |
-| Simplification | Uses an analogy, thought experiment, or simplified restatement to make an abstract point concrete | 98.0% | 0.27 | 100.0% | 0.28 |
-| Question-asking | Poses a genuine question back to the original poster that probes an assumption or invites clarification | 98.0% | 0.16 | 94.4% | 0.28 |
+| Strategy | Definition |
+|---|---|
+| Justification | Gives a reason or logical basis for the position, beyond simply asserting it |
+| Concession | Acknowledges a valid point, limitation, or partial truth in the opposing view before responding |
+| Evidence | Cites a concrete fact, statistic, study, source, or specific example to support a claim |
+| Refutation | Directly identifies and counters a specific flaw, assumption, or weak point in the original argument |
+| Personal narrative | Draws on the commenter's own lived experience to make the case |
+| Call-to-action | Offers a concrete alternative way to act on or think about the issue, not just criticism |
+| Simplification | Uses an analogy, thought experiment, or simplified restatement to make an abstract point concrete |
+| Question-asking | Poses a genuine question back to the original poster that probes an assumption or invites clarification |
 
 ## 2.7 Strategy Ablation
 
