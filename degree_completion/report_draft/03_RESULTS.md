@@ -200,10 +200,8 @@ The eight strategy scores were appended to a 229-feature engineered baseline (th
 trusted representation with `word_count` added) and evaluated with the fixed XGBoost + SMOTE
 architecture, restricted to the 2,753-comment scored population (thread-grouped split: 2,161 train
 / 592 test). Because of this pipeline's column-order sensitivity — reordering the same 237 columns
-swung PR-AUC by as much as 0.0482 in a direct check — every PR-AUC below is an order-robust mean ±
-SD across eight column orderings, not a single-order point estimate; these are measures of
-sensitivity to an arbitrary implementation detail, not confidence intervals or any other estimate
-of sampling uncertainty.
+swung PR-AUC by as much as 0.0482 in a direct check (§2.3) — every PR-AUC below is an order-robust
+mean ± SD across eight column orderings, not a single-order point estimate.
 
 **Table N.** Strategy-score ablation on the 2,753-comment scored population (test-fold no-skill
 PR-AUC 0.2382; `06_strategy_ablation.ipynb`).
@@ -219,8 +217,7 @@ for the engineered baseline with and without the eight strategy scores, and for 
 alone, on the 2,753-comment scored population (`06_strategy_ablation.ipynb`).]
 
 Adding the eight strategy scores raises PR-AUC from 0.4434 to 0.5098, a gain of **0.0664**, which
-clears the combined order-noise band of the two configurations and is accordingly the clearest
-positive result reported in this chapter. The strategy scores alone reach 0.3514 — a real,
+clears the combined order-noise band of the two configurations. The strategy scores alone reach 0.3514 — a real,
 standalone signal, positioned between the scored population's own no-skill baseline (0.2382) and
 the combined model, but not a replacement for the existing engineered features.
 
@@ -228,9 +225,8 @@ the combined model, but not a replacement for the existing engineered features.
 
 Whether this gain reflects something beyond comment length, rather than another proxy for it, was
 tested on a strict decile-bin length-matched sample built within the 2,753-comment scored
-population itself (1,235 comments; this is a separate construction from §3.1.4's full-dataset
-length-matched samples, built from a different population, and the two should not be conflated even
-where sample sizes coincide).
+population itself — independently constructed from §3.1.4's full-dataset sample of the same size
+(1,235 comments).
 
 **Table N.** The strategy-score gain, full scored population versus the length-matched sample built
 within it (`06_strategy_ablation.ipynb`).
@@ -256,21 +252,11 @@ effect on persuasion.
 
 ### 3.2.4 Compact models
 
-The two compact configurations reported in this subsection were identified by different routes, and
-the distinction matters for how each should be read. The nine-column combination was found by
-directly comparing many candidate feature-family configurations against this population's own
-held-out test partition and keeping whichever scored highest (§2.7) — an exploratory, test-informed
-search, not a single evaluation of an independently chosen feature set. The four-column robust core,
-reported below, was instead chosen by a fixed statistical criterion established in §3.2.5 — the
-three strategies whose Mann-Whitney effect size remained significant both before and after length
-matching — rather than by searching for the best-scoring subset; its PR-AUC is a single confirmatory
-evaluation of that already-chosen configuration, not the winner of a comparison across many
-candidates. That selection criterion was itself computed on the same test partition used for every
-evaluation in this chapter, rather than on an independent validation sample, so the robust core's
-selection is not fully insulated from the test set either — just in this narrower, criterion-based
-sense, not via a PR-AUC search. The classifier/resampling comparisons reported alongside both
-configurations, by contrast, do use a genuine inner-validation split once the feature set itself is
-fixed.
+The nine-column combination and the four-column robust core reported below were identified by
+different routes, described fully in §2.7–§2.8: the nine-column combination by an exploratory
+search evaluated directly against this population's own held-out test partition, the robust core by
+a fixed Mann-Whitney significance criterion rather than a search. Both qualifications carry through
+to how the figures below should be read.
 
 Building up from the strategy scores alone, family by family (mirroring the engineered-feature
 ablation methodology of §3.1), identified a configuration smaller than the full 237-column set that
@@ -288,22 +274,19 @@ scoring comparably to the originally selected XGBoost configuration (0.5432 ± 0
 and not a basis for preferring one over the other on this feature set; XGBoost was retained for
 consistency with the rest of the project.
 
-A four-column subset of the nine-column model — refutation, justification, simplification, and
-`word_count`, the three strategies that remained statistically significant both before and after
-length matching in the univariate comparison reported in §3.2.5 — was tested directly by dropping
-the remaining five strategies individually, in combination, and all at once. Every tested removal
-moved PR-AUC by at most −0.016, smaller than the combined order-noise band of the configurations
-being compared (the sum of their two respective SDs), so none of these differences is itself a
-confirmed effect. The four-column combination reached order-robust PR-AUC **0.5489 ± 0.0046** — a
+The robust core — refutation, justification, simplification, and `word_count` (selection criterion
+in §2.8) — reached order-robust PR-AUC **0.5489 ± 0.0046**. Every tested removal of the other five
+strategies moved PR-AUC by at most −0.016, smaller than the combined order-noise band of the
+configurations being compared (the sum of their two respective SDs), so none of these differences
+is itself a confirmed effect. This is a
 higher point estimate than either of the nine-column estimates above, and in that sense the highest
 raw PR-AUC among the configurations evaluated against this population, but not distinguishably
 better than the nine-column model once the two configurations' combined order-noise band (0.0046 +
 0.0108 = 0.0154, against a gap of only 0.0109) is taken into account. The honest reading is that
 question-asking, personal narrative, and evidence can be dropped without a measurable cost to
-predictive power, not that the four-column model is confirmed superior. This four-feature
-combination — referred to below as the robust core — was fixed in advance of the external
-validation reported in §3.3, rather than selected by searching for the best-performing subset on
-that external dataset.
+predictive power, not that the four-column model is confirmed superior. The robust core was fixed
+in advance of the external validation reported in §3.3, not selected by searching for the
+best-performing subset on that external dataset.
 
 ### 3.2.5 Individual strategy importance: SHAP versus Mann-Whitney
 
@@ -348,7 +331,8 @@ Refutation and justification diverge sharply once length is controlled for. Refu
 importance declines only modestly (0.6034 to 0.5193, holding the top rank among strategies) and its
 rank-biserial effect size retains 49% of its full-population value (0.3149 to 0.1540, remaining
 significant). Justification's SHAP importance collapses from the model's third most influential
-input to one of its least influential strategies (0.4156 to 0.1956) — most of what the fitted model
+input (`word_count` and refutation ranking first and second) to one of its least influential
+strategies (0.4156 to 0.1956) — most of what the fitted model
 was using justification for on the full population appears length-related — while its rank-biserial
 effect size retains only 37% of its value (0.3584 to 0.1309) but *remains* statistically significant
 after FDR correction. Simplification is a modest, consistent third strategy across both measures
@@ -376,13 +360,9 @@ Two distinct sources of measurement uncertainty apply to every result in this se
 not be conflated. First, the LLM-assigned strategy scores themselves carry the reliability profile
 reported in §3.2.1 — strong self-consistency, weaker and more variable agreement with a single
 human judge on a small (n = 18) sample, with refutation and justification specifically flagged as
-the hardest strategies to calibrate. Second, the fitted model's PR-AUC is sensitive to an
-essentially arbitrary implementation detail — the order its input columns are presented in — large
-enough (up to 0.0482 PR-AUC on the 237-column set) to rival some of the effects under study. Every
-PR-AUC figure in §3.2 from the ablation onward is therefore reported as a mean ± SD across eight
-column orderings; this SD describes sensitivity to column order, not sampling uncertainty, and
-should not be read as a bootstrap confidence interval or any other such estimate. Both sources of
-uncertainty are independent of each other and both bear on how confidently the refutation/
+the hardest strategies to calibrate. Second, the fitted model's PR-AUC carries the column-order
+sensitivity already described (§2.3, §3.2.2) — a different and independent source of uncertainty
+that does not reflect sampling error. Both sources bear on how confidently the refutation/
 justification pattern in §3.2.6 should be stated.
 
 Whether that specific pattern — refutation as the most length-robust strategy, justification as the
@@ -409,14 +389,12 @@ baseline of **0.5291** — far higher than the home dataset's no-skill baselines
 depending on the fold), reflecting WA's near-balanced, pairwise construction; raw PR-AUC values are
 not comparable between the two datasets without reference to each one's own no-skill baseline.
 
-A new model instance was fit on WA's own native training split and evaluated on WA's own native
-held-out split, with no architecture selection, hyperparameter search, or feature-set tuning
-performed using WA data. This is a transfer of the previously selected modeling procedure — reusing
-a fixed configuration but fitting new parameters on WA's own training data — not a zero-shot
-evaluation of the model already fitted on the home dataset. Because WA was scored only on the
-eight-strategy rubric and `word_count`, not the full engineered-feature pipeline, the feature set
-available for this evaluation is limited to combinations of the nine columns identified on the home
-dataset in §3.2.4, not the larger 237-column representation.
+The home-selected architecture and training configuration were reused on WA, but refit on WA's own
+native training split and evaluated on its native held-out split — a transfer of the modeling
+procedure, not a zero-shot evaluation of the model already fitted on the home dataset (full protocol
+in §2.9). Because WA was scored only on the eight-strategy rubric and `word_count`, the feature set
+available here is limited to combinations of the nine columns identified on the home dataset
+(§3.2.4), not the larger 237-column representation.
 
 ### 3.3.2 Predictive performance: word count, strategy scores, and the robust core
 

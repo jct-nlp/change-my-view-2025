@@ -489,11 +489,10 @@ described in this section is not a direct continuation of the exact feature set 
 with the eight strategy
 scores, the resulting representation totals 237 columns.
 
-The engineered-feature baseline alone achieves PR-AUC 0.4434 (± 0.0187); adding the
-eight strategy scores raises this to 0.5098 (± 0.0200), a gain of 0.0664. The eight strategy scores
-alone, with no engineered features at all, achieve PR-AUC 0.3514 (± 0.0065) — a real, standalone
-predictive signal, positioned between this population's own no-skill baseline (0.2382) and the
-combined 237-column model.
+Adding the eight strategy scores to the engineered-feature baseline produces a real, order-robust
+gain over that baseline alone; the strategy scores alone, with no engineered features at all, also
+carry a real, standalone predictive signal, though a smaller one than the combined representation.
+Exact figures are reported in Results, Table N (§3.2.2).
 
 A further, parsimony-oriented finding is reported here because it bears on how the engineered and
 strategy-score features interact. Among all feature combinations evaluated, the smallest — the
@@ -517,12 +516,11 @@ claim — that rhetorical-strategy scores carry real signal beyond comment lengt
 proxy for it — mirroring the same test §2.5 applied to `word_count`'s own contribution. It was
 checked using a length-matched sample built specifically for this 2,753-comment population: the
 same decile-bin matching procedure used for `04.3`'s strict decile-bin match (§2.5) was independently re-run
-here, yielding 1,235 comments. On this length-matched sample, the
-strategy-score gain drops from 0.0664 to 0.0557 PR-AUC, an 84% retention — far less erosion than
-`word_count`'s own lift or the engineered pipeline's own lift, both of which collapsed to about 18%
-of their full-dataset values under `04.3`'s strict matching (§2.5). This indicates the
-strategy-score signal is not primarily a proxy for comment length, unlike previous signal
-examined.
+here, yielding 1,235 comments. On this length-matched sample, the strategy-score gain retains a
+substantially larger share of its full-population value than `word_count`'s own lift or the
+engineered pipeline's own lift retained under `04.3`'s strict matching (§2.5); exact figures are
+reported in Results, Table N (§3.2.3). This indicates the strategy-score signal is not primarily a
+proxy for comment length, unlike previous signal examined.
 
 [FIGURE: `figures/report/figure3_strategy_gain_length_matching.png` — **Figure N.** The
 strategy-score PR-AUC gain reported above, recomputed on the length-matched sample within the
@@ -558,22 +556,8 @@ home dataset's full population; this is reported directly, as a genuine methodol
 Discussion chapter treats as unresolved, not papered over by relying on only one of the two
 measures.
 
-**Table N.** Both interpretive measures, full population and length-matched sample, for all eight
-strategies (`word_count`'s own SHAP value — 1.0245 full population, 0.8402 matched — is omitted
-from this table for the same reason it's excluded from the figure below: it dwarfs every
-strategy's and isn't itself one of the eight strategies under comparison). `*` marks FDR < 0.05
-significance.
-
-| Strategy | SHAP, full population | SHAP, length-matched | Rank-biserial r, full population | Rank-biserial r, length-matched |
-|---|---|---|---|---|
-| Justification | 0.4156 | 0.1956 | 0.3584* | 0.1309* |
-| Concession | 0.3439 | 0.3445 | 0.1481* | 0.0206 |
-| Evidence | 0.3592 | 0.3090 | 0.1018* | −0.0322 |
-| Refutation | 0.6034 | 0.5193 | 0.3149* | 0.1540* |
-| Personal narrative | 0.1853 | 0.2168 | −0.0217 | −0.0859* |
-| Call-to-action | 0.1837 | 0.2707 | 0.1584* | 0.0592 |
-| Simplification | 0.3193 | 0.3383 | 0.1944* | 0.0789* |
-| Question-asking | 0.1518 | 0.1806 | 0.0069 | −0.0345 |
+Both interpretive measures, for all eight strategies, full population and length-matched sample,
+are reported together in Results, Table N (§3.2.5).
 
 One row is worth flagging, not leaving implicit: `personal_narrative`'s rank-biserial effect
 is not significant on the full population but *is* significant, and negative, on the length-matched
@@ -583,6 +567,20 @@ two populations.
 [FIGURE: `figures/report/figure5_refutation_vs_justification_shap.png` — **Figure N.** Mean |SHAP|
 value for each of the eight rhetorical strategies, full population versus length-matched sample,
 for the nine-column selected model (`07_strategy_interpretation.ipynb`).]
+
+The two measures above converge on the same three strategies — refutation, justification, and
+simplification — as the ones whose rank-biserial effect size remains statistically significant both
+before and after length matching. A pruning check tested this directly: dropping the remaining five
+strategies from the nine-column model, individually, in combination, and all at once, against the
+same test partition used throughout this section. The four-column combination that survives this
+pruning — these three strategies plus `word_count` — is referred to as the robust core in the
+remainder of this report. Its selection differs methodologically from the nine-column search in
+§2.7: the robust core's three strategies were fixed in advance by the Mann-Whitney significance
+criterion above, not chosen by searching for the best-scoring subset — though that criterion was
+itself computed on the same test partition instead of an independent validation sample, so its
+selection is not fully insulated from the test set either, just in this narrower, criterion-based
+sense rather than via a PR-AUC search. Exact PR-AUC figures for both compact configurations are
+reported in Results, §3.2.4.
 
 ## 2.9 External Validation on Winning Arguments
 
