@@ -50,7 +50,15 @@ INK_SECONDARY = "#52514e"
 INK_MUTED = "#898781"
 GRIDLINE = "#e1e0d9"
 BASELINE_LINE = "#898781"
-SURFACE = "#FFFDF8"
+SURFACE_PRESENTATION = "#FFFDF8"
+SURFACE_REPORT = "#FFFFFF"
+
+
+def _surface():
+    """Background/surface color for the current mode: cream for slides, pure white for the
+    printed report (a projected cream background reads fine on a slide but looks unintentional
+    on a printed/PDF page)."""
+    return SURFACE_REPORT if MODE == "report" else SURFACE_PRESENTATION
 
 DPI = 300
 
@@ -115,9 +123,9 @@ def _set_mode(mode):
         "axes.labelcolor": INK_SECONDARY,
         "xtick.color": INK_SECONDARY,
         "ytick.color": INK_PRIMARY,
-        "figure.facecolor": SURFACE,
-        "axes.facecolor": SURFACE,
-        "savefig.facecolor": SURFACE,
+        "figure.facecolor": _surface(),
+        "axes.facecolor": _surface(),
+        "savefig.facecolor": _surface(),
     })
     os.makedirs(_cfg()["outdir"], exist_ok=True)
 
@@ -465,9 +473,9 @@ def figure5():
         line_color = INK_MUTED if not is_hi else INK_SECONDARY
         ax.plot([full, matched], [y - dy, y + dy], color=line_color, linewidth=(2.2 if is_hi else 1.2), zorder=2, alpha=(1.0 if is_hi else 0.6))
         ax.scatter([full], [y - dy], s=(95 if is_hi else 55), color=COLOR_BLUE, zorder=3,
-                   edgecolors=SURFACE, linewidths=1, alpha=(1.0 if is_hi else 0.75))
+                   edgecolors=_surface(), linewidths=1, alpha=(1.0 if is_hi else 0.75))
         ax.scatter([matched], [y + dy], s=(95 if is_hi else 55), color=COLOR_ORANGE, zorder=3,
-                   edgecolors=SURFACE, linewidths=1, alpha=(1.0 if is_hi else 0.75))
+                   edgecolors=_surface(), linewidths=1, alpha=(1.0 if is_hi else 0.75))
 
     ax.set_yticks(y_pos)
     labels = [display_names[name] for name, _, _ in data]
@@ -558,7 +566,7 @@ def figure6():
         for x, r, sig in [(x_home, home_r, home_sig), (x_wa, wa_r, wa_sig)]:
             rank = home_rank[name] if x == x_home else wa_rank[name]
             ax.scatter([x], [rank], s=(110 if is_hi else 70),
-                       facecolors=(color if sig else SURFACE), edgecolors=color, linewidths=1.6,
+                       facecolors=(color if sig else _surface()), edgecolors=color, linewidths=1.6,
                        zorder=(5 if is_hi else 3))
         label_color = INK_PRIMARY if is_hi else INK_MUTED
         weight = "bold" if is_hi else "normal"
@@ -587,7 +595,7 @@ def figure6():
         mlines.Line2D([], [], marker="o", linestyle="None", color=INK_MUTED, markersize=8,
                       markerfacecolor=INK_MUTED, label="Significant (FDR < .05)"),
         mlines.Line2D([], [], marker="o", linestyle="None", color=INK_MUTED, markersize=8,
-                      markerfacecolor=SURFACE, label="Not significant"),
+                      markerfacecolor=_surface(), label="Not significant"),
     ]
     ax.legend(handles=legend_handles, loc="lower center", bbox_to_anchor=(0.5, -0.05),
               ncol=2, frameon=False, fontsize=S(9.5))
@@ -709,7 +717,7 @@ def figure8():
     y = 0.7
 
     figsize = (10.5, 3.7) if MODE == "presentation" else (7.5, 3.9)
-    fig = plt.figure(figsize=figsize, facecolor=SURFACE)
+    fig = plt.figure(figsize=figsize, facecolor=_surface())
     top_frac = 0.72 if _cfg()["show_title"] else 0.88
     bottom_frac = 0.26 if _cfg()["verbose_footer"] else 0.10
     ax = fig.add_axes([0.03, bottom_frac, 0.94, top_frac - bottom_frac])
@@ -759,7 +767,7 @@ def figure8():
     else:
         _footer(fig, "Schematic -- see README.md's notebook-sequence table.", center=footer_center)
 
-    _save(fig, "figure8_pipeline_diagram", facecolor=SURFACE)
+    _save(fig, "figure8_pipeline_diagram", facecolor=_surface())
     plt.close(fig)
 
 

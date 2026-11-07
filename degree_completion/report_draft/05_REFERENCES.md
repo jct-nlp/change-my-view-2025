@@ -21,3 +21,7 @@ The pipeline draws on PRAW (Reddit API client), Google's `google-genai` SDK (Gem
 ## 5.4 AI tools used
 
 Google Gemini was used as the LLM underlying several engineered features (tone, formality, and rhetorical-appeal scores) and the rhetorical-strategy scoring rubric described in §2.2–§2.6; its role in the research method is documented throughout the Methods chapter. Claude Code (Anthropic) was used as an AI coding assistant during the development of the data-processing and modeling pipeline and the accompanying notebooks, and also assisted with drafting and editing this report's text. The research design, analysis, and conclusions are the author's own.
+
+## 5.5 Code and Data Availability
+
+The project's notebooks, supporting code (`common_functions.py`), and `README.md` are included directly with this submission, rather than linked via a hosted repository. `README.md` documents setup, the notebook execution order, and the project's working data files. The raw Reddit data is not included in the submission due to its size; it is available via the read-only Google Drive link given in `README.md`. The Winning Arguments corpus used for external validation (§2.9) is fetched automatically through ConvoKit and is not distributed as part of this submission.

@@ -28,7 +28,7 @@ logistic regression, using no engineered features at all, reached PR-AUC 0.5119.
 logistic regression using only the comment's raw word count reached PR-AUC 0.5256 — the strongest
 of the three models, using the least information.
 
-**Table N.** Held-out PR-AUC and ROC-AUC for the engineered-feature pipeline and the two baselines
+**Table 8.** Held-out PR-AUC and ROC-AUC for the engineered-feature pipeline and the two baselines
 that motivated this section, on the identical 709-comment test fold (no-skill PR-AUC 0.2031). The
 engineered pipeline is the only order-sensitive row (§2.3, §2.7); its order-robust mean ± SD across
 eight column-order shuffles is given alongside its single-fit point estimate. The other three rows
@@ -59,7 +59,7 @@ unlike sparser content words — as it is with them holding genuinely separate, 
 
 Two further qualifications apply to this comparison. First, the engineered pipeline's single-fit
 point estimate (0.3848) sits toward the high end of what the architecture actually produces across
-column orderings — the order-robust mean in Table N (0.3676 ± 0.0182) is about one SD lower — since
+column orderings — the order-robust mean in Table 8 (0.3676 ± 0.0182) is about one SD lower — since
 XGBoost's tie-breaking among this feature set's many correlated columns is itself sensitive to
 column order, with the mechanism set out fully in §2.3. Second, a
 bootstrap-based reliability check (§2.3) gives 95% confidence intervals of [0.311, 0.463] for the
@@ -99,7 +99,7 @@ and for the full dataset, each model's PR-AUC lift over that sample's own test-f
 baseline — not the whole-sample rate, which can drift from the actual test-fold rate on a split
 this small — was computed for TF-IDF, word count alone, and the engineered pipeline.
 
-**Table N.** PR-AUC lift over each sample's own test-fold no-skill baseline, full dataset versus the
+**Table 9.** PR-AUC lift over each sample's own test-fold no-skill baseline, full dataset versus the
 two length-controlled samples (`04.3_length_controlled_analysis.ipynb`).
 
 | Sample | n | Test-fold no-skill | TF-IDF lift | `word_count` lift | Engineered-pipeline lift |
@@ -174,7 +174,7 @@ difference 0.14–0.41). A comparison against a single human judge's hand-scorin
 convincing, 9 not), after the judge reviewed her own first-pass disagreements with the LLM, found
 at least 83.3% agreement within one point for every strategy (mean absolute difference 0.28–0.89).
 
-**Table N.** Reliability figures for each strategy (definitions in Methods, Table N, §2.6), test-retest
+**Table 10.** Reliability figures for each strategy (definitions in Methods, Table 5, §2.6), test-retest
 (n = 200) and human agreement (n = 18 — the judge's final scores after reviewing her own first-pass
 disagreements with the LLM), both at the same ±1-point tolerance (`05_rhetorical_scoring.ipynb`).
 
@@ -203,7 +203,7 @@ architecture, restricted to the 2,753-comment scored population (thread-grouped 
 swung PR-AUC by as much as 0.0482 in a direct check (§2.3) — every PR-AUC below is an order-robust
 mean ± SD across eight column orderings, not a single-order point estimate.
 
-**Table N.** Strategy-score ablation on the 2,753-comment scored population (test-fold no-skill
+**Table 11.** Strategy-score ablation on the 2,753-comment scored population (test-fold no-skill
 PR-AUC 0.2382; `06_strategy_ablation.ipynb`).
 
 | Feature set | PR-AUC (mean ± SD) | ROC-AUC (mean) |
@@ -212,9 +212,7 @@ PR-AUC 0.2382; `06_strategy_ablation.ipynb`).
 | Engineered baseline + 8 strategy scores, 237 columns | 0.5098 ± 0.0200 | 0.7657 |
 | Strategy scores only, 8 columns | 0.3514 ± 0.0065 | 0.6733 |
 
-[FIGURE: `figures/report/figure2_strategy_incremental_value.png` — **Figure N.** Held-out PR-AUC
-for the engineered baseline with and without the eight strategy scores, and for the strategy scores
-alone, on the 2,753-comment scored population (`06_strategy_ablation.ipynb`).]
+![**Figure 2.** Held-out PR-AUC for the engineered baseline with and without the eight strategy scores, and for the strategy scores alone, on the 2,753-comment scored population (`06_strategy_ablation.ipynb`).](figures/report/figure2_strategy_incremental_value.png){width=85%}
 
 Adding the eight strategy scores raises PR-AUC from 0.4434 to 0.5098, a gain of **0.0664**, which
 clears the combined order-noise band of the two configurations. The strategy scores alone reach 0.3514 — a real,
@@ -228,7 +226,7 @@ tested on a strict decile-bin length-matched sample built within the 2,753-comme
 population itself — independently constructed from §3.1.4's full-dataset sample of the same size
 (1,235 comments).
 
-**Table N.** The strategy-score gain, full scored population versus the length-matched sample built
+**Table 12.** The strategy-score gain, full scored population versus the length-matched sample built
 within it (`06_strategy_ablation.ipynb`).
 
 | Sample | n | Lift without strategy scores | Lift with strategy scores | Strategy-score gain |
@@ -299,7 +297,7 @@ tests. Both were computed on the full 2,753-comment scored population and on the
 length-matched sample from §3.2.3. These two measures answer different questions — model reliance
 versus a model-independent univariate association — and neither is a causal-effect estimate.
 
-**Table N.** SHAP importance and Mann-Whitney rank-biserial effect size, full population versus
+**Table 13.** SHAP importance and Mann-Whitney rank-biserial effect size, full population versus
 length-matched sample, for all eight strategies (`word_count`'s own SHAP value — 1.0245 full
 population, 0.8402 matched — is omitted here as it dwarfs every strategy's and is not itself one of
 the eight strategies under comparison). `*` marks FDR < 0.05 significance
@@ -398,7 +396,7 @@ available here is limited to combinations of the nine columns identified on the 
 
 ### 3.3.2 Predictive performance: word count, strategy scores, and the robust core
 
-**Table N.** Order-robust PR-AUC and PR-AUC lift over WA's own no-skill baseline (0.5291), for four
+**Table 14.** Order-robust PR-AUC and PR-AUC lift over WA's own no-skill baseline (0.5291), for four
 feature-set configurations evaluated on WA's native held-out split
 (`08_wa_external_validation.ipynb`).
 
@@ -409,9 +407,7 @@ feature-set configurations evaluated on WA's native held-out split
 | Strategy scores + `word_count` | 0.5814 ± 0.0058 | 0.0523 |
 | Robust core (refutation, justification, simplification, `word_count`) | 0.5919 ± 0.0026 | 0.0628 |
 
-[FIGURE: `figures/report/figure7_wa_external_validation.png` — **Figure N.** Held-out PR-AUC and
-pairwise accuracy for feature-set configurations evaluated on Winning Arguments, with literature
-benchmark ranges shown for context (`08_wa_external_validation.ipynb`).]
+![**Figure 7.** Held-out PR-AUC and pairwise accuracy for feature-set configurations evaluated on Winning Arguments, with literature benchmark ranges shown for context (`08_wa_external_validation.ipynb`).](figures/report/figure7_wa_external_validation.png){width=85%}
 
 Every strategy-containing configuration beats `word_count` alone by PR-AUC. Unlike on the home
 dataset, strategy scores alone (0.5967) slightly edge out strategy scores combined with `word_count`
@@ -442,7 +438,7 @@ the unit the published literature on this corpus reports accuracy against. It co
 native held-out pairs with both sides successfully scored (2 pairs lost both sides to the
 unparseable-response drop).
 
-**Table N.** Pairwise accuracy on WA's 805 scored held-out pairs, with published literature
+**Table 15.** Pairwise accuracy on WA's 805 scored held-out pairs, with published literature
 reference ranges for context (Labruna et al., 2026, Table 1).
 
 | Feature set | Pairwise accuracy |
@@ -472,7 +468,7 @@ different (and much simpler) scoring and modeling pipeline than the literature's
 
 ### 3.3.4 Cross-corpus changes in strategy rankings
 
-**Table N.** SHAP importance and Mann-Whitney rank-biserial effect size for all eight strategies,
+**Table 16.** SHAP importance and Mann-Whitney rank-biserial effect size for all eight strategies,
 home dataset versus WA, each on its own full population (`07_strategy_interpretation.ipynb`;
 `08_wa_external_validation.ipynb`). The two datasets' models are fit independently; SHAP magnitudes
 are not compared across datasets, only each dataset's own internal ranking.
@@ -492,13 +488,9 @@ are not compared across datasets, only each dataset's own internal ranking.
 measure — `word_count`'s own SHAP value, excluded from this ranking for the reasons given in
 §3.2.5, is 1.0245 at home and 0.2780 on WA, ahead of every strategy in both cases.)
 
-[FIGURE: `figures/report/figure6_strategy_ranking_cmv_vs_wa.png` — **Figure N.** Rank-biserial
-effect size for each strategy, home dataset versus Winning Arguments, computed identically on both
-(`07_strategy_interpretation.ipynb`; `08_wa_external_validation.ipynb`).]
+![**Figure 6.** Rank-biserial effect size for each strategy, home dataset versus Winning Arguments, computed identically on both (`07_strategy_interpretation.ipynb`; `08_wa_external_validation.ipynb`).](figures/report/figure6_strategy_ranking_cmv_vs_wa.png){width=85%}
 
-[FIGURE: `figures/report/figure9_strategy_ranking_shap_cmv_vs_wa.png` — **Figure N.** Mean |SHAP|
-*rank* (not magnitude) for each strategy, home dataset versus Winning Arguments
-(`07_strategy_interpretation.ipynb`; `08_wa_external_validation.ipynb`).]
+![**Figure 9.** Mean |SHAP| *rank* (not magnitude) for each strategy, home dataset versus Winning Arguments (`07_strategy_interpretation.ipynb`; `08_wa_external_validation.ipynb`).](figures/report/figure9_strategy_ranking_shap_cmv_vs_wa.png){width=85%}
 
 Refutation, the home dataset's standout strategy by SHAP, is near the bottom of WA's ranking by the
 same measure (7th of 8) and 4th by rank-biserial effect size. Justification, which collapsed under

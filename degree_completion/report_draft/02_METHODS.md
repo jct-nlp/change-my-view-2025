@@ -38,27 +38,12 @@ selected differently. A delta-awarded comment becomes a positive row regardless 
 in the thread; any of its own descendant replies are discarded. A non-convincing comment becomes a
 negative row only if it is a *leaf* — it has no replies of its own — in the thread tree; a
 non-convincing comment that has further replies underneath it does not itself become a row, only
-its descendant leaves do. (The one exception is a leaf that is itself the parent of a delta-awarded
-comment removed by the rule above: it is excluded rather than added as a negative row, since it was
-never evaluated as a final, unanswered reply.) No topical filtering or matching was applied to
+its descendant leaves do. No topical filtering or matching was applied to
 select which leaf comments would serve as negative examples among those eligible. This is a
 deliberate point of contrast with the external validation corpus described in §2.9, whose negative
-examples are instead selected to be topically similar to the corresponding positive example. One
-structural property of the resulting dataset is worth noting here because it bears on later
-feature-engineering choices: because negative examples are drawn only from leaves while a thread
-typically yields at most a small, roughly fixed number of deltas regardless of its size, the number
-of negative rows per thread scales with how much the thread branches while the number of positive
-rows barely does — so thread size ends up structurally correlated with a thread's apparent
-convincing rate, busier threads showing a lower rate almost by construction, independent of
-anything about persuasion. This is relevant to any analysis that aggregates at the level of the
-original post, not the individual comment, and is revisited where relevant in §2.2.
+examples are instead selected to be topically similar to the corresponding positive example.
 
-[FIGURE: `figures/report/figure8_pipeline_diagram.png` — **Figure N.** The project's pipeline as
-four broad phases — data preparation, modeling and the length-confound discovery, rhetorical-
-strategy analysis, and external validation — each labeled with its governing notebook(s). The
-last three phases map one-to-one onto the project's three research questions (RQ1–RQ3, tagged on
-the diagram); data preparation is shared setup, not itself one of the three. The full
-nine-subsection breakdown is §2.1–§2.9 below.]
+![**Figure 8.** The project's pipeline as four broad phases — data preparation, modeling and the length-confound discovery, rhetorical-strategy analysis, and external validation — each labeled with its governing notebook(s). The last three phases map one-to-one onto the project's three research questions (RQ1–RQ3, tagged on the diagram); data preparation is shared setup, not itself one of the three. The full nine-subsection breakdown is §2.1–§2.9 below.](figures/report/figure8_pipeline_diagram.png){width=85%}
 
 ## 2.2 Feature Engineering
 
@@ -133,7 +118,7 @@ representation (the 187 components alone, with no handcrafted features) was also
 assess how much predictive value the handcrafted features add over embeddings alone. All three
 representations were carried forward as candidate feature sets into model selection.
 
-**Table N.** Feature-family summary, with each family's source notebook and whether it belongs to
+**Table 2.** Feature-family summary, with each family's source notebook and whether it belongs to
 the trusted or untrusted set. For the three one-hot-encoded rows, the category count in the
 feature-group name is the true number of labels the classifier assigns; "Columns" is one less per
 side, since the first category of each encoding is dropped as an implicit reference level (§2.2).
@@ -228,7 +213,7 @@ configuration was then evaluated once on the held-out 709-comment test set, achi
 This number, and its subsequent revision after the length confound described in §2.4 was
 discovered, together motivate the remainder of this chapter.
 
-**Table N.** The full 27-combination inner-validation grid, sorted by PR-AUC. These are
+**Table 3.** The full 27-combination inner-validation grid, sorted by PR-AUC. These are
 **validation**-set scores, used only for selection — not the 0.3848 **test**-set PR-AUC reported
 above for the selected configuration, which this grid does not itself contain (the selected row's
 own validation PR-AUC is 0.3063; the test-set figure comes from a separate, one-time evaluation
@@ -320,9 +305,7 @@ a second, even simpler baseline was evaluated: a single-feature logistic regress
 comment's raw word count. This baseline outperformed TF-IDF too, reaching PR-AUC 0.5256 — the
 strongest of the three models compared so far, using the least information.
 
-[FIGURE: `figures/report/figure1_initial_model_comparison.png` — **Figure N.** Held-out PR-AUC for
-the originally selected engineered-feature pipeline, a TF-IDF baseline, and a word-count-only
-baseline, evaluated on the identical 709-comment test fold (`04.2_baseline_comparison.ipynb`).]
+![**Figure 1.** Held-out PR-AUC for the originally selected engineered-feature pipeline, a TF-IDF baseline, and a word-count-only baseline, evaluated on the identical 709-comment test fold (`04.2_baseline_comparison.ipynb`).](figures/report/figure1_initial_model_comparison.png){width=85%}
 
 Second, the raw relationship between comment length and outcome was characterized directly:
 comment length and outcome are strongly associated in this dataset, with a mean word count of 78.0
@@ -352,12 +335,10 @@ turning point: it reframes the project's central question from whether textual f
 delta awards to which predictive signal, if any, remains once comment length is accounted for — the
 question addressed in §2.5 onward.
 
-[FIGURE: `figures/report/figure4_comment_length_by_outcome.png` — **Figure N.** Word-count
-distribution by outcome for the full 3,971-comment dataset, with each class's mean indicated
-(`04.2_baseline_comparison.ipynb`).]
+![**Figure 4.** Word-count distribution by outcome for the full 3,971-comment dataset, with each class's mean indicated (`04.2_baseline_comparison.ipynb`).](figures/report/figure4_comment_length_by_outcome.png){width=85%}
 
 These four models — both their single-fit point estimates and, for the order-sensitive engineered
-pipeline, its order-robust mean ± SD — are tabulated together in the Results chapter (Table N,
+pipeline, its order-robust mean ± SD — are tabulated together in the Results chapter (Table 8,
 §3.1.2; the word-count-augmented re-selected pipeline's figures are discussed in §3.1.4), rather
 than repeated here.
 
@@ -397,7 +378,7 @@ positively on the same matched test partition. This result is presented as a spe
 illustration of a general methodological risk — model re-selection on small samples — and not as
 evidence against re-selection as a practice in general.
 
-**Table N.** The two length-controlled samples used in this section, side by side (both built in
+**Table 4.** The two length-controlled samples used in this section, side by side (both built in
 `04.3_length_controlled_analysis.ipynb`, from the full 3,971-comment dataset).
 
 | Sample | Matching procedure | n | `word_count` r (unmatched → matched) |
@@ -459,9 +440,9 @@ refutation and justification — the two hardest strategies to calibrate against
 after review. This reliability pattern is directly relevant to results reported later in this
 project, since refutation and justification also prove to be the two strategies most central to
 the project's predictive and interpretive findings (§2.8). Exact reliability figures for each
-strategy are given in Results, Table N (§3.2.1).
+strategy are given in Results, Table 10 (§3.2.1).
 
-**Table N.** The eight rhetorical strategies and their definitions.
+**Table 5.** The eight rhetorical strategies and their definitions.
 
 | Strategy | Definition |
 |---|---|
@@ -492,7 +473,7 @@ scores, the resulting representation totals 237 columns.
 Adding the eight strategy scores to the engineered-feature baseline produces a real, order-robust
 gain over that baseline alone; the strategy scores alone, with no engineered features at all, also
 carry a real, standalone predictive signal, though a smaller one than the combined representation.
-Exact figures are reported in Results, Table N (§3.2.2).
+Exact figures are reported in Results, Table 11 (§3.2.2).
 
 A further, parsimony-oriented finding is reported here because it bears on how the engineered and
 strategy-score features interact. Among all feature combinations evaluated, the smallest — the
@@ -519,13 +500,10 @@ same decile-bin matching procedure used for `04.3`'s strict decile-bin match (§
 here, yielding 1,235 comments. On this length-matched sample, the strategy-score gain retains a
 substantially larger share of its full-population value than `word_count`'s own lift or the
 engineered pipeline's own lift retained under `04.3`'s strict matching (§2.5); exact figures are
-reported in Results, Table N (§3.2.3). This indicates the strategy-score signal is not primarily a
+reported in Results, Table 12 (§3.2.3). This indicates the strategy-score signal is not primarily a
 proxy for comment length, unlike previous signal examined.
 
-[FIGURE: `figures/report/figure3_strategy_gain_length_matching.png` — **Figure N.** The
-strategy-score PR-AUC gain reported above, recomputed on the length-matched sample within the
-2,753-comment scored population, showing how much of the gain survives length control
-(`06_strategy_ablation.ipynb`).]
+![**Figure 3.** The strategy-score PR-AUC gain reported above, recomputed on the length-matched sample within the 2,753-comment scored population, showing how much of the gain survives length control (`06_strategy_ablation.ipynb`).](figures/report/figure3_strategy_gain_length_matching.png){width=85%}
 
 ## 2.8 Strategy Interpretation
 
@@ -558,16 +536,14 @@ attribution versus model-free marginal association) rather than an error in eith
 instead of resolving the disagreement by relying on only one of the two measures.
 
 Both interpretive measures, for all eight strategies, full population and length-matched sample,
-are reported together in Results, Table N (§3.2.5).
+are reported together in Results, Table 13 (§3.2.5).
 
 One row is worth flagging, not leaving implicit: `personal_narrative`'s rank-biserial effect
 is not significant on the full population but *is* significant, and negative, on the length-matched
 sample (r = −0.0859) — the only strategy whose significance status and sign both shift between the
 two populations.
 
-[FIGURE: `figures/report/figure5_refutation_vs_justification_shap.png` — **Figure N.** Mean |SHAP|
-value for each of the eight rhetorical strategies, full population versus length-matched sample,
-for the nine-column selected model (`07_strategy_interpretation.ipynb`).]
+![**Figure 5.** Mean |SHAP| value for each of the eight rhetorical strategies, full population versus length-matched sample, for the nine-column selected model (`07_strategy_interpretation.ipynb`).](figures/report/figure5_refutation_vs_justification_shap.png){width=85%}
 
 The two measures above converge on the same three strategies — refutation, justification, and
 simplification — as the ones whose rank-biserial effect size remains statistically significant both
@@ -674,7 +650,7 @@ specifically beyond comment length replicates to the same extent documented for 
 §2.7. Establishing that stronger, more specific claim would require a directly comparable ablation,
 which falls outside the scope of the present external-validation check.
 
-**Table N.** How each dataset's underlying corpus was constructed, side by side — the
+**Table 6.** How each dataset's underlying corpus was constructed, side by side — the
 negative-example row is the single most consequential difference between them, discussed above.
 
 | | Home dataset | Winning Arguments (WA) |
@@ -687,7 +663,7 @@ negative-example row is the single most consequential difference between them, d
 | Class balance | 641 convincing (16.1%) | 4,240 winning comments (52.3%), 3,866 losing comments — close to, but not exactly, balanced. Pairs themselves are exactly 1:1 by construction, but a losing reply can be the closest topical match for more than one winning pair and is stored once rather than once per pair (338 of 4,263 losing slots are such reused comments, versus only 22 of 4,263 winning slots), so deduplicating pairs down to individual comments leaves more unique winning comments than unique losing ones |
 | Paired design | No — comments are evaluated individually, not as pairs | Yes — 4,263 winner/loser pairs total |
 
-**Table N+1.** How this project used each dataset for the external-validation check described in
+**Table 7.** How this project used each dataset for the external-validation check described in
 this section — these are this project's own analysis choices, not properties of either corpus as
 originally constructed.
 
@@ -695,6 +671,6 @@ originally constructed.
 |---|---|---|
 | Comments/posts scored | 2,753 comments, 400 original posts (§2.6 scored subset, not the full 3,971-comment dataset) | 8,096 scored comments (8,106 collected, 10 dropped for unparseable LLM responses), 3,051 original posts |
 | Train/test split | This project's own thread-grouped 80/20 split of the 2,753-comment scored population (§2.7): 2,161 train / 592 test — not the full-dataset 3,262/709 split used in §2.3–§2.4 | WA's native distributed split (not re-split by this project): 6,584 train / 1,512 heldout |
-| Positive rate actually scored/evaluated | 23.3% (641 of 2,753 — the §2.6 scored subset's own rate, not the full dataset's 16.1%) | 52.9% in the heldout split used here, close to but not identical to the 52.3% rate across the whole WA corpus (Table N) — this fold-to-fold variation (train alone is 52.2%) reflects how the reused losing comments happen to fall across original posts, not an effect of this project's train/heldout split or the ten dropped comments |
+| Positive rate actually scored/evaluated | 23.3% (641 of 2,753 — the §2.6 scored subset's own rate, not the full dataset's 16.1%) | 52.9% in the heldout split used here, close to but not identical to the 52.3% rate across the whole WA corpus (Table 6) — this fold-to-fold variation (train alone is 52.2%) reflects how the reused losing comments happen to fall across original posts, not an effect of this project's train/heldout split or the ten dropped comments |
 | No-skill PR-AUC baseline (this project's model) | 0.2382 (the 592-comment test fold's own positive rate, §2.7) | 0.5291 (heldout fold's own positive rate) |
 | Pairs evaluated for pairwise accuracy | N/A — not a paired evaluation | 805 of the native 807 held-out pairs — 2 pairs lost both sides to the unparseable-response drop |

@@ -20,7 +20,7 @@ The objectives are to characterize the predictive role of textual features and l
 
 The project is organized around three research questions:
 
-**Table N.** The three research questions, with the Results and Discussion sections that address each.
+**Table 1.** The three research questions, with the Results and Discussion sections that address each.
 
 | | Research question | Results | Discussion |
 |---|---|---|---|
