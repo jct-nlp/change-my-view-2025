@@ -93,7 +93,7 @@ restricting non-convincing comments to at least the convincing group's own 25th-
 (84 words; 1,638 comments), and a strict decile-bin match sampling non-convincing comments from the
 same length deciles as convincing comments in matching counts (1,235 comments). Because both
 samples are themselves built from the outcome label and length values under study, their test
-partitions are controlled, outcome-balanced evaluation samples rather than naturally distributed
+partitions are controlled, outcome-balanced evaluation samples, not naturally distributed
 held-out populations (§2.5). For each sample,
 and for the full dataset, each model's PR-AUC lift over that sample's own test-fold no-skill
 baseline — not the whole-sample rate, which can drift from the actual test-fold rate on a split
@@ -120,7 +120,7 @@ control for every approach tested, though its degree is modest in absolute terms
 involved are small (1,235–1,638 rows).
 
 Re-running the full 27-combination selection grid (§2.3) from scratch on the strict decile-matched
-sample illustrates a distinct methodological risk rather than a substantive finding about length.
+sample illustrates a distinct methodological risk, not a substantive finding about length.
 The grid's winner by validation PR-AUC on this sample (`RF (no resampling) | embeddings-only`, validation
 PR-AUC 0.6656 against a 205-row validation set) scored PR-AUC 0.4518 on the corresponding test
 partition — *below* that partition's own no-skill baseline of 0.4679, a lift of −0.0162. Simply
@@ -144,7 +144,7 @@ reference point.
 Taken together, these results motivated a change in the project's central question. Comment length
 is associated with delta-award status more strongly than any individual engineered feature or
 feature family tried, and much of the apparent predictive advantage of both the original engineered
-pipeline and a plain bag-of-words model is attributable to this association rather than to
+pipeline and a plain bag-of-words model is attributable to this association, not to
 rhetorical content specifically. This is an empirical, associative finding: it establishes that
 length is informative and that engineered features alone did not capture that information well, not
 that length *causes* persuasive success, nor that every feature correlated with length is
@@ -167,8 +167,8 @@ retaining every convincing comment, the scored population's convincing-comment p
 2,753, 23.3%) is substantially higher than the full dataset's 16.1%; percentages reported from this
 point onward use this subset's own denominator unless stated otherwise.
 
-Two reliability checks, both explicitly lightweight rather than a formal inter-annotator-agreement
-study, accompany these scores. A test-retest check (200 comments scored twice) found 95–99% of
+Two reliability checks, both explicitly lightweight and not intended as a formal
+inter-annotator-agreement study, accompany these scores. A test-retest check (200 comments scored twice) found 95–99% of
 repeat scores within one point of the original across all eight strategies (mean absolute
 difference 0.14–0.41). A comparison against a single human judge's hand-scoring of 18 comments (9
 convincing, 9 not), after the judge reviewed her own first-pass disagreements with the LLM, found
@@ -223,7 +223,7 @@ the combined model, but not a replacement for the existing engineered features.
 
 ### 3.2.3 Survival of the gain under length matching
 
-Whether this gain reflects something beyond comment length, rather than another proxy for it, was
+Whether this gain reflects something beyond comment length, and not just another proxy for it, was
 tested on a strict decile-bin length-matched sample built within the 2,753-comment scored
 population itself — independently constructed from §3.1.4's full-dataset sample of the same size
 (1,235 comments).
@@ -436,9 +436,9 @@ as a replication of the home dataset's specific engineered-pipeline-based ablati
 
 ### 3.3.3 Pairwise accuracy
 
-Because WA's winner/loser pairs are the unit the published literature on this corpus reports
-accuracy against, pairwise accuracy — the fraction of held-out pairs for which the model scores the
-actual winning reply higher than the actual losing reply — was also computed, over the 805 of 807
+Pairwise accuracy — the fraction of held-out pairs for which the model scores the actual winning
+reply higher than the actual losing reply — was also computed, since WA's winner/loser pairs are
+the unit the published literature on this corpus reports accuracy against. It covers the 805 of 807
 native held-out pairs with both sides successfully scored (2 pairs lost both sides to the
 unparseable-response drop).
 
@@ -454,10 +454,21 @@ reference ranges for context (Labruna et al., 2026, Table 1).
 | Independent Scoring (literature) | 53.78%–56.66% |
 | Multi-Strategy Persuasion Scoring (literature) | 60.59%–64.53% |
 
-The robust core's 58.68% sits above the literature's "Independent Scoring" baselines and below its
-full multi-strategy method. This is a reasonable, honestly bounded result, not a like-for-like
-comparison: the robust core uses none of this project's engineered features, no tuning against WA,
-and a different (and much simpler) scoring and modeling pipeline than the literature's own method.
+Within Labruna et al.'s own benchmark, "Independent Scoring" is their weakest baseline and is not
+itself based on the six persuasion strategies at all: the LLM is given a message alone and asked
+for a single holistic 1–10 persuasiveness score, with no strategy decomposition, no original-post
+context, and no reasoning step. "Multi-Strategy Persuasion Scoring" (MS-PS) is their actual
+proposed method, and is the methodologically comparable point of reference for this project's own
+approach: it scores each of six persuasion strategies independently by an LLM, then either averages
+the six scores (MS-PS-AVG) or feeds them, together with summary statistics, into a trained
+classifier (MS-PS-MLP) — structurally the closer analogue to this project's own strategy-scores-plus-
+trained-classifier pipeline. Each reported range reflects variation across the underlying LLM used
+to generate the scores, not a methodological difference within this project's own pipeline. The
+robust core's 58.68% sits above Labruna et al.'s non-strategy-based Independent Scoring baselines
+but below their own strategy-based MS-PS method — the comparison that matters most, given the
+structural similarity, favors their approach, not this project's. This is a reasonable, honestly
+bounded result, not a like-for-like comparison: the robust core uses none of this project's engineered features, no tuning against WA, and a
+different (and much simpler) scoring and modeling pipeline than the literature's own method.
 
 ### 3.3.4 Cross-corpus changes in strategy rankings
 
@@ -471,7 +482,11 @@ are not compared across datasets, only each dataset's own internal ranking.
 | Refutation | 1st (0.6034) | 7th (0.0904) | 0.3149 (2nd) | 0.0949 (4th) |
 | Justification | 2nd (0.4156) | 1st (0.2798) | 0.3584 (1st) | 0.1962 (1st) |
 | Evidence | 3rd (0.3592) | 2nd (0.2136) | 0.1018 (6th) | 0.1467 (2nd) |
+| Concession | 4th (0.3439) | 4th (0.1138) | 0.1481 (5th) | 0.0542 (5th) |
 | Simplification | 5th (0.3193) | 3rd (0.1554) | 0.1944 (3rd) | 0.1105 (3rd) |
+| Personal narrative | 6th (0.1853) | 8th (0.0861) | −0.0217 (8th) | 0.0224 (7th) |
+| Call-to-action | 7th (0.1837) | 5th (0.1107) | 0.1584 (4th) | 0.0305 (6th) |
+| Question-asking | 8th (0.1518) | 6th (0.0953) | 0.0069 (7th) | −0.0135 (8th) |
 
 (Ranks are each strategy's position among the eight strategies only, on its own dataset and
 measure — `word_count`'s own SHAP value, excluded from this ranking for the reasons given in
@@ -515,6 +530,8 @@ pipeline's own order-induced noise band. The robust core remains the reported ex
 result specifically because it was specified before WA was examined, not selected by scanning WA's
 own results for the best-performing subset; the "−call_to_action" configuration is reported here for
 completeness, as a configuration explored on WA, not as a replacement for the pre-specified core.
+
+### 3.3.6 Summary
 
 Taken as a whole, this external evaluation supports two structural conclusions that replicate
 cleanly on an independently constructed dataset: rhetorical-strategy scores carry predictive signal
