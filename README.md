@@ -1,6 +1,6 @@
 # change-my-view-2025
 
-This work is the final project in Text Mining curse at the Jerusalem College of Technology, 2025.
+This work is the degree-completion report for an M.Sc. in Computer Science, specializing in Artificial Intelligence, at the Jerusalem College of Technology (Lev Academic Center), 2026.
 
 Change My View (CMV) is a popular subreddit on Reddit where users engage in structured debates with the goal of persuading 
 others to reconsider their viewpoints. Unlike typical internet arguments, CMV encourages respectful discourse, requiring 
