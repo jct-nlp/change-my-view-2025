@@ -38,14 +38,18 @@ can score highly on one measure without scoring highly on the other precisely be
 measures are not estimating the same quantity, and disagreement between them does not indicate that
 either computation is wrong.
 
-Concretely, `refutation`'s SHAP advantage means that, for this specific fitted XGBoost pipeline, once
-`word_count` and the other seven strategies are already in the feature matrix, the model relies more
-heavily on `refutation` than on any other strategy to resolve the cases its other features leave
-ambiguous. `justification`'s rank-biserial advantage means that, considered as an isolated pairwise
-relationship, `justification`'s scores covary with delta-award status more strongly than any other
-strategy's scores do on their own. Both statements are compatible: a feature can carry the strongest
-raw association with the outcome while contributing comparatively little *additional* information to
-a model that already has other, partially redundant, predictors available, and vice versa. On this
+Concretely, `refutation` receives the highest SHAP attribution among the eight strategies in this
+specific fitted XGBoost pipeline, once `word_count` and the other seven strategies are already in the
+feature matrix. This describes how this particular model's output decomposes, not that `refutation`
+supplies predictive information absent from every other feature: with several correlated strategies
+present in the same feature matrix, SHAP attribution can concentrate on one of them without
+establishing that the others are redundant with it, or that `refutation` is the only route to the
+information it captures. `Justification`'s rank-biserial advantage is a different and more direct
+quantity: considered as an isolated pairwise relationship, `justification`'s scores covary with
+delta-award status more strongly than any other strategy's scores do on their own. The two findings
+are compatible without being in tension — a feature's attribution within one fitted model and its own
+marginal association with the outcome are different quantities that need not move together,
+particularly once correlated predictors are present. On this
 basis, this report does not collapse the full-population analysis into a single "most important
 strategy." `Refutation` is the strongest model-attributed feature in this specific fitted pipeline;
 `justification` is the strategy whose score differs most, on its own, between convincing and
@@ -83,21 +87,25 @@ length-matched result is closer to noise. Distinguishing between these honestly 
 analysis beyond this project's scope; the result is reported here as a pattern worth noting, not as a
 resolved finding.
 
-## 4.2 RQ3: Cross-corpus evaluation — what replicates, what does not, and why that matters
+## 4.2 RQ3: Cross-corpus evaluation — what recurs, what does not, and why that matters
 
-The external evaluation on Winning Arguments (WA) supports two structural conclusions cleanly, on an
-independently constructed corpus built with a different negative-sampling methodology: rhetorical-
-strategy scores carry predictive signal beyond `word_count`, and a small, pre-specified strategy-based
-feature set is competitive with, or exceeds, larger combinations (§3.3.2, §3.3.5, §3.3.6).
+The external evaluation on Winning Arguments (WA) provides supporting evidence, on an independently
+constructed corpus built with a different negative-sampling methodology, for two structural claims:
+that rhetorical-strategy scores carry predictive signal beyond `word_count`, and that a small,
+pre-specified strategy-based feature set is competitive with, or exceeds, larger combinations
+(§3.3.2, §3.3.5, §3.3.6).
 
-This replication deserves substantial weight as independent-corpus support for the central RQ2 claim.
-WA's own length-matched robustness check (§3.3.2) found the strategy-inclusive combination retaining
-87% of its lift over no-skill (0.0523 to 0.0455) while `word_count` alone retained only 44% (0.0476
-to 0.0211) — the same qualitative pattern already established on the home dataset (84% versus roughly
-18%, §3.2.3, §3.1.4). That a second corpus, built by a different team with a deliberately different
-sampling procedure, reproduces the same qualitative asymmetry is meaningful evidence that this
-project's central claim — rhetorical-strategy scores are not simply a proxy for comment length — is
-not an artifact specific to how this project's own dataset happens to be constructed.
+This evidence deserves substantial weight as independent-corpus support for the central RQ2 claim,
+though it is best read as a qualitatively similar pattern recurring on a second corpus rather than a
+replication of equal strength to the home dataset's own result (see the scope and length-confound
+caveats below). WA's own length-matched robustness check (§3.3.2) found the strategy-inclusive
+combination retaining 87% of its lift over no-skill (0.0523 to 0.0455) while `word_count` alone
+retained only 44% (0.0476 to 0.0211) — the same qualitative asymmetry already established on the home
+dataset (84% versus roughly 18%, §3.2.3, §3.1.4). That a second corpus, built by a different team with
+a deliberately different sampling procedure, shows the same qualitative asymmetry is meaningful
+supporting evidence that this project's central claim — rhetorical-strategy scores are not simply a
+proxy for comment length — is not an artifact specific to how this project's own dataset happens to
+be constructed.
 
 That said, the strength of this conclusion should be calibrated to what the check actually measures.
 WA's own length confound is considerably weaker to begin with: matching reduces `word_count`'s own
@@ -113,16 +121,20 @@ narrower and easier test, not that its magnitude or its independence from length
 established to the same degree as on the home dataset.
 
 The specific claim that `refutation` leads that signal, and that `justification` is specifically the
-strategy whose importance is length-confounded, does not replicate. On WA, the two strategies'
+strategy whose importance is length-confounded, does not recur. On WA, the two strategies'
 relative roles are substantially reversed: `refutation` falls from first to seventh of eight by SHAP
 and from second to fourth by rank-biserial effect size, while `justification` rises to first by SHAP
 and remains first by rank-biserial in both datasets — and, unlike at home, `justification`'s
 rank-biserial effect does *not* collapse under WA's own length matching, retaining 84% of its value
-(0.1962 to 0.1648) against the 37% retained at home (§3.3.4). This reversal does not appear to be a
-measurement artifact: a dedicated test-retest check found `refutation` scored *more* consistently on
-WA (76.5% exact match) than on the home dataset (63.8%, the weakest of the eight strategies there),
-and a column-order-shuffle check confirms `refutation`'s low WA standing is stable across eight
-repeats, never ranking above sixth of eight (§3.3.4).
+(0.1962 to 0.1648) against the 37% retained at home (§3.3.4). These checks do not find straightforward
+evidence that scoring instability explains the reversal: a dedicated test-retest check found
+`refutation` scored *more* consistently on WA (76.5% exact match) than on the home dataset (63.8%, the
+weakest of the eight strategies there), and a column-order-shuffle check confirms `refutation`'s low
+WA standing is stable across eight repeats, never ranking above sixth of eight (§3.3.4). This rules
+out instability in the scoring process itself as the explanation, but not other, more systematic
+measurement differences — for instance, the LLM interpreting the same rubric somewhat differently
+against WA's text distribution than against the home dataset's — which neither check is designed to
+detect.
 
 A plausible, but explicitly untested, explanation is that the two corpora's negative-example
 construction differs in a way that matters for which strategy looks most informative. The home
@@ -158,11 +170,15 @@ score positively (§2.5); and the discovery that this project's XGBoost+SMOTE pi
 the order of columns in a correlated, 200+-column feature matrix, large enough (a 0.0482 PR-AUC swing
 in a direct check, §2.3) to rival some of the effects under study. Each of these was disclosed and
 corrected, not absorbed silently, and the third prompted an explicit methodological convention
-adopted mid-project: every PR-AUC reported from that point onward is a mean ± SD across multiple
-column orderings, not a single-order point estimate. This project treats that pattern — catching and
-correcting problems that could have inflated or mischaracterized a result — as a positive indicator of
-methodological rigor, not an admission of weakness, and the corresponding uncertainty discipline it
-produced (§4.4, below) should be read as a direct consequence of it.
+adopted mid-project: every PR-AUC reported from that point onward *for an evaluation of this
+order-sensitive XGBoost+SMOTE architecture* is a mean ± SD across multiple column orderings, not a
+single-order point estimate — this does not apply to the logistic-regression-based baselines
+(TF-IDF, `word_count` alone) or the dummy classifiers compared against it, which have no
+column-order degree of freedom and continue to be reported as single-fit point estimates, typically
+alongside a bootstrap confidence interval instead (§2.3). The resulting uncertainty discipline — reporting
+column-order means and SDs rather than single-fit point estimates for this architecture — carries
+through every later comparison in this report and is reflected in the limitations stated in §4.4,
+below.
 
 It is also worth stating plainly where this project's deep-learning and transformer-based techniques
 actually sit in the pipeline, since the final predictive architecture is not itself a neural model:
@@ -191,14 +207,22 @@ advance.
   bounds how strongly that pattern should be stated — it is possible that some part of what
   distinguishes these two strategies reflects scoring noise and not a stable underlying
   difference.
-- Most individual point-estimate comparisons in this project carry overlapping uncertainty bands and
-  should be read as best estimates, not as statistically decisive rankings. The clearest exceptions —
-  comparisons described in this report as clearing that bar decisively — are the original
-  `word_count`-versus-engineered-pipeline discovery (§3.1.2) and the strategy-ablation gain itself
-  (§3.2.2). The nine-column-versus-robust-core comparison (§3.2.4) is a concrete example of a
-  comparison that does *not* clear this bar: the robust core's higher point estimate is not
-  distinguishable from the nine-column model once their combined order-noise band is taken into
-  account.
+- Most individual point-estimate comparisons in this project carry overlapping uncertainty bands, and
+  none was accompanied by a dedicated statistical test of the difference itself (e.g., a paired
+  bootstrap or permutation test) — they should be read as this project's best point estimates, not as
+  confirmed or statistically significant rankings. Two comparisons stand out as the largest, most
+  consistent margins found anywhere in this project, and are the ones this report leans on most
+  heavily: the original `word_count`-versus-engineered-pipeline discovery (§3.1.2, §2.4), where the
+  two configurations' bootstrap 95% confidence intervals — [0.311, 0.463] without `word_count`, [0.410,
+  0.586] with it — barely overlap rather than failing to overlap outright; and the strategy-ablation
+  gain (§3.2.2), where the two configurations' PR-AUC differ by more than their combined column-order-
+  noise bands, which is evidence against an essentially arbitrary implementation detail (column
+  order), not a sampling-based significance test (§2.3). Neither comparison is described here as
+  statistically significant or decisive in the absence of a dedicated test of the difference; both are
+  reported as the most persuasive point-estimate gaps this project found, nothing stronger. The
+  nine-column-versus-robust-core comparison (§3.2.4) illustrates the more typical case: the robust
+  core's higher point estimate is not distinguishable from the nine-column model once their combined
+  order-noise band is taken into account.
 - A second, independent source of uncertainty layers on top of the first: the fitted model's PR-AUC
   is itself sensitive to the order of the (correlated, 200+-column) feature matrix's columns, a
   property unrelated to sampling error (§2.3, §2.7, §3.2.7). Both sources bear on how confidently any
@@ -258,10 +282,13 @@ model-free marginal association — answer different questions and are not reduc
 ranking.
 
 **RQ3.** The structural claim from RQ2 — that rhetorical-strategy scores add information beyond
-length — replicates on an independently constructed corpus built with a different sampling
-methodology. The specific claim about which strategy drives that signal does not: `refutation` and
-`justification`'s relative importance substantially reverses on Winning Arguments, in a way not
-attributable to scoring-reliability differences between the two corpora. A plausible, but explicitly
+length — finds supporting evidence on an independently constructed corpus built with a different
+sampling methodology, under a narrower and somewhat easier test than the home dataset's own ablation.
+The specific claim about which strategy drives that signal does not recur: `refutation` and
+`justification`'s relative importance substantially reverses on Winning Arguments; the project's
+reliability checks find no straightforward evidence that scoring instability explains this, though
+they do not rule out other, more systematic measurement differences between the two corpora. A
+plausible, but explicitly
 untested, candidate explanation is that the two corpora's differing negative-example construction
 changes what a given strategy is effectively being asked to distinguish.
 

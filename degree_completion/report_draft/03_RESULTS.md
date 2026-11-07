@@ -514,7 +514,11 @@ A natural question is whether this reversal reflects refutation being scored les
 dedicated test-retest check (n = 200, matching §3.2.1's design) found the opposite: refutation is
 *more* internally consistent on WA (76.5% exact match) than on the home dataset (63.8%, the weakest
 of the eight strategies there), and every strategy scores more consistently on WA than on the home
-dataset. The ranking reversal does not appear to be a scoring-reliability artifact.
+dataset. This test-retest check, together with the column-order-shuffle check above, finds no
+straightforward evidence that scoring instability explains the ranking reversal; it does not,
+however, rule out other, more systematic measurement differences, such as the LLM interpreting the
+same rubric somewhat differently against WA's text distribution than against the home dataset's,
+which this check is not designed to detect.
 
 ### 3.3.5 Pre-specified features versus configurations explored on WA
 
@@ -533,12 +537,16 @@ completeness, as a configuration explored on WA, not as a replacement for the pr
 
 ### 3.3.6 Summary
 
-Taken as a whole, this external evaluation supports two structural conclusions that replicate
-cleanly on an independently constructed dataset: rhetorical-strategy scores carry predictive signal
-beyond `word_count`, and a small, pre-specified strategy-based feature set is competitive with, or
-exceeds, every larger combination tried. The specific claim that refutation is the leading strategy,
-and that justification is specifically the one whose importance is length-confounded, does not
-replicate — on WA, the two strategies' roles are substantially reversed. A difference between the
+Taken as a whole, this external evaluation provides supporting evidence, on an independently
+constructed second dataset, for two structural claims: that rhetorical-strategy scores carry
+predictive signal beyond `word_count`, and that a small, pre-specified strategy-based feature set is
+competitive with, or exceeds, every larger combination tried. As §3.3.2 notes, the length-matched
+check behind the first of these claims is narrower in scope than the home dataset's own ablation and
+operates on a corpus whose own length confound is considerably weaker to begin with; the appropriate
+reading is a qualitatively similar pattern recurring on WA, not a replication of equal strength to
+the home dataset's own result. The specific claim that refutation is the leading strategy, and that
+justification is specifically the one whose importance is length-confounded, does not recur here —
+on WA, the two strategies' roles are substantially reversed. A difference between the
 two datasets' negative-example construction (§2.9) is a plausible candidate explanation for this
 reversal, but no analysis in this project tests it directly; it is reported here as an open question
 and examined further, as an explicitly labeled hypothesis, in the Discussion chapter.

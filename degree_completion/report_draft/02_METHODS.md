@@ -633,9 +633,11 @@ Because that comparison surfaces a reversal in which strategy ranks highest (§2
 question is whether a strategy's score is simply less reliably assigned on WA than on the home
 dataset. The same test-retest design used for the home dataset's own reliability check (§2.6) was
 therefore repeated here: 200 WA comments were scored twice, independently, and the two passes
-compared. Every strategy proved more internally consistent on WA than on the home dataset,
-ruling out scoring unreliability as an explanation for the ranking differences reported in the
-Results chapter.
+compared. Every strategy proved more internally consistent on WA than on the home dataset, finding
+no straightforward evidence that scoring instability explains the ranking differences reported in
+the Results chapter — though this check does not rule out other, more systematic measurement
+differences, such as the LLM interpreting the same rubric somewhat differently against WA's text
+distribution than against the home dataset's.
 
 A length-matched robustness check was also performed on WA, using the same decile-bin matching
 procedure as §2.5/§2.7, adapted to WA's own correlation between `word_count` and outcome — considerably
