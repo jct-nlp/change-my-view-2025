@@ -55,9 +55,15 @@ finalized text.
   already in the repository since 2025-03-06 (its own `previous work/readme.md` describes it as
   background reading, not something cited in any notebook), surfaced during the 2026-10-14
   research-mapping pass that built `REPORT_OUTLINE.md`, not something you mentioned in this
-  conversation. **You plan to investigate the paper itself further once work reaches the
-  Discussion section** — left out of the Introduction, as originally scoped, with no further action
-  needed here for now.
+  conversation.
+  **Final decision (2026-11-07): the comparison is omitted from Discussion.** On reaching the
+  Discussion chapter, you confirmed the project's notebooks never investigated or directly compared
+  `refutation` against Na & DeDeo's "Relevance & Presumption" category, and judged the two
+  constructs not clearly equivalent enough to compare without risking a misleading claim — not
+  necessary for interpreting this project's own results. `REPORT_OUTLINE.md` §2.3 updated to match.
+  Checked `01_INTRODUCTION.md` itself: it cites Na & DeDeo only generically alongside Priniski &
+  Horne (§1.1, as background establishing CMV as a research setting) and makes no specific promise
+  to revisit a `refutation` comparison, so no change was needed there.
 - Methodological vs. empirical contributions are distinguished in §1.4's closing paragraph, but
   only at a high level. If the Methods/Discussion chapters later want a sharper "what exactly is
   new here vs. adapted from Priniski & Horne / Labruna et al." statement, that line will need to be

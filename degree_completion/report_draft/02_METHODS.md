@@ -552,9 +552,10 @@ the outcome. Neither is a causal-effect estimate — both describe observed asso
 reliance, not a demonstrated causal mechanism — and the two measures are not guaranteed to agree
 with one another, nor are they intended as interchangeable. In this project, these two measures
 produce a genuine point of disagreement about which single strategy is most important even on the
-home dataset's full population; this is reported directly, as a genuine methodological tension the
-Discussion chapter treats as unresolved, not papered over by relying on only one of the two
-measures.
+home dataset's full population; this is reported directly, and the Discussion chapter explains why
+the two measures disagree — reflecting their different analytical roles (model-dependent predictive
+attribution versus model-free marginal association) rather than an error in either computation —
+instead of resolving the disagreement by relying on only one of the two measures.
 
 Both interpretive measures, for all eight strategies, full population and length-matched sample,
 are reported together in Results, Table N (§3.2.5).

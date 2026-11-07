@@ -20,9 +20,13 @@ The objectives are to characterize the predictive role of textual features and l
 
 The project is organized around three research questions:
 
-- **RQ1.** To what extent can persuasive success be predicted from textual features, and what role does comment length play?
-- **RQ2.** Do rhetorical-strategy measures provide incremental predictive information beyond comment length and other textual features, and which individual strategies are most informative once length is controlled for?
-- **RQ3.** Do these findings hold on an independently constructed dataset, and does the relative importance of individual strategies change?
+**Table N.** The three research questions, with the Results and Discussion sections that address each.
+
+| | Research question | Results | Discussion |
+|---|---|---|---|
+| **RQ1** | To what extent can persuasive success be predicted from textual features, and what role does comment length play? | §3.1 | §4.1 |
+| **RQ2** | Do rhetorical-strategy measures provide incremental predictive information beyond comment length and other textual features, and which individual strategies are most informative once length is controlled for? | §3.2 | §4.1 |
+| **RQ3** | Do these findings hold on an independently constructed dataset, and does the relative importance of individual strategies change? | §3.3 | §4.2 |
 
 RQ1 establishes the predictive setting and the importance of length. RQ2 examines whether the rhetorical-strategy measures add information to the existing feature representation, how their observed contribution changes under length matching, and which individual strategies drive that contribution on the home dataset. RQ3 considers the extent to which the home dataset's findings, including the individual-strategy pattern identified under RQ2, replicate on a second dataset constructed using a different methodology.
 

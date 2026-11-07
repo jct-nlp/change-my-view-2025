@@ -69,12 +69,12 @@ validation on an independent corpus).
    Unsupervised discovery (PMI network + Louvain clustering) of 6 argument-pragmatics patterns
    across 100,170 posts / 5.8M replies; "Causation & Examples" most effective (+23.0% delta-bonus),
    "Relevance & Presumption" least (−19.4%). Contrast to draw: bottom-up/unsupervised discovery vs.
-   this project's top-down, fixed 8-strategy rubric scored by an LLM. **Worth one explicit sentence
-   in Discussion** — Na & DeDeo's "Relevance & Presumption" category is the closest prior-work
-   analogue to this project's `refutation` strategy, and they found it among the *least* effective,
-   while this project finds `refutation` to be its *most* robust predictor — a genuine point of
-   tension with prior work worth naming, not glossing over. **[INTERPRETIVE]** framing of the
-   tension; the two numbers themselves are each **[VERIFIED]** from their respective sources.
+   this project's top-down, fixed 8-strategy rubric scored by an LLM. **Decided against drawing the
+   "Relevance & Presumption" vs. `refutation` comparison in Discussion (2026-11-07), per explicit
+   user instruction.** The two constructs were never investigated or directly compared in any
+   notebook, and the user judged the categories not clearly equivalent enough to compare without
+   risking a misleading claim — omitted as unnecessary for interpreting this project's own results.
+   This citation remains used only for the generic CMV-background mention in Introduction §1.1.
 3. **Labruna, Modzelewski, Satta & Da San Martino (2026)**, *"Detecting Winning Arguments with
    Large Language Models and Persuasion Strategies"*, Findings of the Association for
    Computational Linguistics: EACL 2026, pages 1888–1915, Rabat, Morocco. **[VERIFIED
