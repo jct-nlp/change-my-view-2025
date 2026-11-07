@@ -43,7 +43,7 @@ select which leaf comments would serve as negative examples among those eligible
 deliberate point of contrast with the external validation corpus described in §2.9, whose negative
 examples are instead selected to be topically similar to the corresponding positive example.
 
-![**Figure 8.** The project's pipeline as four broad phases — data preparation, modeling and the length-confound discovery, rhetorical-strategy analysis, and external validation — each labeled with its governing notebook(s). The last three phases map one-to-one onto the project's three research questions (RQ1–RQ3, tagged on the diagram); data preparation is shared setup, not itself one of the three. The full nine-subsection breakdown is §2.1–§2.9 below.](figures/report/figure8_pipeline_diagram.png){width=85%}
+![**Figure 1.** The project's pipeline as four broad phases — data preparation, modeling and the length-confound discovery, rhetorical-strategy analysis, and external validation — each labeled with its governing notebook(s). The last three phases map one-to-one onto the project's three research questions (RQ1–RQ3, tagged on the diagram); data preparation is shared setup, not itself one of the three. The full nine-subsection breakdown is §2.1–§2.9 below.](figures/report/figure8_pipeline_diagram.png){width=85%}
 
 ## 2.2 Feature Engineering
 
@@ -118,32 +118,9 @@ representation (the 187 components alone, with no handcrafted features) was also
 assess how much predictive value the handcrafted features add over embeddings alone. All three
 representations were carried forward as candidate feature sets into model selection.
 
-**Table 2.** Feature-family summary, with each family's source notebook and whether it belongs to
-the trusted or untrusted set. For the three one-hot-encoded rows, the category count in the
-feature-group name is the true number of labels the classifier assigns; "Columns" is one less per
-side, since the first category of each encoding is dropped as an implicit reference level (§2.2).
-
-| Feature / feature group | Variants included | Source notebook(s) | Columns | Set |
-|---|---|---|---|---|
-| Sentiment (LLM, tone-focused) | comment, OP, diff | 03.1, 03.3 | 3 | Trusted |
-| Sentiment (VADER, lexicon-based) | comment only | 03.1 | 1 | Untrusted |
-| Tone (LLM, 6 categories, one-hot) | comment, OP | 03.1, 03.3 | 10 (2 sides × 5, first category dropped per side) | Trusted |
-| Tone (RoBERTa emotion classifier, 7 categories, one-hot) | comment only | 03.1 | 6 (1 side × 6, first category dropped) | Untrusted |
-| Style / formality (LLM-assigned, binary) | comment, OP | 03.1, 03.3 | 2 | Trusted |
-| Style (BART-large-MNLI zero-shot, 2 categories, one-hot) | comment only | 03.1 | 1 (1 side × 1, first category dropped) | Untrusted |
-| Rhetorical appeals: ethos, pathos, logos (LLM, 0–1 scale) | comment, OP, diff | 03.2, 03.3 | 9 | Trusted |
-| Rhetorical appeals: ethos, pathos, logos (Empath lexicon) | comment only | 03.2 | 3 | Untrusted |
-| Adjective–adverb ratio | comment, OP, diff | 03.2, 03.3 | 3 | Trusted |
-| Readability: Flesch–Kincaid grade level | comment, OP, diff | 03.2, 03.3 | 3 | Trusted |
-| Readability: Flesch reading ease | comment only (no OP/diff counterpart — dropped as redundant with `fk_grade_level_op`, r = −0.905) | 03.2 | 1 | Trusted |
-| Evidence-marker count | comment, OP, diff | 03.2, 03.3 | 3 | Trusted |
-| Comment↔OP match indicators (sentiment, tone, style, ethos, pathos, logos) | boolean agreement, computed from original comment/OP values, not derived from the "diff" columns above (bucketed same/different, not a thresholded difference) | 03.3 | 6 | Trusted |
-| Persuasive-language detector output | comment only | 03.2 | 1 | Trusted |
-| Document embeddings (`BAAI/bge-base-en-v1.5`, PCA) | comment only | 03.2 | 187 | Trusted |
-| **Handcrafted Trusted Total** | | | **41** | Trusted |
-| **Handcrafted Untrusted Total** | | | **11** | Untrusted |
-| **Trusted (handcrafted + embeddings)** | | | **228** | — |
-| **Trusted + untrusted** | | | **239** | — |
+**Table 2** (Appendix A, split across Table 2a–2c) summarizes every feature family
+introduced in this section: its variants, source notebook(s), column count, and trusted/untrusted
+status.
 
 ## 2.3 Model Training and Evaluation Methodology
 
@@ -225,6 +202,15 @@ discussed earlier in this section; PR-AUC alone decided selection.
 | **XGBoost** | **SMOTE oversampling** | **trusted+untrusted** | **0.3063** | **0.6952** |
 | Random Forest | SMOTE oversampling | embeddings-only | 0.3043 | 0.6455 |
 | Random Forest | SMOTE oversampling | trusted+untrusted | 0.2961 | 0.7088 |
+
+```{=typst}
+#pagebreak()
+```
+
+**Table 3 (continued).**
+
+| Classifier | Resampling | Feature set | Validation PR-AUC | Validation ROC-AUC |
+|---|---|---|---|---|
 | Random Forest | Random undersampling | trusted+untrusted | 0.2957 | 0.6933 |
 | XGBoost | SMOTE oversampling | embeddings-only | 0.2952 | 0.6551 |
 | Random Forest | Random undersampling | trusted | 0.2886 | 0.6989 |
@@ -238,6 +224,15 @@ discussed earlier in this section; PR-AUC alone decided selection.
 | XGBoost | Random undersampling | embeddings-only | 0.2485 | 0.6140 |
 | XGBoost | Random undersampling | trusted+untrusted | 0.2461 | 0.6308 |
 | XGBoost | SMOTE oversampling | trusted | 0.2436 | 0.6411 |
+
+```{=typst}
+#pagebreak()
+```
+
+**Table 3 (continued).**
+
+| Classifier | Resampling | Feature set | Validation PR-AUC | Validation ROC-AUC |
+|---|---|---|---|---|
 | Random Forest | No resampling | trusted | 0.2420 | 0.6157 |
 | Logistic Regression | No resampling | trusted | 0.2353 | 0.6587 |
 | Logistic Regression | No resampling | trusted+untrusted | 0.2347 | 0.6589 |
@@ -263,7 +258,7 @@ the 9 classifier/resampling pairs.
 
 **Column-order sensitivity.** The `XGB (oversampling)` architecture used throughout this chapter is
 sensitive to the order its input columns are presented in, not just which columns are included.
-XGBoost builds each decision tree by selecting, at every split, whichever candidate feature yields
+XGBoost (Chen & Guestrin, 2016) builds each decision tree by selecting, at every split, whichever candidate feature yields
 the greatest reduction in training loss; when two or more features are correlated — common
 throughout this project's feature sets, from the 187 embedding components to the engineered
 features' own overlapping signals — their split-gain values can come out essentially tied, and
@@ -271,7 +266,7 @@ such ties are broken deterministically by each feature's position (column order)
 matrix, not by anything about the feature's actual values. This has been found to swing PR-AUC by
 as much as 0.0482 on one of this project's larger feature representations (the 237-column set
 tested in §2.7), purely from reordering the same columns. The sensitivity is specific to the
-tree-building step, not `SMOTE`'s oversampling: `SMOTE`'s neighbor-finding operates on Euclidean
+tree-building step, not `SMOTE`'s (Chawla et al., 2002) oversampling: `SMOTE`'s neighbor-finding operates on Euclidean
 distance, which does not depend on the order features are summed in. Because of this, every PR-AUC
 value reported from this point in the chapter onward **for an evaluation of this order-sensitive
 `XGB (oversampling)` architecture** is computed as a mean and standard deviation across eight column
@@ -305,7 +300,7 @@ a second, even simpler baseline was evaluated: a single-feature logistic regress
 comment's raw word count. This baseline outperformed TF-IDF too, reaching PR-AUC 0.5256 — the
 strongest of the three models compared so far, using the least information.
 
-![**Figure 1.** Held-out PR-AUC for the originally selected engineered-feature pipeline, a TF-IDF baseline, and a word-count-only baseline, evaluated on the identical 709-comment test fold (`04.2_baseline_comparison.ipynb`).](figures/report/figure1_initial_model_comparison.png){width=85%}
+![**Figure 2.** Held-out PR-AUC for the originally selected engineered-feature pipeline, a TF-IDF baseline, and a word-count-only baseline, evaluated on the identical 709-comment test fold (`04.2_baseline_comparison.ipynb`).](figures/report/figure1_initial_model_comparison.png){width=85%}
 
 Second, the raw relationship between comment length and outcome was characterized directly:
 comment length and outcome are strongly associated in this dataset, with a mean word count of 78.0
@@ -335,7 +330,7 @@ turning point: it reframes the project's central question from whether textual f
 delta awards to which predictive signal, if any, remains once comment length is accounted for — the
 question addressed in §2.5 onward.
 
-![**Figure 4.** Word-count distribution by outcome for the full 3,971-comment dataset, with each class's mean indicated (`04.2_baseline_comparison.ipynb`).](figures/report/figure4_comment_length_by_outcome.png){width=85%}
+![**Figure 3.** Word-count distribution by outcome for the full 3,971-comment dataset, with each class's mean indicated (`04.2_baseline_comparison.ipynb`).](figures/report/figure4_comment_length_by_outcome.png){width=85%}
 
 These four models — both their single-fit point estimates and, for the order-sensitive engineered
 pipeline, its order-robust mean ± SD — are tabulated together in the Results chapter (Table 8,
@@ -442,6 +437,10 @@ project, since refutation and justification also prove to be the two strategies 
 the project's predictive and interpretive findings (§2.8). Exact reliability figures for each
 strategy are given in Results, Table 10 (§3.2.1).
 
+```{=typst}
+#pagebreak()
+```
+
 **Table 5.** The eight rhetorical strategies and their definitions.
 
 | Strategy | Definition |
@@ -503,14 +502,14 @@ engineered pipeline's own lift retained under `04.3`'s strict matching (§2.5); 
 reported in Results, Table 12 (§3.2.3). This indicates the strategy-score signal is not primarily a
 proxy for comment length, unlike previous signal examined.
 
-![**Figure 3.** The strategy-score PR-AUC gain reported above, recomputed on the length-matched sample within the 2,753-comment scored population, showing how much of the gain survives length control (`06_strategy_ablation.ipynb`).](figures/report/figure3_strategy_gain_length_matching.png){width=85%}
+![**Figure 4.** The strategy-score PR-AUC gain reported above, recomputed on the length-matched sample within the 2,753-comment scored population, showing how much of the gain survives length control (`06_strategy_ablation.ipynb`).](figures/report/figure3_strategy_gain_length_matching.png){width=85%}
 
 ## 2.8 Strategy Interpretation
 
 To identify which individual strategies underlie the aggregate gain reported in §2.7, two
 complementary interpretive analyses were applied to the nine-column model (the eight strategy
 scores plus `word_count`) identified in that section as the strongest-performing combination. The
-first is a SHAP (SHapley Additive exPlanations) analysis, using a tree explainer applied directly to
+first is a SHAP (SHapley Additive exPlanations; Lundberg & Lee, 2017) analysis, using a tree explainer applied directly to
 the fitted XGBoost model, which summarizes how much each feature moves the model's output, on
 average, across the comments in a given evaluation fold. The second is a model-free univariate
 comparison: for each strategy, a two-sided Mann–Whitney U test compares the distribution of that
@@ -657,11 +656,24 @@ negative-example row is the single most consequential difference between them, d
 |---|---|---|
 | Source | r/changemyview, collected directly via the Reddit API (PRAW) | r/changemyview-derived, accessed via ConvoKit (Tan, Niculae, Danescu-Niculescu-Mizil, and Lee, 2016) |
 | Unit of construction | Comment-level — not every reply becomes a row (see the two rows below) | Winner/loser pair-level — each winning reply is matched with one topically similar losing reply; an original post can contribute more than one pair |
+
+```{=typst}
+#pagebreak()
+```
+
+**Table 6 (continued).**
+
+| | Home dataset | Winning Arguments (WA) |
+|---|---|---|
 | Reply depth eligible | Any reply in the thread, regardless of nesting depth | Direct top-level replies to the original post only (exactly one level below it) — matching the original WA paper's own framing of a pair as two arguments made directly in response to the same post |
 | Positive (convincing) examples | Comment awarded a delta, regardless of its position in the thread; its own descendant replies are discarded | Comment awarded a delta (therefore marked as the pair's winning reply) |
 | Negative (non-convincing) examples | Only thread-ending *leaf* comments (no replies of their own) among the non-convincing comments; a non-convincing comment with further replies underneath it is excluded entirely, not included as its own row | The single reply most topically similar (Jaccard similarity) to the winner, among replies that did not win |
 | Class balance | 641 convincing (16.1%) | 4,240 winning comments (52.3%), 3,866 losing comments — close to, but not exactly, balanced. Pairs themselves are exactly 1:1 by construction, but a losing reply can be the closest topical match for more than one winning pair and is stored once rather than once per pair (338 of 4,263 losing slots are such reused comments, versus only 22 of 4,263 winning slots), so deduplicating pairs down to individual comments leaves more unique winning comments than unique losing ones |
 | Paired design | No — comments are evaluated individually, not as pairs | Yes — 4,263 winner/loser pairs total |
+
+```{=typst}
+#pagebreak()
+```
 
 **Table 7.** How this project used each dataset for the external-validation check described in
 this section — these are this project's own analysis choices, not properties of either corpus as

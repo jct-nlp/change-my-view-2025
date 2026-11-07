@@ -28,6 +28,10 @@ logistic regression, using no engineered features at all, reached PR-AUC 0.5119.
 logistic regression using only the comment's raw word count reached PR-AUC 0.5256 — the strongest
 of the three models, using the least information.
 
+```{=typst}
+#pagebreak()
+```
+
 **Table 8.** Held-out PR-AUC and ROC-AUC for the engineered-feature pipeline and the two baselines
 that motivated this section, on the identical 709-comment test fold (no-skill PR-AUC 0.2031). The
 engineered pipeline is the only order-sensitive row (§2.3, §2.7); its order-robust mean ± SD across
@@ -36,13 +40,13 @@ have no column-order degree of freedom and are reported as single-fit point esti
 
 | Model | PR-AUC | PR-AUC (order-robust mean ± SD) | ROC-AUC | ROC-AUC (order-robust mean ± SD) |
 |---|---|---|---|---|
-| Majority-class (no-skill reference) | 0.2031 | n/a (order-invariant) | 0.5000 | n/a (order-invariant) |
+| Majority-class (no-skill reference) | 0.2031 | order invariant | 0.5000 | order invariant |
 | Selected engineered pipeline (XGBoost + SMOTE, trusted+untrusted) | 0.3848 | 0.3676 ± 0.0182 | 0.6982 | 0.6903 ± 0.0096 |
-| TF-IDF + Logistic Regression | 0.5119 | n/a (order-invariant) | 0.8150 | n/a (order-invariant) |
-| Word count alone (1 feature) | 0.5256 | n/a (order-invariant) | 0.8294 | n/a (order-invariant) |
+| TF-IDF + Logistic Regression | 0.5119 | order invariant | 0.8150 | order invariant |
+| Word count alone (1 feature) | 0.5256 | order invariant | 0.8294 | order invariant |
 
 The "majority-class" row is this fold's own positive-class prevalence, not a property of a hard
-always-negative decision rule (§2.3). The three non-reference values are plotted in Figure 1
+always-negative decision rule (§2.3). The three non-reference values are plotted in Figure 2
 (§2.4).
 
 Inspecting the TF-IDF model's coefficients showed that the great majority of its most heavily
@@ -72,7 +76,7 @@ consistent across every variant of the comparison tried, but it is not a gap any
 
 Comment length and outcome are strongly associated in the full 3,971-comment dataset: convincing
 comments average 216.7 words against 78.0 for non-convincing comments, a point-biserial correlation
-of r = 0.3716 (p = 2.92 × 10⁻¹³⁰). This distribution, by outcome, is shown in Figure 4 (§2.4).
+of r = 0.3716 (p = 2.92 × 10⁻¹³⁰). This distribution, by outcome, is shown in Figure 3 (§2.4).
 
 Two within-thread checks rule out this association being purely an artifact of some threads being
 systematically longer or more active than others. A fixed-effects check, demeaning both word count
@@ -212,7 +216,7 @@ PR-AUC 0.2382; `06_strategy_ablation.ipynb`).
 | Engineered baseline + 8 strategy scores, 237 columns | 0.5098 ± 0.0200 | 0.7657 |
 | Strategy scores only, 8 columns | 0.3514 ± 0.0065 | 0.6733 |
 
-![**Figure 2.** Held-out PR-AUC for the engineered baseline with and without the eight strategy scores, and for the strategy scores alone, on the 2,753-comment scored population (`06_strategy_ablation.ipynb`).](figures/report/figure2_strategy_incremental_value.png){width=85%}
+![**Figure 6.** Held-out PR-AUC for the engineered baseline with and without the eight strategy scores, and for the strategy scores alone, on the 2,753-comment scored population (`06_strategy_ablation.ipynb`).](figures/report/figure2_strategy_incremental_value.png){width=85%}
 
 Adding the eight strategy scores raises PR-AUC from 0.4434 to 0.5098, a gain of **0.0664**, which
 clears the combined order-noise band of the two configurations. The strategy scores alone reach 0.3514 — a real,
@@ -234,7 +238,7 @@ within it (`06_strategy_ablation.ipynb`).
 | Full scored population | 2,753 | 0.2052 | 0.2716 | 0.0664 |
 | Length-matched (within scored population) | 1,235 | 0.0629 | 0.1186 | 0.0557 |
 
-This gain is plotted in Figure 3 (§2.7), alongside the retention percentage discussed below.
+This gain is plotted in Figure 4 (§2.7), alongside the retention percentage discussed below.
 
 Both arms' overall lift collapses sharply once length is matched (69% and 56% reductions,
 respectively), consistent with the pattern already established in §3.1.4: length is still doing
@@ -488,7 +492,7 @@ are not compared across datasets, only each dataset's own internal ranking.
 measure — `word_count`'s own SHAP value, excluded from this ranking for the reasons given in
 §3.2.5, is 1.0245 at home and 0.2780 on WA, ahead of every strategy in both cases.)
 
-![**Figure 6.** Rank-biserial effect size for each strategy, home dataset versus Winning Arguments, computed identically on both (`07_strategy_interpretation.ipynb`; `08_wa_external_validation.ipynb`).](figures/report/figure6_strategy_ranking_cmv_vs_wa.png){width=85%}
+![**Figure 8.** Rank-biserial effect size for each strategy, home dataset versus Winning Arguments, computed identically on both (`07_strategy_interpretation.ipynb`; `08_wa_external_validation.ipynb`).](figures/report/figure6_strategy_ranking_cmv_vs_wa.png){width=85%}
 
 ![**Figure 9.** Mean |SHAP| *rank* (not magnitude) for each strategy, home dataset versus Winning Arguments (`07_strategy_interpretation.ipynb`; `08_wa_external_validation.ipynb`).](figures/report/figure9_strategy_ranking_shap_cmv_vs_wa.png){width=85%}
 

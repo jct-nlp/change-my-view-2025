@@ -2,9 +2,15 @@
 
 ## 5.1 Cited literature
 
+- Chawla, N. V., Bowyer, K. W., Hall, L. O., & Kegelmeyer, W. P. (2002). SMOTE: Synthetic minority over-sampling technique. *Journal of Artificial Intelligence Research*, *16*, 321–357. https://doi.org/10.1613/jair.953
+
+- Chen, T., & Guestrin, C. (2016). XGBoost: A scalable tree boosting system. In *Proceedings of the 22nd ACM SIGKDD International Conference on Knowledge Discovery and Data Mining* (pp. 785–794). ACM. https://doi.org/10.1145/2939672.2939785
+
 - Labruna, T., Modzelewski, A., Satta, G., & Da San Martino, G. (2026). Detecting winning arguments with large language models and persuasion strategies. In *Findings of the Association for Computational Linguistics: EACL 2026* (pp. 1888–1915). Association for Computational Linguistics. https://doi.org/10.18653/v1/2026.findings-eacl.97
 
-- Na, R. W., & DeDeo, S. (2022). The diversity of argument-making in the wild: From assumptions and definitions to causation and anecdote in Reddit's "Change My View." *Proceedings of the Annual Meeting of the Cognitive Science Society*, *44*. https://arxiv.org/abs/2205.07938
+- Lundberg, S. M., & Lee, S.-I. (2017). A unified approach to interpreting model predictions. In *Advances in Neural Information Processing Systems* (Vol. 30). https://proceedings.neurips.cc/paper/2017/hash/8a20a8621978632d76c43dfd28b67767-Abstract.html
+
+- Na, R. W., & DeDeo, S. (2022). The diversity of argument-making in the wild: From assumptions and definitions to causation and anecdote in Reddit's "Change My View." In J. Culbertson, A. Perfors, H. Rabagliati, & V. Ramenzoni (Eds.), *Proceedings of the 44th Annual Meeting of the Cognitive Science Society*. Cognitive Science Society. https://escholarship.org/uc/item/20n240qq
 
 - Priniski, J. H., & Horne, Z. (2018). Attitude change on Reddit's Change My View. In *Proceedings of the 40th Annual Meeting of the Cognitive Science Society* (pp. 2279–2284). Cognitive Science Society.
 
@@ -24,4 +30,4 @@ Google Gemini was used as the LLM underlying several engineered features (tone, 
 
 ## 5.5 Code and Data Availability
 
-The project's notebooks, supporting code (`common_functions.py`), and `README.md` are included directly with this submission, rather than linked via a hosted repository. `README.md` documents setup, the notebook execution order, and the project's working data files. The raw Reddit data is not included in the submission due to its size; it is available via the read-only Google Drive link given in `README.md`. The Winning Arguments corpus used for external validation (§2.9) is fetched automatically through ConvoKit and is not distributed as part of this submission.
+The project's notebooks, supporting code (`common_functions.py`), and `README.md` are included directly with this submission. `README.md` documents setup, the notebook execution order, and the project's working data files. The raw Reddit data is not included in the submission due to its size; it is available via the read-only Google Drive link given in `README.md`. The Winning Arguments corpus used for external validation (§2.9) is fetched automatically through ConvoKit and is not distributed as part of this submission.

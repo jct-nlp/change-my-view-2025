@@ -1,4 +1,4 @@
-# change-my-view-2025
+# change-my-view-2026
 
 This work is the degree-completion report for an M.Sc. in Computer Science, specializing in Artificial Intelligence, at the Jerusalem College of Technology (Lev Academic Center), 2026.
 
