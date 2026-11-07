@@ -636,6 +636,14 @@ compared. Every strategy proved more internally consistent on WA than on the hom
 ruling out scoring unreliability as an explanation for the ranking differences reported in the
 Results chapter.
 
+A length-matched robustness check was also performed on WA, using the same decile-bin matching
+procedure as §2.5/§2.7, adapted to WA's own correlation between `word_count` and outcome — considerably
+weaker than the home dataset's own confound, since WA's winning and losing replies were already fairly
+similar in length before any matching, by construction. This check compares `word_count` alone
+against `word_count` combined with the eight strategy scores, not the home dataset's own comparison
+of a full engineered-feature pipeline with and without those scores, since WA was never scored on
+that pipeline. Exact figures are reported in Results, §3.3.2.
+
 Because WA's class balance and negative-sampling procedure differ substantially from the home
 dataset's, raw PR-AUC values are not directly comparable between the two datasets without reference
 to each dataset's own no-skill baseline; WA's held-out fold has a no-skill PR-AUC of 0.5291,
@@ -652,13 +660,16 @@ from the held-out split; the remaining 805 held-out pairs, both sides scored, ar
 this metric.
 
 One limitation of this external validation is stated directly here, because it bears on how the
-WA results should be read, not just a matter for the Discussion chapter: this
-analysis supports the broader claim that rhetorical-strategy scores carry predictive information in
-a second, independently constructed dataset, but it does not, by itself, establish that their
-*incremental* predictive contribution specifically beyond comment length replicates to the same
-extent documented for the home dataset in §2.7. No length-controlled ablation comparable to the one
-described there was performed on WA; establishing that stronger, more specific claim would require
-such an analysis, which falls outside the scope of the present external-validation check.
+WA results should be read, not just a matter for the Discussion chapter: this analysis supports the
+broader claim that rhetorical-strategy scores carry predictive information in a second,
+independently constructed dataset, and the length-matched check above finds a broadly similar
+pattern of retention to the home dataset's own ablation. However, because that check is narrower in
+scope — comparing `word_count` alone against `word_count` plus strategy scores, not the home
+dataset's own full engineered-feature pipeline with and without those scores — it does not, by
+itself, establish that the *incremental* predictive contribution of rhetorical strategies
+specifically beyond comment length replicates to the same extent documented for the home dataset in
+§2.7. Establishing that stronger, more specific claim would require a directly comparable ablation,
+which falls outside the scope of the present external-validation check.
 
 **Table N.** How each dataset's underlying corpus was constructed, side by side — the
 negative-example row is the single most consequential difference between them, discussed above.

@@ -417,7 +417,7 @@ Every strategy-containing configuration beats `word_count` alone by PR-AUC. Unli
 dataset, strategy scores alone (0.5967) slightly edge out strategy scores combined with `word_count`
 (0.5814) on this metric — `word_count`'s own correlation with the outcome is markedly weaker on WA
 (r = 0.1516) than on the home dataset (r = 0.3716), so combining it with the strategy scores has
-less to add here and, by this particular metric, costs a little rather than adding.
+less to add here and, by this particular metric, even costs a little instead of adding.
 
 A length-matched robustness check specific to WA — built with the same decile-matching procedure
 used in §3.2.3, applied to WA's own (considerably weaker) length confound — found `word_count`'s
